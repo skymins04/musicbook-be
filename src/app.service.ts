@@ -1,11 +1,14 @@
 import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 import { Injectable } from '@nestjs/common';
+import { ApiResponseDataDTO } from './common/api-response-data.dto';
 
 @Injectable()
 export class AppService {
   constructor(@InjectRedis() private readonly redis: Redis) {}
 
   async getHello() {
-    return `Hello World!: ${process.pid} ${await this.redis.get('test')}`;
+    return new ApiResponseDataDTO({
+      data: 'hello world',
+    });
   }
 }
