@@ -7,5 +7,13 @@ declare namespace NodeJS {
     MYSQL_DATABASE: string;
     REDIS_HOST: string;
     REDIS_PORT: number;
+    JWT_SECRET: string;
   }
+}
+
+declare interface MusicbookJwtPayload {
+  id: number;
+  name: string;
+  displayName: string;
+  accessToken: string;
 }

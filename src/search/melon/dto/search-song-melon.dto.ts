@@ -7,7 +7,7 @@ import {
   IsPositive,
   IsString,
 } from 'class-validator';
-import { ApiResponsePagenationDataDTO } from 'src/common/api-response-data.dto';
+import { ApiResponsePagenationDataDTO } from 'src/common/api-response/api-response-data.dto';
 
 export enum SearchSongMelonSortEnum {
   weight = 'weight',

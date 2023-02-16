@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Matches } from 'class-validator';
-import { ApiResponseDataDTO } from 'src/common/api-response-data.dto';
+import { ApiResponseDataDTO } from 'src/common/api-response/api-response-data.dto';
 
 export class GetAlbumMelonDTO {
   @IsString()

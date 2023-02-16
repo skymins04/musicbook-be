@@ -6,7 +6,7 @@ import { Redis } from 'ioredis';
 import {
   ApiResponseDataDTO,
   ApiResponsePagenationDataDTO,
-} from 'src/common/api-response-data.dto';
+} from 'src/common/api-response/api-response-data.dto';
 import {
   SearchSongMelonSortEnum,
   SearchSongMelonSectionEnum,

@@ -1,16 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { RedisIoAdapter } from './common/redis-io.adapter';
+import { RedisIoAdapter } from './common/redis-socket.io/redis-io.adapter';
 import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SearchModule } from './search/search.module';
+import * as cookieParser from 'cookie-parser';
+import { UserModule } from './user/user.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: true,
   });
+  app.use(cookieParser());
   app.use(
     helmet({
       contentSecurityPolicy: false,
@@ -27,7 +30,7 @@ async function bootstrap() {
   app.useWebSocketAdapter(redisIoAdapter);
 
   SwaggerModule.setup(
-    'api',
+    'docs',
     app,
     SwaggerModule.createDocument(
       app,
@@ -40,7 +43,7 @@ async function bootstrap() {
         .addBearerAuth()
         .build(),
       {
-        include: [SearchModule],
+        include: [SearchModule, UserModule],
       },
     ),
   );

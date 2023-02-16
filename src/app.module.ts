@@ -5,18 +5,14 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { RedisModule } from '@nestjs-modules/ioredis';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
-import { SocketModule } from './socket/socket.module';
 import { SearchModule } from './search/search.module';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { ApiResponseInterceptor } from './common/api-response.interceptor';
+import { ApiResponseInterceptor } from './common/api-response/api-response.interceptor';
+import { AuthModule } from './common/jwt-auth/jwt-auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -28,6 +24,7 @@ import { ApiResponseInterceptor } from './common/api-response.interceptor';
         MYSQL_DATABASE: Joi.string().required(),
         REDIS_HOST: Joi.string().required(),
         REDIS_PORT: Joi.number().required(),
+        JWT_SECRET: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -45,8 +42,9 @@ import { ApiResponseInterceptor } from './common/api-response.interceptor';
         port: process.env.REDIS_PORT,
       },
     }),
-    SocketModule,
+    AuthModule,
     SearchModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [
