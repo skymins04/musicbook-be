@@ -1,8 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 import { JwtAuthService } from './jwt-auth.service';
 import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtAuthStrategy } from 'src/common/jwt-auth/jwt-auth.strategy';
 
 @Global()
@@ -10,6 +10,7 @@ import { JwtAuthStrategy } from 'src/common/jwt-auth/jwt-auth.strategy';
   imports: [
     PassportModule,
     JwtModule.registerAsync({
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.get('JWT_SECRET'),
@@ -17,7 +18,7 @@ import { JwtAuthStrategy } from 'src/common/jwt-auth/jwt-auth.strategy';
       }),
     }),
   ],
-  providers: [JwtAuthService, JwtAuthStrategy],
-  exports: [JwtAuthService],
+  providers: [JwtAuthService, JwtAuthStrategy, JwtService],
+  exports: [JwtAuthService, JwtModule],
 })
-export class AuthModule {}
+export class JwtAuthModule {}

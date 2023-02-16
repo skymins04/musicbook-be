@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtAuthService {
@@ -19,5 +20,12 @@ export class JwtAuthService {
 
   jwtVerifyAsync(token: string) {
     return this.jwtService.verifyAsync<MusicbookJwtPayload>(token);
+  }
+
+  getJwtFromReq(req: Request): string | null {
+    const cookieJwt = req.cookies.jwt || null;
+    const authHeaderJwt =
+      req.headers.authorization?.replace('Bearer ', '') || null;
+    return cookieJwt || authHeaderJwt || null;
   }
 }
