@@ -10,7 +10,7 @@ import {
 import { UserService } from './user.service';
 import * as dotenv from 'dotenv';
 import { UserLoginCallbackQueryDTO } from './dto/user-login.dto';
-import { Request, Response } from 'express';
+import { Request, Response, query } from 'express';
 import { ApiResponseDataDTO } from 'src/common/api-response/api-response-data.dto';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
 import {
@@ -20,6 +20,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserMeResponseDTO } from './dto/user-me.dto';
+import {
+  UserLinkableQueryDTO,
+  UserLinkableResponseDTO,
+} from './dto/user-linkable.dto';
 
 dotenv.config();
 
@@ -118,4 +122,54 @@ export class UserController {
   async getMeInfo(@Req() req: Request) {
     return new ApiResponseDataDTO(await this.userService.getMeInfo(req));
   }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '사용자 연결 가능한 트위치 계정 여부',
+    description:
+      'id에 해당하는 트위치 계정의 다른 사용자 연결 가능 여부를 얻는 엔드포인트.',
+  })
+  @ApiOkResponse({
+    description: '조회 성공',
+    type: UserLinkableResponseDTO,
+  })
+  @Get('/linkable/twitch')
+  async getLinkableTwitchToUser(@Query() _query: UserLinkableQueryDTO) {
+    const { id } = _query;
+    return new ApiResponseDataDTO(
+      await this.userService.checkUserLinkableTwitch(id),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '사용자 연결 가능한 구글 계정 여부',
+    description:
+      'id에 해당하는 구글 계정의 다른 사용자 연걸 가능 여부를 얻는 엔드포인트.',
+  })
+  @ApiOkResponse({
+    description: '조회 성공',
+    type: UserLinkableResponseDTO,
+  })
+  @Get('/linkable/google')
+  async getLinkableGoogleToUser(@Query() _query: UserLinkableQueryDTO) {
+    const { id } = _query;
+    return new ApiResponseDataDTO(
+      await this.userService.checkUserLinkableGoogle(id),
+    );
+  }
+
+  @Get('/link/twitch')
+  async linkTwitchToUser(@Req() req: Request) {}
+
+  @Get('/link/google')
+  async linkGoogleToUser(@Req() req: Request) {}
+
+  @Get('/link/twitch/cb')
+  async linkTwitchToUserCallback(@Req() req: Request) {}
+
+  @Get('/link/google/cb')
+  async linkGoogleToUserCallback(@Req() req: Request) {}
 }

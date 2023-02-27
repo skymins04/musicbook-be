@@ -177,6 +177,22 @@ export class UserService {
     }
   }
 
+  async getMeInfo(_req: Request) {
+    try {
+      const jwt = this.jwtAuthService.jwtVerify(
+        this.jwtAuthService.getJwtFromReq(_req),
+      );
+      const user = await this.userRepositoryService.findOneUserById(
+        jwt.id,
+        false,
+      );
+      if (user) return user;
+      throw new BadRequestException('not found user');
+    } catch (e) {
+      throw new BadRequestException('invaild authentication');
+    }
+  }
+
   async checkUserLinkableTwitch(
     _twitchId: string,
   ): Promise<'notFound' | 'notLinkable' | 'linkable'> {
@@ -253,21 +269,5 @@ export class UserService {
 
     targetUser.google = userGoogle;
     await targetUser.save();
-  }
-
-  async getMeInfo(_req: Request) {
-    try {
-      const jwt = this.jwtAuthService.jwtVerify(
-        this.jwtAuthService.getJwtFromReq(_req),
-      );
-      const user = await this.userRepositoryService.findOneUserById(
-        jwt.id,
-        false,
-      );
-      if (user) return user;
-      throw new BadRequestException('not found user');
-    } catch (e) {
-      throw new BadRequestException('invaild authentication');
-    }
   }
 }
