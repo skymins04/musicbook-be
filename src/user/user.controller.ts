@@ -73,26 +73,8 @@ export class UserController {
     @Query() query: UserLoginCallbackQueryDTO,
     @Res({ passthrough: true }) res: Response,
   ) {
-    // const data = await axios
-    //   .post(`https://oauth2.googleapis.com/token`, {
-    //     code: query.code,
-    //     client_id: process.env.GOOGLE_CLIENT_ID,
-    //     client_secret: process.env.GOOGLE_CLIENT_SECRET,
-    //     redirect_uri: `${process.env.API_ADDRESS}/user/login/google/cb`,
-    //     grant_type: 'authorization_code',
-    //   })
-    //   .then((res) => res.data)
-    //   .then((res) =>
-    //     axios.get(
-    //       `https://oauth2.googleapis.com/tokeninfo?id_token=${res.id_token}`,
-    //     ),
-    //   )
-    //   .then((res) => res.data);
-    // console.log(data);
-    // const { code } = query;
-    // const token = await this.userService.loginByTwitch(code);
-    // res.cookie('jwt', token, { httpOnly: true });
-    // return new ApiResponseDataDTO(token);
+    const { code } = query;
+    await this.userService.loginByGoogle(code);
   }
 
   @UseGuards(JwtAuthGuard)

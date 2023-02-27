@@ -14,8 +14,8 @@ import { UserEntity } from './user.entity';
 export class UserTwitchEntity extends BaseEntity {
   @PrimaryColumn({ name: 'twitch_id' })
   twitchId: number;
-  @Column({ name: 'twitch_name' })
-  twitchName: string;
+  @Column({ name: 'twitch_login' })
+  twitchLogin: string;
   @Column({ name: 'twitch_display_name', nullable: true })
   twitchDisplayName: string;
   @Column({ name: 'twitch_description', nullable: true })
@@ -49,5 +49,5 @@ export class UserTwitchEntity extends BaseEntity {
 
 export type UserTwitchEntityDTO = Omit<
   UserTwitchEntity,
-  'hasId' | 'recover' | 'reload' | 'remove' | 'save' | 'softRemove'
-> & { createdAt?: Date; updatedAt?: Date; deletedAt?: Date };
+  'hasId' | 'recover' | 'reload' | 'remove' | 'save' | 'softRemove' | 'user'
+>;

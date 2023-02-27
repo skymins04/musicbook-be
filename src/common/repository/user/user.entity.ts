@@ -23,10 +23,6 @@ export class UserEntity extends BaseEntity {
   twitch: UserTwitchEntity;
   @JoinColumn({ name: 'google_id' })
   google: UserGoogleEntity;
-  // @Column({ name: 'google_id', unique: true, nullable: true })
-  // googleId: string;
-  // @Column({ name: 'twitter_id', unique: true, nullable: true })
-  // twitterId: string;
   @Column({ name: 'display_name' })
   displayName: string;
   @Column({ name: 'profile_img_url', length: 512 })

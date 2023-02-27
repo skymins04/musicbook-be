@@ -54,21 +54,20 @@ export class UserService {
   async loginByTwitch(code: string) {
     const { accessToken, refreshToken } = await this.getTwitchUserToken(code);
     const twitchAPIUserInfo = await this.getTwitchUserInfo(accessToken);
-    const userTwitch =
-      await this.userRepositoryService.createOrUpdateUserTwitch({
-        twitchId: twitchAPIUserInfo.id,
-        twitchName: twitchAPIUserInfo.login,
-        twitchDisplayName: twitchAPIUserInfo.display_name,
-        twitchDescription: twitchAPIUserInfo.description,
-        twitchProfileImgURL: twitchAPIUserInfo.profile_image_url,
-        twitchOfflineImgURL: twitchAPIUserInfo.offline_image_url,
-        twitchEmail: twitchAPIUserInfo.email,
-        twitchCreatedAt: twitchAPIUserInfo.created_at,
-        twitchType: twitchAPIUserInfo.type,
-        twitchBroadcasterType: twitchAPIUserInfo.broadcaster_type,
-        twitchAccessToken: accessToken,
-        twitchRefreshToken: refreshToken,
-      });
+    const userTwitch = await this.userRepositoryService.createOrUpdateTwitch({
+      twitchId: twitchAPIUserInfo.id,
+      twitchLogin: twitchAPIUserInfo.login,
+      twitchDisplayName: twitchAPIUserInfo.display_name,
+      twitchDescription: twitchAPIUserInfo.description,
+      twitchProfileImgURL: twitchAPIUserInfo.profile_image_url,
+      twitchOfflineImgURL: twitchAPIUserInfo.offline_image_url,
+      twitchEmail: twitchAPIUserInfo.email,
+      twitchCreatedAt: twitchAPIUserInfo.created_at,
+      twitchType: twitchAPIUserInfo.type,
+      twitchBroadcasterType: twitchAPIUserInfo.broadcaster_type,
+      twitchAccessToken: accessToken,
+      twitchRefreshToken: refreshToken,
+    });
     const existingUser =
       await this.userRepositoryService.findOneUserByTwitchEntity(
         userTwitch,
@@ -97,6 +96,47 @@ export class UserService {
         providerId: parseInt(twitchAPIUserInfo.id),
       });
     }
+  }
+
+  async loginByGoogle(code: string) {
+    const data = await axios
+      .post(`https://oauth2.googleapis.com/token`, {
+        code,
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        redirect_uri: `${process.env.API_ADDRESS}/user/login/google/cb`,
+        grant_type: 'authorization_code',
+      })
+      .then((res) => res.data)
+      .then((res) =>
+        axios.get(
+          `https://oauth2.googleapis.com/tokeninfo?id_token=${res.id_token}`,
+        ),
+      )
+      .then(
+        (res) =>
+          ({ ...res.data, email_verified: res.data === 'true' } as {
+            iss: string;
+            azp: string;
+            aud: string;
+            sub: string;
+            email: string;
+            email_verified: true;
+            at_hash: string;
+            name: string;
+            picture: string;
+            given_name: string;
+            family_name: string;
+            locale: string;
+            iat: string;
+            exp: string;
+            alg: string;
+            kid: string;
+            typ: string;
+          }),
+      );
+
+    console.log(data);
   }
 
   async getMeInfo(req: Request) {
