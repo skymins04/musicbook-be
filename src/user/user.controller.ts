@@ -9,10 +9,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import * as dotenv from 'dotenv';
-import {
-  UserLoginCallbackQueryDTO,
-  UserMeResponseDTO,
-} from './dto/user-login.dto';
+import { UserLoginCallbackQueryDTO } from './dto/user-login.dto';
 import { Request, Response } from 'express';
 import { ApiResponseDataDTO } from 'src/common/api-response/api-response-data.dto';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
@@ -22,6 +19,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { UserMeResponseDTO } from './dto/user-me.dto';
 
 dotenv.config();
 

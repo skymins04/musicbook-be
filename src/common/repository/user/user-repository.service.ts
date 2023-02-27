@@ -90,6 +90,20 @@ export class UserRepositoryService {
       });
   }
 
+  findOneTwitchById(_twitchId: string, _withDeleted: boolean) {
+    return this.userTwitchRepository.findOne({
+      where: { twitchId: _twitchId },
+      withDeleted: _withDeleted,
+    });
+  }
+
+  findOneGoogleById(_googleId: string, _withDeleted: boolean) {
+    return this.userGoogleRepository.findOne({
+      where: { googleId: _googleId },
+      withDeleted: _withDeleted,
+    });
+  }
+
   findOneUserById(_id: string, _withDeleted: boolean) {
     return this.userRepository.findOne({
       where: { id: _id },

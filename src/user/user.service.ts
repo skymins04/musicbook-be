@@ -12,7 +12,7 @@ export class UserService {
   ) {}
 
   getTwitchUserToken(
-    code: string,
+    _code: string,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     return axios
       .post(
@@ -20,7 +20,7 @@ export class UserService {
         {
           client_id: process.env.TWITCH_CLIENT_ID,
           client_secret: process.env.TWITCH_CLIENT_SECRET,
-          code,
+          code: _code,
           grant_type: 'authorization_code',
           redirect_uri: `${process.env.API_ADDRESS}/user/login/twitch/cb`,
         },
@@ -37,11 +37,11 @@ export class UserService {
       }));
   }
 
-  getTwitchUserInfo(token: string) {
+  getTwitchUserInfo(_token: string) {
     return axios
       .get('https://api.twitch.tv/helix/users', {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${_token}`,
           'Client-ID': process.env.TWITCH_CLIENT_ID,
         },
       })
@@ -50,10 +50,10 @@ export class UserService {
       }));
   }
 
-  getGoogleUserToken(code: string): Promise<string> {
+  getGoogleUserToken(_code: string): Promise<string> {
     return axios
       .post(`https://oauth2.googleapis.com/token`, {
-        code,
+        code: _code,
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
         redirect_uri: `${process.env.API_ADDRESS}/user/login/google/cb`,
@@ -62,7 +62,7 @@ export class UserService {
       .then((res) => res.data.id_token);
   }
 
-  getGoogleUserInfo(token: string): Promise<{
+  getGoogleUserInfo(_token: string): Promise<{
     iss: string;
     azp: string;
     aud: string;
@@ -82,15 +82,15 @@ export class UserService {
     typ: string;
   }> {
     return axios
-      .get(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`)
+      .get(`https://oauth2.googleapis.com/tokeninfo?id_token=${_token}`)
       .then((res) => ({
         ...res.data,
         email_verified: res.data.email_verified === 'true',
       }));
   }
 
-  async loginByTwitch(code: string) {
-    const { accessToken, refreshToken } = await this.getTwitchUserToken(code);
+  async loginByTwitch(_code: string) {
+    const { accessToken, refreshToken } = await this.getTwitchUserToken(_code);
     const twitchAPIUserInfo = await this.getTwitchUserInfo(accessToken);
     const userTwitch = await this.userRepositoryService.createOrUpdateTwitch({
       twitchId: twitchAPIUserInfo.id,
@@ -114,6 +114,7 @@ export class UserService {
 
     if (existingUser) {
       existingUser.deletedAt = null;
+      existingUser.twitch = userTwitch;
       await existingUser.save();
       return this.jwtAuthService.jwtSign({
         id: existingUser.id,
@@ -136,8 +137,8 @@ export class UserService {
     }
   }
 
-  async loginByGoogle(code: string) {
-    const token = await this.getGoogleUserToken(code);
+  async loginByGoogle(_code: string) {
+    const token = await this.getGoogleUserToken(_code);
     const googleAPIUserInfo = await this.getGoogleUserInfo(token);
     const userGoogle = await this.userRepositoryService.createOrUpdateGoogle({
       googleId: googleAPIUserInfo.sub,
@@ -153,6 +154,7 @@ export class UserService {
 
     if (existingUser) {
       existingUser.deletedAt = null;
+      existingUser.google = userGoogle;
       await existingUser.save();
       return this.jwtAuthService.jwtSign({
         id: existingUser.id,
@@ -175,10 +177,42 @@ export class UserService {
     }
   }
 
-  async getMeInfo(req: Request) {
+  async checkUserLinkableTwitch(
+    _twitchId: string,
+  ): Promise<'notFound' | 'notLinkable' | 'linkable'> {
+    const userTwitch = await this.userRepositoryService.findOneTwitchById(
+      _twitchId,
+      true,
+    );
+    const existingUser = await this.userRepositoryService.findOneUserByTwitchId(
+      _twitchId,
+      true,
+    );
+    if (!userTwitch) return 'notFound';
+    if (existingUser && existingUser.google === null) return 'notLinkable';
+    return 'linkable';
+  }
+
+  async checkUserLinkableGoogle(
+    _googleId: string,
+  ): Promise<'notFound' | 'notLinkable' | 'linkable'> {
+    const userGoogle = await this.userRepositoryService.findOneGoogleById(
+      _googleId,
+      true,
+    );
+    const existingUser = await this.userRepositoryService.findOneUserByGoogleId(
+      _googleId,
+      true,
+    );
+    if (!userGoogle) return 'notFound';
+    if (existingUser && existingUser.twitch === null) return 'notLinkable';
+    return 'linkable';
+  }
+
+  async getMeInfo(_req: Request) {
     try {
       const jwt = this.jwtAuthService.jwtVerify(
-        this.jwtAuthService.getJwtFromReq(req),
+        this.jwtAuthService.getJwtFromReq(_req),
       );
       const user = await this.userRepositoryService.findOneUserById(
         jwt.id,
