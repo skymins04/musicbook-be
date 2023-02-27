@@ -93,6 +93,7 @@ export class UserRepositoryService {
   findOneUserById(_id: string, _withDeleted: boolean) {
     return this.userRepository.findOne({
       where: { id: _id },
+      relations: ['twitch', 'google'],
       withDeleted: _withDeleted,
     });
   }
@@ -100,6 +101,7 @@ export class UserRepositoryService {
   findOneUserByEmail(_email: string, _withDeleted: boolean) {
     return this.userRepository.findOne({
       where: { email: _email },
+      relations: ['twitch', 'google'],
       withDeleted: _withDeleted,
     });
   }
@@ -107,6 +109,7 @@ export class UserRepositoryService {
   findOneUserByTwitchId(_twitchId: string, _withDeleted: boolean) {
     return this.userRepository.findOne({
       where: { twitch: { twitchId: _twitchId } },
+      relations: ['twitch', 'google'],
       withDeleted: _withDeleted,
     });
   }
@@ -120,6 +123,7 @@ export class UserRepositoryService {
         { email: _twitch.twitchEmail },
         { twitch: { twitchId: _twitch.twitchId } },
       ],
+      relations: ['twitch', 'google'],
       withDeleted: _withDeleted,
     });
   }
@@ -127,6 +131,7 @@ export class UserRepositoryService {
   findOneUserByGoogleId(_googleId: string, _withDeleted: boolean) {
     return this.userRepository.findOne({
       where: { google: { googleId: _googleId } },
+      relations: ['twitch', 'google'],
       withDeleted: _withDeleted,
     });
   }
@@ -140,6 +145,7 @@ export class UserRepositoryService {
         { email: _google.googleEmail },
         { google: { googleId: _google.googleId } },
       ],
+      relations: ['twitch', 'google'],
       withDeleted: _withDeleted,
     });
   }
@@ -147,7 +153,7 @@ export class UserRepositoryService {
   async deteleUser(_id: string) {
     const user = await this.userRepository.findOne({
       where: { id: _id },
-      relations: ['twitch'],
+      relations: ['twitch', 'google'],
     });
     if (user) {
       await this.userTwitchRepository.softRemove(user.twitch);
