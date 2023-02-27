@@ -9,7 +9,7 @@ import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ApiResponseInterceptor } from './common/api-response/api-response.interceptor';
 import { JwtAuthModule } from './common/jwt-auth/jwt-auth.module';
 import { UserModule } from './user/user.module';
-import { PrismaModule } from './common/prisma/prisma.module';
+import { RepositoryModule } from './common/repository/repository.module';
 
 @Module({
   imports: [
@@ -17,10 +17,18 @@ import { PrismaModule } from './common/prisma/prisma.module';
       isGlobal: true,
       envFilePath: '.env',
       validationSchema: Joi.object({
-        DATABASE_URL: Joi.string().required(),
+        // DATABASE_URL: Joi.string().required(),
+        API_ADDRESS: Joi.string().required(),
+        MYSQL_HOST: Joi.string().required(),
+        MYSQL_PORT: Joi.number().required(),
+        MYSQL_USERNAME: Joi.string().required(),
+        MYSQL_PASSWORD: Joi.string().required(),
+        MYSQL_DATABASE: Joi.string().required(),
         REDIS_HOST: Joi.string().required(),
         REDIS_PORT: Joi.number().required(),
         JWT_SECRET: Joi.string().required(),
+        TWITCH_CLIENT_ID: Joi.string().required(),
+        TWITCH_CLIENT_SECRET: Joi.string().required(),
       }),
     }),
     RedisModule.forRoot({
@@ -29,8 +37,8 @@ import { PrismaModule } from './common/prisma/prisma.module';
         port: process.env.REDIS_PORT,
       },
     }),
+    RepositoryModule,
     JwtAuthModule,
-    PrismaModule,
     SearchModule,
     UserModule,
   ],

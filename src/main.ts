@@ -7,7 +7,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SearchModule } from './search/search.module';
 import * as cookieParser from 'cookie-parser';
 import { UserModule } from './user/user.module';
-import { PrismaService } from './common/prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,9 +28,6 @@ async function bootstrap() {
   const redisIoAdapter = new RedisIoAdapter(app);
   await redisIoAdapter.connectToRedis();
   app.useWebSocketAdapter(redisIoAdapter);
-
-  const prismaService = app.get(PrismaService);
-  await prismaService.enableShutdownHooks(app);
 
   SwaggerModule.setup(
     'docs',

@@ -27,10 +27,11 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any): Promise<MusicbookJwtPayload> {
     return {
-      id: parseInt(payload.id),
-      name: payload.name,
+      id: payload.id,
       displayName: payload.displayName,
       accessToken: payload.accessToken,
+      provider: payload.provider,
+      providerId: payload.providerId,
     };
   }
 }

@@ -6,8 +6,8 @@ generator client {
 }
 
 generator erd {
-  provider = "prisma-erd-generator"
-  output = "./ERD.svg"
+  provider  = "prisma-erd-generator"
+  output    = "./ERD.svg"
   includeRelationFromFields = true
 }
 
@@ -17,12 +17,189 @@ datasource db {
 }
 
 model User {
-  no Int @id @default(autoincrement())
-  id String @unique
-  email String @unique
-  name String
-  password String
-  createdAt DateTime @default(now())
-  updatedAt DateTime?
-  deletedAt DateTime?
+  usr_id              Int       @id @default(autoincrement())
+  usr_twitch_id       String?   @unique
+  usr_google_id       String?   @unique
+  usr_twitter_id      String?   @unique
+  usr_display_name    String
+  usr_profile_img_url String
+  usr_email           String    @unique
+  usr_created_at      DateTime  @default(now())
+  usr_updated_at      DateTime?
+  usr_deleted_at      DateTime?
+
+  user_twitch         UserTwitch?
+  user_google         UserGoogle?
+  user_twitter        UserTwitter?
+  book                Book?
+  book_likes          BookLike[]
+  book_like_count     BookLikeCount[]
+  musics              Music[]
+  music_likes         MusicLike[]
+  music_like_counts   MusicLikeCount[]
+}
+
+model UserTwitch {
+  twitch_id               String    @id
+  twitch_name             String    @unique
+  twitch_displayname      String
+  twitch_description      String?
+  twitch_profile_img_url  String
+  twitch_offline_img_url  String?
+  twitch_email            String    @unique
+  twitch_type             String?
+  twitch_broadcaster_type String?
+  twitch_access_token     String
+  twitch_refresh_token    String?
+  twitch_created_at       DateTime?
+  twitch_lastsync_at      DateTime  @default(now())
+
+  user                    User      @relation(fields: [twitch_id], references: [usr_twitch_id])
+}
+
+model UserGoogle {
+  google_id               String    @id
+  google_name             String    @unique
+  google_displayname      String
+  google_description      String?
+  google_profile_img_url  String
+  google_offline_img_url  String?
+  google_email            String    @unique
+  google_type             String?
+  google_broadcaster_type String?
+  google_access_token     String
+  google_refresh_token    String?
+  google_created_at       DateTime?
+  google_lastsync_at      DateTime  @default(now())
+
+  user                    User      @relation(fields: [google_id], references: [usr_google_id])
+}
+
+model UserTwitter {
+  twitter_id               String    @id
+  twitter_name             String    @unique
+  twitter_displayname      String
+  twitter_description      String?
+  twitter_profile_img_url  String
+  twitter_offline_img_url  String?
+  twitter_email            String    @unique
+  twitter_type             String?
+  twitter_broadcaster_type String?
+  twitter_access_token     String
+  twitter_refresh_token    String?
+  twitter_created_at       DateTime?
+  twitter_lastsync_at      DateTime  @default(now())
+
+  user                     User      @relation(fields: [twitter_id], references: [usr_twitter_id])
+}
+
+enum MusicPreiviewType {
+  YOUTUBE
+  SOUNDCLOUD
+  FILE
+}
+
+enum MusicSourceType {
+  YOUTUBE
+  SOUNDCLOUD
+  SPOTIFY
+  FLAC
+  WAV
+  MP3
+}
+
+model Music {
+  msc_id              Int       @id @default(autoincrement())
+  msc_melon_id        String?
+  msc_category_id     Int
+  msc_broadcaster_id  Int
+  msc_bk_id           Int
+  msc_title           String
+  msc_artist          String
+  msc_preview_url     String?
+  msc_preview_type    MusicPreiviewType?
+  msc_thumbnail_url   String
+  msc_source_url      String?
+  msc_source_type     MusicSourceType?
+  msc_is_requestable  Boolean   @default(true)
+  msc_is_hide         Boolean   @default(false)
+  msc_is_paid         Boolean   @default(false)
+  msc_created_at      DateTime  @default(now())
+  msc_updated_at      DateTime?
+  msc_deleted_at      DateTime?
+
+  user                User      @relation(fields: [msc_broadcaster_id], references: [usr_id])
+  book                Book      @relation(fields: [msc_bk_id], references: [bk_id])
+
+  music_likes         MusicLike[]
+  music_like_counts   MusicLikeCount[]
+}
+
+model MusicLike {
+  id          Int       @id @default(autoincrement())
+  viewer_id   Int
+  bk_id       Int
+  msc_id      Int
+  created_at  DateTime  @default(now())
+  
+  user        User      @relation(fields: [viewer_id], references: [usr_id])
+  book        Book      @relation(fields: [bk_id], references: [bk_id])
+  music       Music     @relation(fields: [msc_id], references: [msc_id])
+}
+
+model MusicLikeCount {
+  id              Int       @id @default(autoincrement())
+  broadcaster_id  Int
+  bk_id           Int
+  msc_id          Int
+  count           Int
+  created_at      DateTime  @default(now())
+
+  user            User      @relation(fields: [broadcaster_id], references: [usr_id])
+  book            Book      @relation(fields: [bk_id], references: [bk_id])
+  music           Music     @relation(fields: [msc_id], references: [msc_id])
+}
+
+model Book {
+  bk_id             Int       @id @default(autoincrement())
+  bk_custom_id      String    @unique
+  bk_usr_id         Int       @unique
+  bk_title          String
+  bk_description    String
+  bk_command_prefix String
+  bk_thumbnail      String
+  bk_is_requestable Boolean   @default(true)
+  bk_is_hide        Boolean   @default(false)
+  bk_is_paid        Boolean   @default(false)
+  bk_created_at     DateTime  @default(now())
+  bk_updated_at     DateTime?
+  bk_deleted_at     DateTime?
+
+  user              User      @relation(fields: [bk_usr_id], references: [usr_id])
+  book_likes        BookLike[]
+  book_like_counts  BookLikeCount[]
+  musics            Music[]
+  music_likes       MusicLike[]
+  music_like_counts MusicLikeCount[]
+}
+
+model BookLike {
+  id          Int       @id @default(autoincrement())
+  viewer_id   Int
+  bk_id       Int
+  created_at  DateTime  @default(now())
+  
+  user        User      @relation(fields: [viewer_id], references: [usr_id])
+  book        Book      @relation(fields: [bk_id], references: [bk_id])
+}
+
+model BookLikeCount {
+  id              Int       @id @default(autoincrement())
+  broadcaster_id  Int
+  bk_id           Int
+  count           Int
+  created_at      DateTime  @default(now())
+
+  user            User      @relation(fields: [broadcaster_id], references: [usr_id])
+  book            Book      @relation(fields: [bk_id], references: [bk_id])
 }
