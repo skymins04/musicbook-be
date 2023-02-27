@@ -11,10 +11,12 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import * as dotenv from 'dotenv';
-import { UserLoginTwitchCallbackQueryDTO } from './dto/user-login.dto';
+import { UserLoginCallbackQueryDTO } from './dto/user-login.dto';
 import { Request, Response } from 'express';
 import { ApiResponseDataDTO } from 'src/common/api-response/api-response-data.dto';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
+import axios from 'axios';
 
 dotenv.config();
 
@@ -27,6 +29,7 @@ const TWITCH_CLIENT_SCOPES = [
   'channel:read:vips',
   'moderator:read:followers',
 ].join('+');
+const GOOGLE_CLIENT_SCOPES = ['openid', 'profile', 'email'].join('+');
 
 @Controller('user')
 export class UserController {
@@ -47,7 +50,7 @@ export class UserController {
 
   @Get('login/twitch/cb')
   async loginByTwitchCallback(
-    @Query() query: UserLoginTwitchCallbackQueryDTO,
+    @Query() query: UserLoginCallbackQueryDTO,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { code } = query;
@@ -57,9 +60,46 @@ export class UserController {
     return new ApiResponseDataDTO(token);
   }
 
+  @Get('login/google')
+  @Redirect(
+    `https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=${process.env.API_ADDRESS}/user/login/google/cb&scope=${GOOGLE_CLIENT_SCOPES}&client_id=${process.env.GOOGLE_CLIENT_ID}&service=lso&o2v=2&flowName=GeneralOAuthFlow&prompt=select_account`,
+  )
+  loginByGoogle() {
+    return;
+  }
+
+  @Get('login/google/cb')
+  async loginByGoogleCallback(
+    @Query() query: UserLoginCallbackQueryDTO,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // const data = await axios
+    //   .post(`https://oauth2.googleapis.com/token`, {
+    //     code: query.code,
+    //     client_id: process.env.GOOGLE_CLIENT_ID,
+    //     client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    //     redirect_uri: `${process.env.API_ADDRESS}/user/login/google/cb`,
+    //     grant_type: 'authorization_code',
+    //   })
+    //   .then((res) => res.data)
+    //   .then((res) =>
+    //     axios.get(
+    //       `https://oauth2.googleapis.com/tokeninfo?id_token=${res.id_token}`,
+    //     ),
+    //   )
+    //   .then((res) => res.data);
+    // console.log(data);
+    // const { code } = query;
+    // const token = await this.userService.loginByTwitch(code);
+    // res.cookie('jwt', token, { httpOnly: true });
+    // return new ApiResponseDataDTO(token);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMeInfo(@Req() req: Request) {
     return new ApiResponseDataDTO(await this.userService.getMeInfo(req));
   }
 }
+
+//http://localhost:3000/user/login/google/cb?code=4%2F0AWtgzh553IC0Ed2aexJajR9E8qkXEIhEE9IeBSqjs5u6milMg0A8otrXXD0upa5zoLSSJA&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly+openid&authuser=0&prompt=consent

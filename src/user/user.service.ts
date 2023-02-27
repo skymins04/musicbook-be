@@ -11,8 +11,10 @@ export class UserService {
     private readonly jwtAuthService: JwtAuthService,
   ) {}
 
-  async loginByTwitch(code: string) {
-    const { access_token, refresh_token } = await axios
+  getTwitchUserToken(
+    code: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    return axios
       .post(
         'https://id.twitch.tv/oauth2/token',
         {
@@ -28,33 +30,45 @@ export class UserService {
           },
         },
       )
-      .then((res) => res.data);
+      .then((res) => res.data)
+      .then((res) => ({
+        accessToken: res.access_token,
+        refreshToken: res.refresh_token,
+      }));
+  }
 
-    const twitchAPIUserInfo = await axios
+  getTwitchUserInfo(accessToken: string) {
+    return axios
       .get('https://api.twitch.tv/helix/users', {
         headers: {
-          Authorization: `Bearer ${access_token}`,
+          Authorization: `Bearer ${accessToken}`,
           'Client-ID': process.env.TWITCH_CLIENT_ID,
         },
       })
-      .then((res) => res.data);
+      .then((res) => {
+        console.log(res.data.data[0]);
+        return res.data.data[0];
+      });
+  }
 
+  async loginByTwitch(code: string) {
+    const { accessToken, refreshToken } = await this.getTwitchUserToken(code);
+    const twitchAPIUserInfo = await this.getTwitchUserInfo(accessToken);
     const userTwitch =
       await this.userRepositoryService.createOrUpdateUserTwitch({
-        twitchId: twitchAPIUserInfo.data[0].id,
-        twitchName: twitchAPIUserInfo.data[0].login,
-        twitchDisplayName: twitchAPIUserInfo.data[0].display_name,
-        twitchDescription: twitchAPIUserInfo.data[0].description,
-        twitchProfileImgURL: twitchAPIUserInfo.data[0].profile_image_url,
-        twitchOfflineImgURL: twitchAPIUserInfo.data[0].offline_image_url,
-        twitchEmail: twitchAPIUserInfo.data[0].email,
-        twitchCreatedAt: twitchAPIUserInfo.data[0].created_at,
-        twitchType: twitchAPIUserInfo.data[0].type,
-        twitchBroadcasterType: twitchAPIUserInfo.data[0].broadcaster_type,
-        twitchAccessToken: access_token,
-        twitchRefreshToken: refresh_token,
+        twitchId: twitchAPIUserInfo.id,
+        twitchName: twitchAPIUserInfo.login,
+        twitchDisplayName: twitchAPIUserInfo.display_name,
+        twitchDescription: twitchAPIUserInfo.description,
+        twitchProfileImgURL: twitchAPIUserInfo.profile_image_url,
+        twitchOfflineImgURL: twitchAPIUserInfo.offline_image_url,
+        twitchEmail: twitchAPIUserInfo.email,
+        twitchCreatedAt: twitchAPIUserInfo.created_at,
+        twitchType: twitchAPIUserInfo.type,
+        twitchBroadcasterType: twitchAPIUserInfo.broadcaster_type,
+        twitchAccessToken: accessToken,
+        twitchRefreshToken: refreshToken,
       });
-
     const existingUser =
       await this.userRepositoryService.findOneUserByTwitchEntity(
         userTwitch,
@@ -67,9 +81,9 @@ export class UserService {
       return this.jwtAuthService.jwtSign({
         id: existingUser.id,
         displayName: existingUser.displayName,
-        accessToken: access_token,
+        accessToken,
         provider: 'twitch',
-        providerId: parseInt(twitchAPIUserInfo.data[0].id),
+        providerId: parseInt(twitchAPIUserInfo.id),
       });
     } else {
       const user = await this.userRepositoryService.createUserByTwitch(
@@ -78,9 +92,9 @@ export class UserService {
       return this.jwtAuthService.jwtSign({
         id: user.id,
         displayName: user.displayName,
-        accessToken: access_token,
+        accessToken,
         provider: 'twitch',
-        providerId: parseInt(twitchAPIUserInfo.data[0].id),
+        providerId: parseInt(twitchAPIUserInfo.id),
       });
     }
   }

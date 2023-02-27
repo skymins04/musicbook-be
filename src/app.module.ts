@@ -29,6 +29,8 @@ import { RepositoryModule } from './common/repository/repository.module';
         JWT_SECRET: Joi.string().required(),
         TWITCH_CLIENT_ID: Joi.string().required(),
         TWITCH_CLIENT_SECRET: Joi.string().required(),
+        GOOGLE_CLIENT_ID: Joi.string().required(),
+        GOOGLE_CLIENT_SECRET: Joi.string().required(),
       }),
     }),
     RedisModule.forRoot({

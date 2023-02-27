@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class UserLoginTwitchCallbackQueryDTO {
+export class UserLoginCallbackQueryDTO {
   @IsString()
   code: string;
 }
