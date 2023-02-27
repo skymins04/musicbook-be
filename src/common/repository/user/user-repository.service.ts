@@ -90,32 +90,32 @@ export class UserRepositoryService {
       });
   }
 
-  async findOneUserById(_id: string, _withDeleted: boolean) {
-    return await this.userRepository.findOne({
+  findOneUserById(_id: string, _withDeleted: boolean) {
+    return this.userRepository.findOne({
       where: { id: _id },
       withDeleted: _withDeleted,
     });
   }
 
-  async findOneUserByEmail(_email: string, _withDeleted: boolean) {
-    return await this.userRepository.findOne({
+  findOneUserByEmail(_email: string, _withDeleted: boolean) {
+    return this.userRepository.findOne({
       where: { email: _email },
       withDeleted: _withDeleted,
     });
   }
 
-  async findOneUserByTwitchId(_twitchId: string, _withDeleted: boolean) {
-    return await this.userRepository.findOne({
+  findOneUserByTwitchId(_twitchId: string, _withDeleted: boolean) {
+    return this.userRepository.findOne({
       where: { twitch: { twitchId: _twitchId } },
       withDeleted: _withDeleted,
     });
   }
 
-  async findOneUserByTwitchEntity(
+  findOneUserByTwitchEntity(
     _twitch: UserTwitchEntityDTO,
     _withDeleted: boolean,
   ) {
-    return await this.userRepository.findOne({
+    return this.userRepository.findOne({
       where: [
         { email: _twitch.twitchEmail },
         { twitch: { twitchId: _twitch.twitchId } },
@@ -124,18 +124,18 @@ export class UserRepositoryService {
     });
   }
 
-  async findOneUserByGoogleId(_googleId: string, _withDeleted: boolean) {
-    return await this.userRepository.findOne({
+  findOneUserByGoogleId(_googleId: string, _withDeleted: boolean) {
+    return this.userRepository.findOne({
       where: { google: { googleId: _googleId } },
       withDeleted: _withDeleted,
     });
   }
 
-  async findOneUserByGoogleEntity(
+  findOneUserByGoogleEntity(
     _google: UserGoogleEntityDTO,
     _withDeleted: boolean,
   ) {
-    return await this.userRepository.findOne({
+    return this.userRepository.findOne({
       where: [
         { email: _google.googleEmail },
         { google: { googleId: _google.googleId } },
@@ -151,6 +151,7 @@ export class UserRepositoryService {
     });
     if (user) {
       await this.userTwitchRepository.softRemove(user.twitch);
+      await this.userGoogleRepository.softRemove(user.google);
       await this.userRepository.softRemove(user);
     }
   }
