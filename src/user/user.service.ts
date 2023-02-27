@@ -209,6 +209,52 @@ export class UserService {
     return 'linkable';
   }
 
+  async linkTwitchToUser(_twitchId: string, _userId: string) {
+    const userTwitch = await this.userRepositoryService.findOneTwitchById(
+      _twitchId,
+      true,
+    );
+    const existingUser = await this.userRepositoryService.findOneUserByTwitchId(
+      _twitchId,
+      true,
+    );
+    const targetUser = await this.userRepositoryService.findOneUserById(
+      _userId,
+      false,
+    );
+    if (!userTwitch || !targetUser) throw new BadRequestException();
+
+    existingUser.twitch = null;
+    if (existingUser.google === null) await existingUser.remove();
+    else await existingUser.save();
+
+    targetUser.twitch = userTwitch;
+    await targetUser.save();
+  }
+
+  async linkGoogleToUser(_googleId: string, _userId: string) {
+    const userGoogle = await this.userRepositoryService.findOneGoogleById(
+      _googleId,
+      true,
+    );
+    const existingUser = await this.userRepositoryService.findOneUserByGoogleId(
+      _googleId,
+      true,
+    );
+    const targetUser = await this.userRepositoryService.findOneUserById(
+      _userId,
+      false,
+    );
+    if (!userGoogle || !targetUser) throw new BadRequestException();
+
+    existingUser.google = null;
+    if (existingUser.twitch === null) await existingUser.remove();
+    else await existingUser.save();
+
+    targetUser.google = userGoogle;
+    await targetUser.save();
+  }
+
   async getMeInfo(_req: Request) {
     try {
       const jwt = this.jwtAuthService.jwtVerify(
