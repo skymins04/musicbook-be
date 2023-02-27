@@ -52,13 +52,15 @@ export class UserRepositoryService {
             existingUserTwitch[key] = _twitch[key];
           }
           return this.userTwitchRepository
-            .update({ twitchId: _twitch.twitchId }, _twitch)
+            .update(
+              { twitchId: _twitch.twitchId },
+              { ..._twitch, deletedAt: null },
+            )
             .then(() => existingUserTwitch);
         } else {
           return this.userTwitchRepository.save({
             ..._twitch,
             twitchId: _twitch.twitchId,
-            deletedAt: null,
           });
         }
       });
@@ -78,13 +80,15 @@ export class UserRepositoryService {
             exitstingUserGoogle[key] = _google[key];
           }
           return this.userGoogleRepository
-            .update({ googleId: _google.googleId }, _google)
+            .update(
+              { googleId: _google.googleId },
+              { ..._google, deletedAt: null },
+            )
             .then(() => exitstingUserGoogle);
         } else {
           return this.userGoogleRepository.save({
             ..._google,
             googleId: _google.googleId,
-            deletedAt: null,
           });
         }
       });
