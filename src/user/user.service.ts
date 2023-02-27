@@ -37,18 +37,56 @@ export class UserService {
       }));
   }
 
-  getTwitchUserInfo(accessToken: string) {
+  getTwitchUserInfo(token: string) {
     return axios
       .get('https://api.twitch.tv/helix/users', {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${token}`,
           'Client-ID': process.env.TWITCH_CLIENT_ID,
         },
       })
-      .then((res) => {
-        console.log(res.data.data[0]);
-        return res.data.data[0];
-      });
+      .then((res) => ({
+        ...res.data.data[0],
+      }));
+  }
+
+  getGoogleUserToken(code: string): Promise<string> {
+    return axios
+      .post(`https://oauth2.googleapis.com/token`, {
+        code,
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        redirect_uri: `${process.env.API_ADDRESS}/user/login/google/cb`,
+        grant_type: 'authorization_code',
+      })
+      .then((res) => res.data.id_token);
+  }
+
+  getGoogleUserInfo(token: string): Promise<{
+    iss: string;
+    azp: string;
+    aud: string;
+    sub: string;
+    email: string;
+    email_verified: boolean;
+    at_hash: string;
+    name: string;
+    picture: string;
+    given_name: string;
+    family_name: string;
+    locale: string;
+    iat: string;
+    exp: string;
+    alg: string;
+    kid: string;
+    typ: string;
+  }> {
+    return axios
+      .get(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`)
+      .then((res) => ({
+        ...res.data,
+        email_verified: res.data.email_verified === 'true',
+      }));
   }
 
   async loginByTwitch(code: string) {
@@ -82,7 +120,7 @@ export class UserService {
         displayName: existingUser.displayName,
         accessToken,
         provider: 'twitch',
-        providerId: parseInt(twitchAPIUserInfo.id),
+        providerId: twitchAPIUserInfo.id,
       });
     } else {
       const user = await this.userRepositoryService.createUserByTwitch(
@@ -93,50 +131,48 @@ export class UserService {
         displayName: user.displayName,
         accessToken,
         provider: 'twitch',
-        providerId: parseInt(twitchAPIUserInfo.id),
+        providerId: twitchAPIUserInfo.id,
       });
     }
   }
 
   async loginByGoogle(code: string) {
-    const data = await axios
-      .post(`https://oauth2.googleapis.com/token`, {
-        code,
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: `${process.env.API_ADDRESS}/user/login/google/cb`,
-        grant_type: 'authorization_code',
-      })
-      .then((res) => res.data)
-      .then((res) =>
-        axios.get(
-          `https://oauth2.googleapis.com/tokeninfo?id_token=${res.id_token}`,
-        ),
-      )
-      .then(
-        (res) =>
-          ({ ...res.data, email_verified: res.data === 'true' } as {
-            iss: string;
-            azp: string;
-            aud: string;
-            sub: string;
-            email: string;
-            email_verified: true;
-            at_hash: string;
-            name: string;
-            picture: string;
-            given_name: string;
-            family_name: string;
-            locale: string;
-            iat: string;
-            exp: string;
-            alg: string;
-            kid: string;
-            typ: string;
-          }),
+    const token = await this.getGoogleUserToken(code);
+    const googleAPIUserInfo = await this.getGoogleUserInfo(token);
+    const userGoogle = await this.userRepositoryService.createOrUpdateGoogle({
+      googleId: googleAPIUserInfo.sub,
+      googleDisplayName: googleAPIUserInfo.name,
+      googleProfileImgURL: googleAPIUserInfo.picture,
+      googleEmail: googleAPIUserInfo.email,
+    });
+    const existingUser =
+      await this.userRepositoryService.findOneUserByGoogleEntity(
+        userGoogle,
+        true,
       );
 
-    console.log(data);
+    if (existingUser) {
+      existingUser.deletedAt = null;
+      await existingUser.save();
+      return this.jwtAuthService.jwtSign({
+        id: existingUser.id,
+        displayName: existingUser.displayName,
+        accessToken: '',
+        provider: 'google',
+        providerId: googleAPIUserInfo.sub,
+      });
+    } else {
+      const user = await this.userRepositoryService.createUserByGoogle(
+        userGoogle,
+      );
+      return this.jwtAuthService.jwtSign({
+        id: user.id,
+        displayName: user.displayName,
+        accessToken: '',
+        provider: 'google',
+        providerId: googleAPIUserInfo.sub,
+      });
+    }
   }
 
   async getMeInfo(req: Request) {

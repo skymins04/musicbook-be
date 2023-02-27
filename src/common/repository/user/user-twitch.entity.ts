@@ -13,7 +13,7 @@ import { UserEntity } from './user.entity';
 @Entity('user_twitch')
 export class UserTwitchEntity extends BaseEntity {
   @PrimaryColumn({ name: 'twitch_id' })
-  twitchId: number;
+  twitchId: string;
   @Column({ name: 'twitch_login' })
   twitchLogin: string;
   @Column({ name: 'twitch_display_name', nullable: true })

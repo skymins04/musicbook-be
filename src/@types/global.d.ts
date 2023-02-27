@@ -22,5 +22,5 @@ declare interface MusicbookJwtPayload {
   displayName: string;
   accessToken: string;
   provider: string;
-  providerId: string | number;
+  providerId: string;
 }

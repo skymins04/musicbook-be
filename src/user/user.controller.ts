@@ -74,7 +74,10 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { code } = query;
-    await this.userService.loginByGoogle(code);
+    const token = await this.userService.loginByGoogle(code);
+
+    res.cookie('jwt', token, { httpOnly: true });
+    return new ApiResponseDataDTO(token);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -83,5 +86,3 @@ export class UserController {
     return new ApiResponseDataDTO(await this.userService.getMeInfo(req));
   }
 }
-
-//http://localhost:3000/user/login/google/cb?code=4%2F0AWtgzh553IC0Ed2aexJajR9E8qkXEIhEE9IeBSqjs5u6milMg0A8otrXXD0upa5zoLSSJA&scope=email+profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly+openid&authuser=0&prompt=consent

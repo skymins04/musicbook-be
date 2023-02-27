@@ -104,7 +104,7 @@ export class UserRepositoryService {
     });
   }
 
-  async findOneUserByTwitchId(_twitchId: number, _withDeleted: boolean) {
+  async findOneUserByTwitchId(_twitchId: string, _withDeleted: boolean) {
     return await this.userRepository.findOne({
       where: { twitch: { twitchId: _twitchId } },
       withDeleted: _withDeleted,
@@ -124,7 +124,7 @@ export class UserRepositoryService {
     });
   }
 
-  async findOneUserByGoogleId(_googleId: number, _withDeleted: boolean) {
+  async findOneUserByGoogleId(_googleId: string, _withDeleted: boolean) {
     return await this.userRepository.findOne({
       where: { google: { googleId: _googleId } },
       withDeleted: _withDeleted,

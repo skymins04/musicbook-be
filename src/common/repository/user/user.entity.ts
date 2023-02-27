@@ -21,6 +21,9 @@ export class UserEntity extends BaseEntity {
   })
   @JoinColumn({ name: 'twitch_id' })
   twitch: UserTwitchEntity;
+  @OneToOne(() => UserGoogleEntity, (userGoogle) => userGoogle.user, {
+    cascade: true,
+  })
   @JoinColumn({ name: 'google_id' })
   google: UserGoogleEntity;
   @Column({ name: 'display_name' })

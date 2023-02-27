@@ -13,7 +13,7 @@ import { UserEntity } from './user.entity';
 @Entity('user_google')
 export class UserGoogleEntity extends BaseEntity {
   @PrimaryColumn({ name: 'google_id' })
-  googleId: number;
+  googleId: string;
   @Column({ name: 'google_display_name', nullable: true })
   googleDisplayName: string;
   @Column({ name: 'google_profile_img_url' })
