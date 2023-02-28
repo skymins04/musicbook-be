@@ -1,6 +1,8 @@
 import {
   Controller,
+  Delete,
   Get,
+  Post,
   Query,
   Redirect,
   Req,
@@ -187,13 +189,28 @@ export class UserController {
     description: '트위치 계정 사용자 연동 oauth callback',
   })
   @Get('/link/twitch/cb')
-  async linkTwitchToUserCallback(
+  async linkTwitchToUserCallback(@Query() _query: UserLoginCallbackQueryDTO) {
+    const { code } = _query;
+    return new ApiResponseDataDTO(
+      await this.userService.linkTwitchToUserCallback(code),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '트위치 계정 사용자 연동 적용',
+    description:
+      'GET /user/link/twitch를 통해 발급된 code를 전달하면 트위치 계정 사용자 연동이 적용되는 엔드포인트',
+  })
+  @Post('/link/twitch')
+  async linkTwitchToUserApply(
     @Req() _req: Request,
     @Query() _query: UserLoginCallbackQueryDTO,
   ) {
     const { code } = _query;
     const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    await this.userService.linkTwitchToUserCallback(jwt, code);
+    await this.userService.linkTwitchToUserApply(jwt, code);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -217,13 +234,28 @@ export class UserController {
     description: '구글 계정 사용자 연동 oauth callback',
   })
   @Get('/link/google/cb')
-  async linkGoogleToUserCallback(
+  async linkGoogleToUserCallback(@Query() _query: UserLoginCallbackQueryDTO) {
+    const { code } = _query;
+    return new ApiResponseDataDTO(
+      await this.userService.linkGoogleToUserCallback(code),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '구글 계정 사용자 연동 적용',
+    description:
+      'GET /user/link/google을 통해 발급된 code를 전달하면 구글 계정 사용자 연동이 적용되는 엔드포인트',
+  })
+  @Post('/link/google')
+  async linkGoogleToUserApply(
     @Req() _req: Request,
     @Query() _query: UserLoginCallbackQueryDTO,
   ) {
     const { code } = _query;
     const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    await this.userService.linkGoogleToUserCallback(jwt, code);
+    await this.userService.linkGoogleToUserApply(jwt, code);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -232,7 +264,7 @@ export class UserController {
     summary: '트위치 계정 사용자 연동 해제',
     description: '트위치 계정 사용자 연동 해제',
   })
-  @Get('/unlink/twitch')
+  @Delete('/link/twitch')
   async unlinkTwitchToUser(@Req() _req: Request) {
     const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
     await this.userService.unlinkTwitchToUser(jwt);
@@ -244,7 +276,7 @@ export class UserController {
     summary: '구글 계정 사용자 연동 해제',
     description: '구글 계정 사용자 연동 해제',
   })
-  @Get('/unlink/google')
+  @Delete('/link/google')
   async unlinkGoogleToUser(@Req() _req: Request) {
     const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
     await this.userService.unlinkGoogleToUser(jwt);

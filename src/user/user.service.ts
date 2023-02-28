@@ -1,6 +1,8 @@
+import { InjectRedis } from '@nestjs-modules/ioredis';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { Request } from 'express';
+import { Redis } from 'ioredis';
 import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
 import { UserRepositoryService } from 'src/common/repository/user/user-repository.service';
 
@@ -9,6 +11,7 @@ export class UserService {
   constructor(
     private readonly userRepositoryService: UserRepositoryService,
     private readonly jwtAuthService: JwtAuthService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   getTwitchUserToken(
@@ -261,9 +264,30 @@ export class UserService {
     await targetUser.save();
   }
 
-  async linkTwitchToUserCallback(_jwt: MusicbookJwtPayload, _code: string) {
+  async linkTwitchToUserCallback(_code: string) {
     const { accessToken, refreshToken } = await this.getTwitchUserToken(_code);
     const twitchAPIUserInfo = await this.getTwitchUserInfo(accessToken);
+    const linkable = await this.getLinkableTwitchToUser(twitchAPIUserInfo.id);
+
+    await this.redis.set(
+      _code,
+      JSON.stringify({ ...twitchAPIUserInfo, accessToken, refreshToken }),
+    );
+    await this.redis.expire(_code, 100);
+
+    return {
+      linkable,
+      code: _code,
+    };
+  }
+
+  async linkTwitchToUserApply(_jwt: MusicbookJwtPayload, _code: string) {
+    const stringifiedTwitchAPIUserInfo = await this.redis.get(_code);
+    if (!stringifiedTwitchAPIUserInfo)
+      throw new BadRequestException('invaild request or expired request');
+    else await this.redis.del(_code);
+
+    const twitchAPIUserInfo = JSON.parse(stringifiedTwitchAPIUserInfo);
     const userTwitch = await this.userRepositoryService.createOrUpdateTwitch({
       twitchId: twitchAPIUserInfo.id,
       twitchLogin: twitchAPIUserInfo.login,
@@ -275,8 +299,8 @@ export class UserService {
       twitchCreatedAt: twitchAPIUserInfo.created_at,
       twitchType: twitchAPIUserInfo.type,
       twitchBroadcasterType: twitchAPIUserInfo.broadcaster_type,
-      twitchAccessToken: accessToken,
-      twitchRefreshToken: refreshToken,
+      twitchAccessToken: twitchAPIUserInfo.accessToken,
+      twitchRefreshToken: twitchAPIUserInfo.refreshToken,
     });
 
     await this.linkTwitchToUser(userTwitch.twitchId, _jwt.id);
@@ -305,9 +329,27 @@ export class UserService {
     await targetUser.save();
   }
 
-  async linkGoogleToUserCallback(_jwt: MusicbookJwtPayload, _code: string) {
+  async linkGoogleToUserCallback(_code: string) {
     const token = await this.getGoogleUserToken(_code);
     const googleAPIUserInfo = await this.getGoogleUserInfo(token);
+    const linkable = await this.getLinkableGoogleToUser(googleAPIUserInfo.sub);
+
+    await this.redis.set(_code, JSON.stringify({ ...googleAPIUserInfo }));
+    await this.redis.expire(_code, 100);
+
+    return {
+      linkable,
+      code: _code,
+    };
+  }
+
+  async linkGoogleToUserApply(_jwt: MusicbookJwtPayload, _code: string) {
+    const stringifiedTwitchAPIUserInfo = await this.redis.get(_code);
+    if (!stringifiedTwitchAPIUserInfo)
+      throw new BadRequestException('invaild request or expired request');
+    else await this.redis.del(_code);
+
+    const googleAPIUserInfo = JSON.parse(stringifiedTwitchAPIUserInfo);
     const userGoogle = await this.userRepositoryService.createOrUpdateGoogle({
       googleId: googleAPIUserInfo.sub,
       googleDisplayName: googleAPIUserInfo.name,
