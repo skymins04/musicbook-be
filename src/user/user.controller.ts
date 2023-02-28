@@ -74,7 +74,7 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { code } = query;
-    const token = await this.userService.loginByTwitch(code);
+    const token = await this.userService.loginByTwitchCallback(code);
 
     res.cookie('jwt', token, { httpOnly: true });
     return new ApiResponseDataDTO(token);
@@ -102,7 +102,7 @@ export class UserController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { code } = query;
-    const token = await this.userService.loginByGoogle(code);
+    const token = await this.userService.loginByGoogleCallback(code);
 
     res.cookie('jwt', token, { httpOnly: true });
     return new ApiResponseDataDTO(token);
@@ -138,7 +138,7 @@ export class UserController {
   async getLinkableTwitchToUser(@Query() _query: UserLinkableQueryDTO) {
     const { id } = _query;
     return new ApiResponseDataDTO(
-      await this.userService.checkUserLinkableTwitch(id),
+      await this.userService.getLinkableTwitchToUser(id),
     );
   }
 
@@ -157,19 +157,75 @@ export class UserController {
   async getLinkableGoogleToUser(@Query() _query: UserLinkableQueryDTO) {
     const { id } = _query;
     return new ApiResponseDataDTO(
-      await this.userService.checkUserLinkableGoogle(id),
+      await this.userService.getLinkableGoogleToUser(id),
     );
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '트위치 계정 사용자 연동',
+    description: '트위치 계정을 노래책 사용자에 연동하는 엔드포인트.',
+  })
   @Get('/link/twitch')
-  async linkTwitchToUser(@Req() req: Request) {}
+  @Redirect(
+    `https://id.twitch.tv/oauth2/authorize?client_id=${process.env.TWITCH_CLIENT_ID}&redirect_uri=${process.env.API_ADDRESS}/user/link/twitch/cb&response_type=code&scope=${TWITCH_CLIENT_SCOPES}&force_verify=true`,
+  )
+  async linkTwitchToUser() {
+    return;
+  }
 
-  @Get('/link/google')
-  async linkGoogleToUser(@Req() req: Request) {}
-
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '트위치 계정 사용자 연동 oauth callback',
+    description: '트위치 계정 사용자 연동 oauth callback',
+  })
   @Get('/link/twitch/cb')
-  async linkTwitchToUserCallback(@Req() req: Request) {}
+  async linkTwitchToUserCallback(
+    @Req() req: Request,
+    @Query() query: UserLoginCallbackQueryDTO,
+  ) {
+    const { code } = query;
+    await this.userService.linkTwitchToUserCallback(req, code);
+  }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '구글 계정 사용자 연동',
+    description: '구글 계정을 노래책 사용자에 연동하는 엔드포인트.',
+  })
+  @Get('/link/google')
+  @Redirect(
+    `https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=${process.env.API_ADDRESS}/user/link/google/cb&scope=${GOOGLE_CLIENT_SCOPES}&client_id=${process.env.GOOGLE_CLIENT_ID}&service=lso&o2v=2&flowName=GeneralOAuthFlow&prompt=select_account`,
+  )
+  async linkGoogleToUser() {
+    return;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '구글 계정 사용자 연동 oauth callback',
+    description: '구글 계정 사용자 연동 oauth callback',
+  })
   @Get('/link/google/cb')
-  async linkGoogleToUserCallback(@Req() req: Request) {}
+  async linkGoogleToUserCallback(
+    @Req() req: Request,
+    @Query() query: UserLoginCallbackQueryDTO,
+  ) {
+    const { code } = query;
+    await this.userService.linkGoogleToUserCallback(req, code);
+  }
+
+  @Get('/unlink/twitch')
+  async unlinkTwitchToUser() {
+    return;
+  }
+
+  @Get('/unlink/google')
+  async unlinkGoogleToUser() {
+    return;
+  }
 }

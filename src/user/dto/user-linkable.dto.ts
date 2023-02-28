@@ -16,6 +16,7 @@ enum EUserLinkableResponse {
   notFound = 'notFound',
   notLinkable = 'notLinkable',
   linkable = 'linkable',
+  assigned = 'assigned',
 }
 
 export class UserLinkableResponseDTO implements ApiResponseDataDTO {

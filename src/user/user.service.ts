@@ -89,7 +89,7 @@ export class UserService {
       }));
   }
 
-  async loginByTwitch(_code: string) {
+  async loginByTwitchCallback(_code: string) {
     const { accessToken, refreshToken } = await this.getTwitchUserToken(_code);
     const twitchAPIUserInfo = await this.getTwitchUserInfo(accessToken);
     const userTwitch = await this.userRepositoryService.createOrUpdateTwitch({
@@ -106,11 +106,17 @@ export class UserService {
       twitchAccessToken: accessToken,
       twitchRefreshToken: refreshToken,
     });
-    const existingUser =
-      await this.userRepositoryService.findOneUserByTwitchEntity(
-        userTwitch,
+    const existingUserByTwitchId =
+      await this.userRepositoryService.findOneUserByTwitchId(
+        userTwitch.twitchId,
         true,
       );
+    const existingUserByEmail =
+      await this.userRepositoryService.findOneUserByEmail(
+        userTwitch.twitchEmail,
+        true,
+      );
+    const existingUser = existingUserByTwitchId || existingUserByEmail;
 
     if (existingUser) {
       existingUser.deletedAt = null;
@@ -137,7 +143,7 @@ export class UserService {
     }
   }
 
-  async loginByGoogle(_code: string) {
+  async loginByGoogleCallback(_code: string) {
     const token = await this.getGoogleUserToken(_code);
     const googleAPIUserInfo = await this.getGoogleUserInfo(token);
     const userGoogle = await this.userRepositoryService.createOrUpdateGoogle({
@@ -146,11 +152,17 @@ export class UserService {
       googleProfileImgURL: googleAPIUserInfo.picture,
       googleEmail: googleAPIUserInfo.email,
     });
-    const existingUser =
-      await this.userRepositoryService.findOneUserByGoogleEntity(
-        userGoogle,
+    const existingUserByGoogleId =
+      await this.userRepositoryService.findOneUserByGoogleId(
+        userGoogle.googleId,
         true,
       );
+    const existingUserByEmail =
+      await this.userRepositoryService.findOneUserByEmail(
+        userGoogle.googleEmail,
+        true,
+      );
+    const existingUser = existingUserByGoogleId || existingUserByEmail;
 
     if (existingUser) {
       existingUser.deletedAt = null;
@@ -193,9 +205,9 @@ export class UserService {
     }
   }
 
-  async checkUserLinkableTwitch(
+  async getLinkableTwitchToUser(
     _twitchId: string,
-  ): Promise<'notFound' | 'notLinkable' | 'linkable'> {
+  ): Promise<'notFound' | 'notLinkable' | 'linkable' | 'assigned'> {
     const userTwitch = await this.userRepositoryService.findOneTwitchById(
       _twitchId,
       true,
@@ -206,12 +218,13 @@ export class UserService {
     );
     if (!userTwitch) return 'notFound';
     if (existingUser && existingUser.google === null) return 'notLinkable';
+    if (existingUser) return 'assigned';
     return 'linkable';
   }
 
-  async checkUserLinkableGoogle(
+  async getLinkableGoogleToUser(
     _googleId: string,
-  ): Promise<'notFound' | 'notLinkable' | 'linkable'> {
+  ): Promise<'notFound' | 'notLinkable' | 'linkable' | 'assigned'> {
     const userGoogle = await this.userRepositoryService.findOneGoogleById(
       _googleId,
       true,
@@ -222,6 +235,7 @@ export class UserService {
     );
     if (!userGoogle) return 'notFound';
     if (existingUser && existingUser.twitch === null) return 'notLinkable';
+    if (existingUser) return 'assigned';
     return 'linkable';
   }
 
@@ -240,12 +254,39 @@ export class UserService {
     );
     if (!userTwitch || !targetUser) throw new BadRequestException();
 
-    existingUser.twitch = null;
-    if (existingUser.google === null) await existingUser.remove();
-    else await existingUser.save();
+    if (existingUser) {
+      existingUser.twitch = null;
+      if (existingUser.google === null) await existingUser.remove();
+      else await existingUser.save();
+    }
 
     targetUser.twitch = userTwitch;
     await targetUser.save();
+  }
+
+  async linkTwitchToUserCallback(_req: Request, _code: string) {
+    const { accessToken, refreshToken } = await this.getTwitchUserToken(_code);
+    const twitchAPIUserInfo = await this.getTwitchUserInfo(accessToken);
+    const userTwitch = await this.userRepositoryService.createOrUpdateTwitch({
+      twitchId: twitchAPIUserInfo.id,
+      twitchLogin: twitchAPIUserInfo.login,
+      twitchDisplayName: twitchAPIUserInfo.display_name,
+      twitchDescription: twitchAPIUserInfo.description,
+      twitchProfileImgURL: twitchAPIUserInfo.profile_image_url,
+      twitchOfflineImgURL: twitchAPIUserInfo.offline_image_url,
+      twitchEmail: twitchAPIUserInfo.email,
+      twitchCreatedAt: twitchAPIUserInfo.created_at,
+      twitchType: twitchAPIUserInfo.type,
+      twitchBroadcasterType: twitchAPIUserInfo.broadcaster_type,
+      twitchAccessToken: accessToken,
+      twitchRefreshToken: refreshToken,
+    });
+
+    const jwt = this.jwtAuthService.jwtVerify(
+      this.jwtAuthService.getJwtFromReq(_req),
+    );
+
+    await this.linkTwitchToUser(userTwitch.twitchId, jwt.id);
   }
 
   async linkGoogleToUser(_googleId: string, _userId: string) {
@@ -269,5 +310,52 @@ export class UserService {
 
     targetUser.google = userGoogle;
     await targetUser.save();
+  }
+
+  async linkGoogleToUserCallback(_req: Request, _code: string) {
+    const token = await this.getGoogleUserToken(_code);
+    const googleAPIUserInfo = await this.getGoogleUserInfo(token);
+    const userGoogle = await this.userRepositoryService.createOrUpdateGoogle({
+      googleId: googleAPIUserInfo.sub,
+      googleDisplayName: googleAPIUserInfo.name,
+      googleProfileImgURL: googleAPIUserInfo.picture,
+      googleEmail: googleAPIUserInfo.email,
+    });
+
+    const jwt = this.jwtAuthService.jwtVerify(
+      this.jwtAuthService.getJwtFromReq(_req),
+    );
+
+    await this.linkGoogleToUser(userGoogle.googleId, jwt.id);
+  }
+
+  async unlinkTwitchToUser(_req: Request) {
+    const jwt = this.jwtAuthService.jwtVerify(
+      this.jwtAuthService.getJwtFromReq(_req),
+    );
+
+    const user = await this.userRepositoryService.findOneUserById(
+      jwt.id,
+      false,
+    );
+    if (user.google !== null) {
+      user.twitch = null;
+      await user.save();
+    }
+  }
+
+  async unlinkGoogleToUser(_req: Request) {
+    const jwt = this.jwtAuthService.jwtVerify(
+      this.jwtAuthService.getJwtFromReq(_req),
+    );
+
+    const user = await this.userRepositoryService.findOneUserById(
+      jwt.id,
+      false,
+    );
+    if (user.twitch !== null) {
+      user.google = null;
+      await user.save();
+    }
   }
 }

@@ -22,18 +22,14 @@ export class UserEntity extends BaseEntity {
     example: '12341234-1234-1234-1234-123412341234',
   })
   id: string;
-  @OneToOne(() => UserTwitchEntity, (userTwitch) => userTwitch.user, {
-    cascade: true,
-  })
+  @OneToOne(() => UserTwitchEntity, (userTwitch) => userTwitch.user)
   @JoinColumn({ name: 'twitch_id' })
   @ApiProperty({
     description: '트위치 사용자 연동 정보',
     type: UserTwitchEntity,
   })
   twitch: UserTwitchEntity;
-  @OneToOne(() => UserGoogleEntity, (userGoogle) => userGoogle.user, {
-    cascade: true,
-  })
+  @OneToOne(() => UserGoogleEntity, (userGoogle) => userGoogle.user)
   @JoinColumn({ name: 'google_id' })
   @ApiProperty({
     description: '구글 사용자 연동 정보',
