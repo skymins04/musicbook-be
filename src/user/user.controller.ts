@@ -22,11 +22,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserMeResponseDTO } from './dto/user-me.dto';
-import {
-  UserLinkableQueryDTO,
-  UserLinkableResponseDTO,
-} from './dto/user-linkable.dto';
 import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
+import { UserLinkaCallbackResponseDTO } from './dto/user-link.dto';
 
 dotenv.config();
 
@@ -133,46 +130,9 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '사용자 연결 가능한 트위치 계정 여부',
-    description:
-      'id에 해당하는 트위치 계정의 다른 사용자 연결 가능 여부를 얻는 엔드포인트.',
-  })
-  @ApiOkResponse({
-    description: '조회 성공',
-    type: UserLinkableResponseDTO,
-  })
-  @Get('/linkable/twitch')
-  async getLinkableTwitchToUser(@Query() _query: UserLinkableQueryDTO) {
-    const { id } = _query;
-    return new ApiResponseDataDTO(
-      await this.userService.getLinkableTwitchToUser(id),
-    );
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: '사용자 연결 가능한 구글 계정 여부',
-    description:
-      'id에 해당하는 구글 계정의 다른 사용자 연걸 가능 여부를 얻는 엔드포인트.',
-  })
-  @ApiOkResponse({
-    description: '조회 성공',
-    type: UserLinkableResponseDTO,
-  })
-  @Get('/linkable/google')
-  async getLinkableGoogleToUser(@Query() _query: UserLinkableQueryDTO) {
-    const { id } = _query;
-    return new ApiResponseDataDTO(
-      await this.userService.getLinkableGoogleToUser(id),
-    );
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
     summary: '트위치 계정 사용자 연동',
-    description: '트위치 계정을 노래책 사용자에 연동하는 엔드포인트.',
+    description:
+      '트위치 계정을 노래책 사용자에 연동하는 엔드포인트. 트위치 OAuth 페이지로 리다이렉트 후, /user/link/twitch/cb로 콜백됨.',
   })
   @Get('/link/twitch')
   @Redirect(
@@ -186,7 +146,12 @@ export class UserController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: '트위치 계정 사용자 연동 oauth callback',
-    description: '트위치 계정 사용자 연동 oauth callback',
+    description:
+      '트위치 계정 사용자 연동 oauth callback. response 내의 "code"를 100초 이내에 POST /user/link/twitch의 "code" 파라미터로 전달하면 트위치 계정 연동이 적용됨. 100초 이후 캐시가 만료되어 400에러 발생.',
+  })
+  @ApiOkResponse({
+    description: 'OAuth 인증 성공',
+    type: UserLinkaCallbackResponseDTO,
   })
   @Get('/link/twitch/cb')
   async linkTwitchToUserCallback(@Query() _query: UserLoginCallbackQueryDTO) {
@@ -216,8 +181,21 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({
+    summary: '트위치 계정 사용자 연동 해제',
+    description: '트위치 계정 사용자 연동 해제',
+  })
+  @Delete('/link/twitch')
+  async unlinkTwitchToUser(@Req() _req: Request) {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    await this.userService.unlinkTwitchToUser(jwt);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
     summary: '구글 계정 사용자 연동',
-    description: '구글 계정을 노래책 사용자에 연동하는 엔드포인트.',
+    description:
+      '구글 계정을 노래책 사용자에 연동하는 엔드포인트. 구글 OAuth 페이지로 리다이렉트 후, /user/link/google/cb로 콜백됨.',
   })
   @Get('/link/google')
   @Redirect(
@@ -231,7 +209,12 @@ export class UserController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: '구글 계정 사용자 연동 oauth callback',
-    description: '구글 계정 사용자 연동 oauth callback',
+    description:
+      '구글 계정 사용자 연동 oauth callback. response 내의 "code"를 100초 이내에 POST /user/link/twitch의 "code" 파라미터로 전달하면 구글 계정 연동이 적용됨. 100초 이후 캐시가 만료되어 400에러 발생.',
+  })
+  @ApiOkResponse({
+    description: 'OAuth 인증 성공',
+    type: UserLinkaCallbackResponseDTO,
   })
   @Get('/link/google/cb')
   async linkGoogleToUserCallback(@Query() _query: UserLoginCallbackQueryDTO) {
@@ -256,18 +239,6 @@ export class UserController {
     const { code } = _query;
     const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
     await this.userService.linkGoogleToUserApply(jwt, code);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: '트위치 계정 사용자 연동 해제',
-    description: '트위치 계정 사용자 연동 해제',
-  })
-  @Delete('/link/twitch')
-  async unlinkTwitchToUser(@Req() _req: Request) {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    await this.userService.unlinkTwitchToUser(jwt);
   }
 
   @UseGuards(JwtAuthGuard)

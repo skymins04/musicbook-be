@@ -19,12 +19,25 @@ enum EUserLinkableResponse {
   assigned = 'assigned',
 }
 
-export class UserLinkableResponseDTO implements ApiResponseDataDTO {
-  @IsString()
+class UserLinkCallbackResponseDataDTO {
   @ApiProperty({
     description: '사용자 계정 연동 가능 여부',
     enum: EUserLinkableResponse,
     example: 'linkable',
   })
-  data: keyof typeof EUserLinkableResponse;
+  linkable: keyof typeof EUserLinkableResponse;
+  @ApiProperty({
+    description: '사용자 계정 연동 코드',
+    type: String,
+    example: 'faoiwehfiawhefiohaowiefhoawefoi',
+  })
+  code: string;
+}
+
+export class UserLinkaCallbackResponseDTO implements ApiResponseDataDTO {
+  @ApiProperty({
+    description: '사용자 계정 연동 가능 여부',
+    type: UserLinkCallbackResponseDataDTO,
+  })
+  data: UserLinkCallbackResponseDataDTO;
 }
