@@ -24,8 +24,8 @@ export class SearchController {
     description: 'melon 음원 검색 성공',
     type: SearchSongMelonResponseDTO,
   })
-  async searchSongMelon(@Query() query: SearchSongMelonDTO) {
-    const { q, page = 1, sort = 'hit', section = 'all' } = query;
+  async searchSongMelon(@Query() _query: SearchSongMelonDTO) {
+    const { q, page = 1, sort = 'hit', section = 'all' } = _query;
     return await this.melonService.searchSongByMelon(section, q, page, sort);
   }
 
@@ -38,8 +38,8 @@ export class SearchController {
     description: 'melon 음원 조회 성공',
     type: GetAlbumMelonResponseDTO,
   })
-  async getAlbumMelon(@Query() query: GetAlbumMelonDTO) {
-    const { albumId } = query;
+  async getAlbumMelon(@Query() _query: GetAlbumMelonDTO) {
+    const { albumId } = _query;
     return await this.melonService.getMelonAlbumInfo(albumId);
   }
 }

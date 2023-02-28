@@ -6,26 +6,30 @@ import { Request } from 'express';
 export class JwtAuthService {
   constructor(private readonly jwtService: JwtService) {}
 
-  jwtSign(payload: MusicbookJwtPayload) {
-    return this.jwtService.sign(payload);
+  jwtSign(_payload: MusicbookJwtPayload) {
+    return this.jwtService.sign(_payload);
   }
 
-  jwtSignAsync(payload: MusicbookJwtPayload) {
-    return this.jwtService.signAsync(payload);
+  jwtSignAsync(_payload: MusicbookJwtPayload) {
+    return this.jwtService.signAsync(_payload);
   }
 
-  jwtVerify(token: string) {
-    return this.jwtService.verify<MusicbookJwtPayload>(token);
+  jwtVerify(_token: string) {
+    return this.jwtService.verify<MusicbookJwtPayload>(_token);
   }
 
-  jwtVerifyAsync(token: string) {
-    return this.jwtService.verifyAsync<MusicbookJwtPayload>(token);
+  jwtVerifyAsync(_token: string) {
+    return this.jwtService.verifyAsync<MusicbookJwtPayload>(_token);
   }
 
-  getJwtFromReq(req: Request): string | null {
-    const cookieJwt = req.cookies.jwt || null;
+  getJwtFromReq(_req: Request): string | null {
+    const cookieJwt = _req.cookies.jwt || null;
     const authHeaderJwt =
-      req.headers.authorization?.replace('Bearer ', '') || null;
+      _req.headers.authorization?.replace('Bearer ', '') || null;
     return cookieJwt || authHeaderJwt || null;
+  }
+
+  getJwtAndVerifyFromReq(_req: Request) {
+    return this.jwtVerify(this.getJwtFromReq(_req));
   }
 }

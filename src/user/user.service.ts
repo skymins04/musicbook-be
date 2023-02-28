@@ -189,13 +189,10 @@ export class UserService {
     }
   }
 
-  async getMeInfo(_req: Request) {
+  async getMeInfo(_jwt: MusicbookJwtPayload) {
     try {
-      const jwt = this.jwtAuthService.jwtVerify(
-        this.jwtAuthService.getJwtFromReq(_req),
-      );
       const user = await this.userRepositoryService.findOneUserById(
-        jwt.id,
+        _jwt.id,
         false,
       );
       if (user) return user;
@@ -264,7 +261,7 @@ export class UserService {
     await targetUser.save();
   }
 
-  async linkTwitchToUserCallback(_req: Request, _code: string) {
+  async linkTwitchToUserCallback(_jwt: MusicbookJwtPayload, _code: string) {
     const { accessToken, refreshToken } = await this.getTwitchUserToken(_code);
     const twitchAPIUserInfo = await this.getTwitchUserInfo(accessToken);
     const userTwitch = await this.userRepositoryService.createOrUpdateTwitch({
@@ -282,11 +279,7 @@ export class UserService {
       twitchRefreshToken: refreshToken,
     });
 
-    const jwt = this.jwtAuthService.jwtVerify(
-      this.jwtAuthService.getJwtFromReq(_req),
-    );
-
-    await this.linkTwitchToUser(userTwitch.twitchId, jwt.id);
+    await this.linkTwitchToUser(userTwitch.twitchId, _jwt.id);
   }
 
   async linkGoogleToUser(_googleId: string, _userId: string) {
@@ -312,7 +305,7 @@ export class UserService {
     await targetUser.save();
   }
 
-  async linkGoogleToUserCallback(_req: Request, _code: string) {
+  async linkGoogleToUserCallback(_jwt: MusicbookJwtPayload, _code: string) {
     const token = await this.getGoogleUserToken(_code);
     const googleAPIUserInfo = await this.getGoogleUserInfo(token);
     const userGoogle = await this.userRepositoryService.createOrUpdateGoogle({
@@ -322,40 +315,28 @@ export class UserService {
       googleEmail: googleAPIUserInfo.email,
     });
 
-    const jwt = this.jwtAuthService.jwtVerify(
-      this.jwtAuthService.getJwtFromReq(_req),
-    );
-
-    await this.linkGoogleToUser(userGoogle.googleId, jwt.id);
+    await this.linkGoogleToUser(userGoogle.googleId, _jwt.id);
   }
 
-  async unlinkTwitchToUser(_req: Request) {
-    const jwt = this.jwtAuthService.jwtVerify(
-      this.jwtAuthService.getJwtFromReq(_req),
-    );
-
+  async unlinkTwitchToUser(_jwt: MusicbookJwtPayload) {
     const user = await this.userRepositoryService.findOneUserById(
-      jwt.id,
+      _jwt.id,
       false,
     );
     if (user.google !== null) {
       user.twitch = null;
       await user.save();
-    }
+    } else throw new BadRequestException();
   }
 
-  async unlinkGoogleToUser(_req: Request) {
-    const jwt = this.jwtAuthService.jwtVerify(
-      this.jwtAuthService.getJwtFromReq(_req),
-    );
-
+  async unlinkGoogleToUser(_jwt: MusicbookJwtPayload) {
     const user = await this.userRepositoryService.findOneUserById(
-      jwt.id,
+      _jwt.id,
       false,
     );
     if (user.twitch !== null) {
       user.google = null;
       await user.save();
-    }
+    } else throw new BadRequestException();
   }
 }

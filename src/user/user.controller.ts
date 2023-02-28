@@ -10,7 +10,7 @@ import {
 import { UserService } from './user.service';
 import * as dotenv from 'dotenv';
 import { UserLoginCallbackQueryDTO } from './dto/user-login.dto';
-import { Request, Response, query } from 'express';
+import { Request, Response } from 'express';
 import { ApiResponseDataDTO } from 'src/common/api-response/api-response-data.dto';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
 import {
@@ -24,6 +24,7 @@ import {
   UserLinkableQueryDTO,
   UserLinkableResponseDTO,
 } from './dto/user-linkable.dto';
+import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
 
 dotenv.config();
 
@@ -41,15 +42,18 @@ const GOOGLE_CLIENT_SCOPES = ['openid', 'profile', 'email'].join('+');
 @Controller('user')
 @ApiTags('User')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtAuthService: JwtAuthService,
+  ) {}
 
   @Get('logout')
   @ApiOperation({
     summary: '사용자 로그아웃',
     description: `쿠키 "jwt"를 제거하여 사용자를 로그아웃시키는 엔드포인트`,
   })
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.cookie('jwt', '', { maxAge: 0 });
+  logout(@Res({ passthrough: true }) _res: Response) {
+    _res.cookie('jwt', '', { maxAge: 0 });
   }
 
   @Get('login/twitch')
@@ -70,13 +74,13 @@ export class UserController {
     description: '트위치를 통한 사용자 로그인 oauth callback',
   })
   async loginByTwitchCallback(
-    @Query() query: UserLoginCallbackQueryDTO,
-    @Res({ passthrough: true }) res: Response,
+    @Query() _query: UserLoginCallbackQueryDTO,
+    @Res({ passthrough: true }) _res: Response,
   ) {
-    const { code } = query;
+    const { code } = _query;
     const token = await this.userService.loginByTwitchCallback(code);
 
-    res.cookie('jwt', token, { httpOnly: true });
+    _res.cookie('jwt', token, { httpOnly: true });
     return new ApiResponseDataDTO(token);
   }
 
@@ -98,13 +102,13 @@ export class UserController {
     description: '구글을 통한 사용자 로그인 oauth callback',
   })
   async loginByGoogleCallback(
-    @Query() query: UserLoginCallbackQueryDTO,
-    @Res({ passthrough: true }) res: Response,
+    @Query() _query: UserLoginCallbackQueryDTO,
+    @Res({ passthrough: true }) _res: Response,
   ) {
-    const { code } = query;
+    const { code } = _query;
     const token = await this.userService.loginByGoogleCallback(code);
 
-    res.cookie('jwt', token, { httpOnly: true });
+    _res.cookie('jwt', token, { httpOnly: true });
     return new ApiResponseDataDTO(token);
   }
 
@@ -119,8 +123,9 @@ export class UserController {
     type: UserMeResponseDTO,
   })
   @Get('me')
-  async getMeInfo(@Req() req: Request) {
-    return new ApiResponseDataDTO(await this.userService.getMeInfo(req));
+  async getMeInfo(@Req() _req: Request) {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    return new ApiResponseDataDTO(await this.userService.getMeInfo(jwt));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -183,11 +188,12 @@ export class UserController {
   })
   @Get('/link/twitch/cb')
   async linkTwitchToUserCallback(
-    @Req() req: Request,
-    @Query() query: UserLoginCallbackQueryDTO,
+    @Req() _req: Request,
+    @Query() _query: UserLoginCallbackQueryDTO,
   ) {
-    const { code } = query;
-    await this.userService.linkTwitchToUserCallback(req, code);
+    const { code } = _query;
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    await this.userService.linkTwitchToUserCallback(jwt, code);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -212,20 +218,35 @@ export class UserController {
   })
   @Get('/link/google/cb')
   async linkGoogleToUserCallback(
-    @Req() req: Request,
-    @Query() query: UserLoginCallbackQueryDTO,
+    @Req() _req: Request,
+    @Query() _query: UserLoginCallbackQueryDTO,
   ) {
-    const { code } = query;
-    await this.userService.linkGoogleToUserCallback(req, code);
+    const { code } = _query;
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    await this.userService.linkGoogleToUserCallback(jwt, code);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '트위치 계정 사용자 연동 해제',
+    description: '트위치 계정 사용자 연동 해제',
+  })
   @Get('/unlink/twitch')
-  async unlinkTwitchToUser() {
-    return;
+  async unlinkTwitchToUser(@Req() _req: Request) {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    await this.userService.unlinkTwitchToUser(jwt);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '구글 계정 사용자 연동 해제',
+    description: '구글 계정 사용자 연동 해제',
+  })
   @Get('/unlink/google')
-  async unlinkGoogleToUser() {
-    return;
+  async unlinkGoogleToUser(@Req() _req: Request) {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    await this.userService.unlinkGoogleToUser(jwt);
   }
 }
