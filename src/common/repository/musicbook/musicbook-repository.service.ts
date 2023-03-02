@@ -54,6 +54,10 @@ export class MusicBookRepositoryService {
     await this.musicRepository.update(_music.id, _music);
   }
 
+  async deleteMusicById(_musicId: number) {
+    await this.musicRepository.softDelete(_musicId);
+  }
+
   findOneMusicById(
     _musicId: number,
     _option?: {
@@ -153,6 +157,11 @@ export class MusicBookRepositoryService {
     _book: DeepPartial<BookEntity>,
   ) {
     await this.bookRepository.update(_where, _book);
+  }
+
+  async deleteBookById(_bookId: number) {
+    await this.bookRepository.softDelete(_bookId);
+    await this.musicRepository.softDelete({ book: { id: _bookId } });
   }
 
   findOneBookById(
