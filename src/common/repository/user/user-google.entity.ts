@@ -69,8 +69,3 @@ export class UserGoogleEntity extends BaseEntity {
   @OneToOne(() => UserEntity, (user) => user.google, { eager: true })
   user: UserEntity;
 }
-
-export type UserGoogleEntityDTO = Omit<
-  UserGoogleEntity,
-  'hasId' | 'recover' | 'reload' | 'remove' | 'save' | 'softRemove' | 'user'
->;

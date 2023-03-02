@@ -126,8 +126,3 @@ export class UserTwitchEntity extends BaseEntity {
   @OneToOne(() => UserEntity, (user) => user.twitch, { eager: true })
   user: UserEntity;
 }
-
-export type UserTwitchEntityDTO = Omit<
-  UserTwitchEntity,
-  'hasId' | 'recover' | 'reload' | 'remove' | 'save' | 'softRemove' | 'user'
->;

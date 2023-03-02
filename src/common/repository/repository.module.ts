@@ -5,6 +5,13 @@ import { UserEntity } from './user/user.entity';
 import { UserTwitchEntity } from './user/user-twitch.entity';
 import { UserGoogleEntity } from './user/user-google.entity';
 import { UserRepositoryService } from './user/user-repository.service';
+import { MusicEntity } from './musicbook/music.entity';
+import { BookEntity } from './musicbook/book.entity';
+import { MusicLikeEntity } from './musicbook/music-like.entity';
+import { BookLikeEntity } from './musicbook/book-like.entity';
+import { MusicLikeCountEntity } from './musicbook/music-like-count.entity';
+import { BookLikeCountEntity } from './musicbook/book-like-count.entity';
+import { MusicBookRepositoryService } from './musicbook/musicbook-repository.service';
 
 @Global()
 @Module({
@@ -20,16 +27,36 @@ import { UserRepositoryService } from './user/user-repository.service';
           username: config.get('MYSQL_USERNAME'),
           password: config.get('MYSQL_PASSWORD'),
           database: config.get('MYSQL_DATABASE'),
-          entities: [UserEntity, UserTwitchEntity, UserGoogleEntity],
-          synchronize: true,
-          logging: false,
+          entities: [
+            UserEntity,
+            UserTwitchEntity,
+            UserGoogleEntity,
+            MusicEntity,
+            BookEntity,
+            MusicLikeEntity,
+            BookLikeEntity,
+            MusicLikeCountEntity,
+            BookLikeCountEntity,
+          ],
+          synchronize: false,
+          logging: true,
           keepConnectionAlive: true,
         };
       },
     }),
-    TypeOrmModule.forFeature([UserEntity, UserTwitchEntity, UserGoogleEntity]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      UserTwitchEntity,
+      UserGoogleEntity,
+      MusicEntity,
+      BookEntity,
+      MusicLikeEntity,
+      BookLikeEntity,
+      MusicLikeCountEntity,
+      BookLikeCountEntity,
+    ]),
   ],
-  providers: [UserRepositoryService],
-  exports: [TypeOrmModule, UserRepositoryService],
+  providers: [UserRepositoryService, MusicBookRepositoryService],
+  exports: [TypeOrmModule, UserRepositoryService, MusicBookRepositoryService],
 })
 export class RepositoryModule {}

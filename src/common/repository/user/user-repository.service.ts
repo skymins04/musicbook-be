@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { UserTwitchEntity, UserTwitchEntityDTO } from './user-twitch.entity';
-import { UserGoogleEntity, UserGoogleEntityDTO } from './user-google.entity';
+import { UserTwitchEntity } from './user-twitch.entity';
+import { UserGoogleEntity } from './user-google.entity';
 
 @Injectable()
 export class UserRepositoryService {
@@ -38,8 +38,22 @@ export class UserRepositoryService {
     return this.userRepository.insert(user).then(() => user);
   }
 
+  async updateUser(
+    _where:
+      | string
+      | string[]
+      | number
+      | number[]
+      | Date
+      | Date[]
+      | FindOptionsWhere<UserEntity>,
+    _user: DeepPartial<UserEntity>,
+  ) {
+    await this.userRepository.update(_where, _user);
+  }
+
   createOrUpdateTwitch(
-    _twitch: Partial<UserTwitchEntityDTO>,
+    _twitch: DeepPartial<UserTwitchEntity>,
   ): Promise<UserTwitchEntity> {
     return this.userTwitchRepository
       .findOne({
@@ -67,7 +81,7 @@ export class UserRepositoryService {
   }
 
   createOrUpdateGoogle(
-    _google: Partial<UserGoogleEntityDTO>,
+    _google: DeepPartial<UserGoogleEntity>,
   ): Promise<UserGoogleEntity> {
     return this.userGoogleRepository
       .findOne({
@@ -94,77 +108,107 @@ export class UserRepositoryService {
       });
   }
 
-  findOneTwitchById(_twitchId: string, _withDeleted: boolean) {
+  findOneTwitchById(_twitchId: string, _option?: { withDeleted?: boolean }) {
     return this.userTwitchRepository.findOne({
       where: { twitchId: _twitchId },
-      withDeleted: _withDeleted,
+      withDeleted: _option?.withDeleted,
     });
   }
 
-  findOneGoogleById(_googleId: string, _withDeleted: boolean) {
+  findOneGoogleById(_googleId: string, _option?: { withDeleted?: boolean }) {
     return this.userGoogleRepository.findOne({
       where: { googleId: _googleId },
-      withDeleted: _withDeleted,
+      withDeleted: _option?.withDeleted,
     });
   }
 
-  findOneUserById(_id: string, _withDeleted: boolean) {
+  findOneUserById(
+    _id: string,
+    _option?: { withDeleted?: boolean; withJoin?: boolean },
+  ) {
     return this.userRepository.findOne({
       where: { id: _id },
-      relations: ['twitch', 'google'],
-      withDeleted: _withDeleted,
+      relations:
+        _option?.withDeleted === undefined || _option?.withDeleted
+          ? ['twitch', 'google']
+          : [],
+      withDeleted: _option?.withDeleted,
     });
   }
 
-  findOneUserByEmail(_email: string, _withDeleted: boolean) {
+  findOneUserByEmail(
+    _email: string,
+    _option?: { withDeleted?: boolean; withJoin?: boolean },
+  ) {
     return this.userRepository.findOne({
       where: { email: _email },
-      relations: ['twitch', 'google'],
-      withDeleted: _withDeleted,
+      relations:
+        _option?.withDeleted === undefined || _option?.withDeleted
+          ? ['twitch', 'google']
+          : [],
+      withDeleted: _option?.withDeleted,
     });
   }
 
-  findOneUserByTwitchId(_twitchId: string, _withDeleted: boolean) {
+  findOneUserByTwitchId(
+    _twitchId: string,
+    _option?: { withDeleted?: boolean; withJoin?: boolean },
+  ) {
     return this.userRepository.findOne({
       where: { twitch: { twitchId: _twitchId } },
-      relations: ['twitch', 'google'],
-      withDeleted: _withDeleted,
+      relations:
+        _option?.withDeleted === undefined || _option?.withDeleted
+          ? ['twitch', 'google']
+          : [],
+      withDeleted: _option?.withDeleted,
     });
   }
 
   findOneUserByTwitchEntity(
-    _twitch: UserTwitchEntityDTO,
-    _withDeleted: boolean,
+    _twitch: UserTwitchEntity,
+    _option?: { withDeleted?: boolean; withJoin?: boolean },
   ) {
     return this.userRepository.findOne({
       where: [
         { email: _twitch.twitchEmail },
         { twitch: { twitchId: _twitch.twitchId } },
       ],
-      relations: ['twitch', 'google'],
-      withDeleted: _withDeleted,
+      relations:
+        _option?.withDeleted === undefined || _option?.withDeleted
+          ? ['twitch', 'google']
+          : [],
+      withDeleted: _option?.withDeleted,
     });
   }
 
-  findOneUserByGoogleId(_googleId: string, _withDeleted: boolean) {
+  findOneUserByGoogleId(
+    _googleId: string,
+    _option?: { withDeleted?: boolean; withJoin?: boolean },
+  ) {
     return this.userRepository.findOne({
       where: { google: { googleId: _googleId } },
-      relations: ['twitch', 'google'],
-      withDeleted: _withDeleted,
+      relations:
+        _option?.withDeleted === undefined || _option?.withDeleted
+          ? ['twitch', 'google']
+          : [],
+      withDeleted: _option?.withDeleted,
     });
   }
 
   findOneUserByGoogleEntity(
-    _google: UserGoogleEntityDTO,
-    _withDeleted: boolean,
+    _google: UserGoogleEntity,
+    _option?: { withDeleted?: boolean; withJoin?: boolean },
   ) {
     return this.userRepository.findOne({
       where: [
         { email: _google.googleEmail },
         { google: { googleId: _google.googleId } },
       ],
-      relations: ['twitch', 'google'],
-      withDeleted: _withDeleted,
+      relations:
+        _option?.withDeleted === undefined || _option?.withDeleted
+          ? ['twitch', 'google']
+          : [],
+      withDeleted: _option?.withDeleted,
     });
   }
 

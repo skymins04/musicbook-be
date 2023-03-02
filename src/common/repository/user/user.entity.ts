@@ -5,6 +5,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -12,6 +13,12 @@ import {
 import { UserTwitchEntity } from './user-twitch.entity';
 import { UserGoogleEntity } from './user-google.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { MusicEntity } from '../musicbook/music.entity';
+import { BookEntity } from '../musicbook/book.entity';
+import { MusicLikeEntity } from '../musicbook/music-like.entity';
+import { BookLikeEntity } from '../musicbook/book-like.entity';
+import { MusicLikeCountEntity } from '../musicbook/music-like-count.entity';
+import { BookLikeCountEntity } from '../musicbook/book-like-count.entity';
 
 @Entity('user')
 export class UserEntity extends BaseEntity {
@@ -22,20 +29,6 @@ export class UserEntity extends BaseEntity {
     example: '12341234-1234-1234-1234-123412341234',
   })
   id: string;
-  @OneToOne(() => UserTwitchEntity, (userTwitch) => userTwitch.user)
-  @JoinColumn({ name: 'twitch_id' })
-  @ApiProperty({
-    description: '트위치 사용자 연동 정보',
-    type: UserTwitchEntity,
-  })
-  twitch: UserTwitchEntity;
-  @OneToOne(() => UserGoogleEntity, (userGoogle) => userGoogle.user)
-  @JoinColumn({ name: 'google_id' })
-  @ApiProperty({
-    description: '구글 사용자 연동 정보',
-    type: UserGoogleEntity,
-  })
-  google: UserGoogleEntity;
   @Column({ name: 'display_name' })
   @ApiProperty({
     description: '노래책 고유 사용자 이름',
@@ -80,7 +73,7 @@ export class UserEntity extends BaseEntity {
     nullable: true,
     example: '2023-02-27T13:02:00.650Z',
   })
-  updatedAt: Date | null;
+  updatedAt: Date;
   @DeleteDateColumn({ name: 'deleted_at' })
   @ApiProperty({
     description:
@@ -89,5 +82,32 @@ export class UserEntity extends BaseEntity {
     nullable: true,
     example: '2023-02-27T13:02:00.650Z',
   })
-  deletedAt: Date | null;
+  deletedAt: Date;
+
+  @OneToOne(() => UserTwitchEntity, (userTwitch) => userTwitch.user)
+  @JoinColumn({ name: 'twitch_id' })
+  @ApiProperty({
+    description: '트위치 사용자 연동 정보',
+    type: UserTwitchEntity,
+  })
+  twitch: UserTwitchEntity;
+  @OneToOne(() => UserGoogleEntity, (userGoogle) => userGoogle.user)
+  @JoinColumn({ name: 'google_id' })
+  @ApiProperty({
+    description: '구글 사용자 연동 정보',
+    type: UserGoogleEntity,
+  })
+  google: UserGoogleEntity;
+  @OneToMany(() => MusicEntity, (music) => music.id)
+  musics: MusicEntity;
+  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.id)
+  musicLikes: MusicLikeEntity;
+  @OneToMany(() => MusicLikeCountEntity, (musicLikeCount) => musicLikeCount.id)
+  musicLikeCounts: MusicLikeCountEntity;
+  @OneToOne(() => BookEntity, (book) => book.id)
+  book: BookEntity;
+  @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.id)
+  bookLikes: BookLikeEntity;
+  @OneToMany(() => BookLikeCountEntity, (bookLikeCount) => bookLikeCount.id)
+  bookLikeCounts: BookLikeCountEntity;
 }

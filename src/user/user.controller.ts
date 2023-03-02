@@ -1,7 +1,9 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
+  Patch,
   Post,
   Query,
   Redirect,
@@ -21,7 +23,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { UserMeResponseDTO } from './dto/user-me.dto';
+import { UserMeResponseDTO, UserMeUpdateDTO } from './dto/user-me.dto';
 import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
 import { UserLinkaCallbackResponseDTO } from './dto/user-link.dto';
 
@@ -125,6 +127,18 @@ export class UserController {
   async getMeInfo(@Req() _req: Request) {
     const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
     return new ApiResponseDataDTO(await this.userService.getMeInfo(jwt));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '사용자 본인의 정보 업데이트',
+    description: `사용자 본인의 정보를 업데이트하는 엔드포인트.`,
+  })
+  @Patch('me')
+  async updateMeInfo(@Req() _req: Request, @Body() _body: UserMeUpdateDTO) {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    await this.userService.updateMeInfo(jwt, _body);
   }
 
   @UseGuards(JwtAuthGuard)
