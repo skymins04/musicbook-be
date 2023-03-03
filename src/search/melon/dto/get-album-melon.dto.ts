@@ -1,24 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumberString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNumber } from 'class-validator';
 import { ApiResponseDataDTO } from 'src/common/api-response/api-response-data.dto';
 
 export class GetAlbumMelonDTO {
-  @IsNumberString()
+  @Type(() => Number)
+  @IsNumber()
   @ApiProperty({
-    description: 'melon 앨범 ID (numeric string)',
-    type: String,
-    example: '12345678',
+    description: 'melon 앨범 ID (number)',
+    type: Number,
+    example: 12345678,
   })
-  id: string;
+  id: number;
 }
 
 export class GetAlbumMelonResponseDataDTO {
   @ApiProperty({
-    description: 'melon 앨범 ID (numeric string)',
-    type: String,
-    example: '12345678',
+    description: 'melon 앨범 ID (number)',
+    type: Number,
+    example: 12345678,
   })
-  albumId: string;
+  albumId: number;
   @ApiProperty({
     description: 'melon 앨범 제목',
     type: String,

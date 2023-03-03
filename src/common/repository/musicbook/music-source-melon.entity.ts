@@ -83,7 +83,7 @@ export class MusicSourceMelonEntity extends BaseEntity {
     example: '대충 가사 텍스트.',
   })
   lyrics: string;
-  @Column('date')
+  @Column('datetime')
   @ApiProperty({
     description: 'melon 음원 발매일 (ISO8601, YYYY-MM-DDTHH:mm:ss.sssZ)',
     type: String,

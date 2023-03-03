@@ -102,11 +102,11 @@ class SearchSongMelonResponseMetaDTO {
 
 export class SearchSongMelonResponseDataDTO {
   @ApiProperty({
-    description: 'melon 음원 ID (numeric string)',
-    type: String,
-    example: '12345678',
+    description: 'melon 음원 ID (number)',
+    type: Number,
+    example: 12345678,
   })
-  songId: string;
+  songId: number;
   @ApiProperty({
     description: 'melon 음원 제목',
     type: String,
@@ -120,15 +120,15 @@ export class SearchSongMelonResponseDataDTO {
   })
   artist: string;
   @ApiProperty({
-    description: 'melon 음원 앨범 정보. (id: numeric string)',
+    description: 'melon 음원 앨범 정보. (id: number)',
     example: {
       title: '앨범제목',
-      id: '12345678',
+      id: 12345678,
     },
   })
   album: {
     title: string;
-    id: string;
+    id: number;
   };
 }
 

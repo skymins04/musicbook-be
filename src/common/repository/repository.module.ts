@@ -15,6 +15,7 @@ import { MusicBookRepositoryService } from './musicbook/musicbook-repository.ser
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { MusicSourceMelonEntity } from './musicbook/music-source-melon.entity';
 import { MusicSourceOriginalEntity } from './musicbook/music-source-original.entity';
+import { MusicBookSourceRepositoryService } from './musicbook/musicbook-source-repository.service';
 
 @Global()
 @Module({
@@ -64,7 +65,16 @@ import { MusicSourceOriginalEntity } from './musicbook/music-source-original.ent
       BookLikeCountEntity,
     ]),
   ],
-  providers: [UserRepositoryService, MusicBookRepositoryService],
-  exports: [TypeOrmModule, UserRepositoryService, MusicBookRepositoryService],
+  providers: [
+    UserRepositoryService,
+    MusicBookRepositoryService,
+    MusicBookSourceRepositoryService,
+  ],
+  exports: [
+    TypeOrmModule,
+    UserRepositoryService,
+    MusicBookRepositoryService,
+    MusicBookSourceRepositoryService,
+  ],
 })
 export class RepositoryModule {}

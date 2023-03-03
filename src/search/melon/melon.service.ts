@@ -10,10 +10,15 @@ import {
 } from './dto/search-song-melon.dto';
 import { GetSongMelonResponseDataDTO } from './dto/get-song-melon.dto';
 import { GetAlbumMelonResponseDataDTO } from './dto/get-album-melon.dto';
+import { MusicBookSourceRepositoryService } from 'src/common/repository/musicbook/musicbook-source-repository.service';
+import { MusicSourceMelonEntity } from 'src/common/repository/musicbook/music-source-melon.entity';
 
 @Injectable()
 export class MelonService {
-  constructor(@InjectRedis() private readonly redisCache: Redis) {}
+  constructor(
+    @InjectRedis() private readonly redisCache: Redis,
+    private readonly musicbookSourceRepositoryService: MusicBookSourceRepositoryService,
+  ) {}
 
   async searchSongByMelon(
     _section: keyof typeof SearchSongMelonSectionEnum,
@@ -33,7 +38,7 @@ export class MelonService {
         const $ = cheerio.load(res);
         const songIds = Array.from(
           $('tbody > tr > td:nth-of-type(1) input').map((i, el) =>
-            $(el).attr('value').trim(),
+            parseInt($(el).attr('value').trim()),
           ),
         );
         const songTitles = Array.from(
@@ -53,7 +58,7 @@ export class MelonService {
               .match(/(?<=goAlbumDetail\(\')[0-9]+(?=\'\))/)[0];
             return {
               title: $(el).attr('title').split(' - 페이지 ')[0].trim(),
-              id: albumId,
+              id: parseInt(albumId),
             };
           }),
         );
@@ -68,12 +73,33 @@ export class MelonService {
   }
 
   async getMelonSongInfo(
-    _songId: string,
+    _songId: number,
   ): Promise<GetSongMelonResponseDataDTO> {
+    const source =
+      await this.musicbookSourceRepositoryService.findOneSourceMelonById(
+        _songId,
+      );
+    if (source)
+      return {
+        songId: _songId,
+        songTitle: source.songTitle,
+        albumTitle: source.albumTitle,
+        artistName: source.artistName,
+        category: source.category,
+        releasedAt: source.releasedAt.toISOString(),
+        artistThumbnail: source.artistThumbnail,
+        thumbnail: {
+          '1000': source.albumThumbnail1000,
+          '500': source.albumThumbnail500,
+          '200': source.albumThumbnail200,
+        },
+        lyrics: source.lyrics,
+      };
+
     return await axios
       .get(`https://www.melon.com/song/detail.htm?songId=${_songId}`)
       .then((res) => res.data)
-      .then((res) => {
+      .then(async (res) => {
         const $song = cheerio.load(res);
         if (
           !$song(
@@ -137,6 +163,20 @@ export class MelonService {
           thumbnailBaseURL = thumbnailRawURL.split('.jpg')[0];
         }
 
+        const melonSource = new MusicSourceMelonEntity();
+        melonSource.songId = _songId;
+        melonSource.songTitle = songTitle;
+        melonSource.albumTitle = albumTitle;
+        melonSource.artistName = artistName;
+        melonSource.category = category;
+        melonSource.releasedAt = new Date(releasedAt);
+        melonSource.artistThumbnail = artistThumbnail;
+        melonSource.albumThumbnail1000 = `${thumbnailBaseURL}_1000.jpg`;
+        melonSource.albumThumbnail500 = `${thumbnailBaseURL}_500.jpg`;
+        melonSource.albumThumbnail200 = `${thumbnailBaseURL}_200.jpg`;
+        melonSource.lyrics = lyrics;
+        await melonSource.save();
+
         return {
           songId: _songId,
           songTitle,
@@ -156,7 +196,7 @@ export class MelonService {
   }
 
   async getMelonAlbumInfo(
-    _albumId: string,
+    _albumId: number,
   ): Promise<GetAlbumMelonResponseDataDTO> {
     return await axios
       .get(`https://www.melon.com/album/detail.htm?albumId=${_albumId}`)

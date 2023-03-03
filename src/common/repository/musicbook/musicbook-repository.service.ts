@@ -2,27 +2,15 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
 import { MusicEntity } from './music.entity';
-import { MusicLikeEntity } from './music-like.entity';
-import { MusicLikeCountEntity } from './music-like-count.entity';
 import { BookEntity } from './book.entity';
-import { BookLikeEntity } from './book-like.entity';
-import { BookLikeCountEntity } from './book-like-count.entity';
 
 @Injectable()
 export class MusicBookRepositoryService {
   constructor(
     @InjectRepository(MusicEntity)
     private readonly musicRepository: Repository<MusicEntity>,
-    @InjectRepository(MusicLikeEntity)
-    private readonly musicLikeRepository: Repository<MusicLikeEntity>,
-    @InjectRepository(MusicLikeCountEntity)
-    private readonly musicLikeCountRepository: Repository<MusicLikeCountEntity>,
     @InjectRepository(BookEntity)
     private readonly bookRepository: Repository<BookEntity>,
-    @InjectRepository(BookLikeEntity)
-    private readonly bookLikeRepository: Repository<BookLikeEntity>,
-    @InjectRepository(BookLikeCountEntity)
-    private readonly bookLikeCountRepository: Repository<BookLikeCountEntity>,
   ) {}
 
   async createMusicByMelonSource(
