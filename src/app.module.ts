@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { RepositoryModule } from './common/repository/repository.module';
 import { MusicModule } from './music/music.module';
 import { MelonModule } from './melon/melon.module';
+import { BookModule } from './book/book.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { MelonModule } from './melon/melon.module';
     MelonModule,
     UserModule,
     MusicModule,
+    BookModule,
   ],
   controllers: [AppController],
   providers: [

@@ -148,6 +148,8 @@ export class MusicBookRepositoryService {
   }
 
   async createBook(_userId: string, _book: DeepPartial<BookEntity>) {
+    if (this.bookRepository.exist({ where: { broadcaster: { id: _userId } } }))
+      throw new BadRequestException('already created');
     const book = new BookEntity();
     book.broadcaster.id = _userId;
     for (const key of Object.keys(_book)) book[key] = _book[key];
