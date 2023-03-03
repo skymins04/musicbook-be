@@ -7,6 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SearchModule } from './search/search.module';
 import * as cookieParser from 'cookie-parser';
 import { UserModule } from './user/user.module';
+import * as fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,24 +30,20 @@ async function bootstrap() {
   await redisIoAdapter.connectToRedis();
   app.useWebSocketAdapter(redisIoAdapter);
 
-  SwaggerModule.setup(
-    'docs',
+  const swaggerDocument = SwaggerModule.createDocument(
     app,
-    SwaggerModule.createDocument(
-      app,
-      new DocumentBuilder()
-        .setTitle('노래책 API')
-        .setDescription(
-          '지상최고의 음악방송 오버레이 서비스, 노래책 Backend API',
-        )
-        .setVersion('1')
-        .addBearerAuth()
-        .build(),
-      {
-        include: [SearchModule, UserModule],
-      },
-    ),
+    new DocumentBuilder()
+      .setTitle('노래책 API')
+      .setDescription('지상최고의 음악방송 오버레이 서비스, 노래책 Backend API')
+      .setVersion('1')
+      .addBearerAuth()
+      .build(),
+    {
+      include: [SearchModule, UserModule],
+    },
   );
+  SwaggerModule.setup('docs', app, swaggerDocument);
+  fs.writeFileSync('./swagger-spec.json', JSON.stringify(swaggerDocument));
 
   await app.listen(3000);
 }

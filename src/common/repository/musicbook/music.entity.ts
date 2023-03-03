@@ -15,6 +15,8 @@ import { UserEntity } from '../user/user.entity';
 import { BookEntity } from './book.entity';
 import { MusicLikeEntity } from './music-like.entity';
 import { MusicLikeCountEntity } from './music-like-count.entity';
+import { MusicSourceOriginalEntity } from './music-source-original.entity';
+import { MusicSourceMelonEntity } from './music-source-melon.entity';
 
 enum EMusicPreviewType {
   YOUTUBE = 'YOUTUBE',
@@ -33,44 +35,21 @@ enum EMusicSouceType {
 
 @Entity('music')
 export class MusicEntity extends BaseEntity {
-  @PrimaryGeneratedColumn('increment', { name: 'msc_id' })
+  @PrimaryGeneratedColumn('uuid')
   @ApiProperty({
-    description: '수록곡 고유 ID (number, autoincrement)',
-    type: Number,
-    example: 1234,
+    description: '수록곡 고유 ID (uuidv4)',
+    type: String,
+    example: '12341234-1234-1234-123412341234',
   })
   id: number;
-  @Column({ name: 'msc_melon_id', nullable: true })
-  @ApiProperty({
-    description:
-      '맬론 음원 ID. 맬론 음원 검색을 통해 추가된 음원일 경우 본 컬럼에 음원 ID가 포함됨.',
-    type: String,
-    nullable: true,
-    example: 'melon_song_1234567890',
-  })
-  melonId: string;
-  @Column({ name: 'msc_title' })
-  @ApiProperty({
-    description: '수록곡 제목',
-    type: String,
-    example: 'NIGHT DANCER',
-  })
-  title: string;
-  @Column({ name: 'msc_artist' })
-  @ApiProperty({
-    description: '수록곡 원곡 가수명',
-    type: String,
-    example: 'imase',
-  })
-  artist: string;
-  @Column({ name: 'msc_description' })
+
   @ApiProperty({
     description: '수록곡 설명',
     type: String,
     example: '이것은 설명 텍스트.',
   })
   description: string;
-  @Column({ name: 'msc_preview_url', nullable: true })
+  @Column({ nullable: true })
   @ApiProperty({
     description: '수록곡 미리보기 URL',
     type: String,
@@ -79,7 +58,6 @@ export class MusicEntity extends BaseEntity {
   })
   previewURL: string;
   @Column('enum', {
-    name: 'msc_preview_type',
     nullable: true,
     enum: EMusicPreviewType,
   })
@@ -90,14 +68,7 @@ export class MusicEntity extends BaseEntity {
     example: 'YOUTUBE',
   })
   previewType: keyof typeof EMusicPreviewType;
-  @Column({ name: 'msc_thumnail_url' })
-  @ApiProperty({
-    description: '수록곡 썸네일(앨범아트) URL',
-    type: String,
-    example: 'https://example.com',
-  })
-  thumbnailURL: string;
-  @Column({ name: 'msc_source_url', nullable: true })
+  @Column({ nullable: true })
   @ApiProperty({
     description: '수록곡 음원소스 URL',
     type: String,
@@ -106,7 +77,6 @@ export class MusicEntity extends BaseEntity {
   })
   sourceURL: string;
   @Column('enum', {
-    name: 'msc_source_type',
     nullable: true,
     enum: EMusicSouceType,
   })
@@ -117,7 +87,7 @@ export class MusicEntity extends BaseEntity {
     example: 'YOUTUBE',
   })
   sourceType: keyof typeof EMusicSouceType;
-  @Column('boolean', { name: 'msc_is_requestable', default: true })
+  @Column('boolean', { default: true })
   @ApiProperty({
     description: '수록곡 신청곡 요청 가능 여부',
     type: Boolean,
@@ -125,7 +95,7 @@ export class MusicEntity extends BaseEntity {
     default: true,
   })
   isRequestable: boolean;
-  @Column('boolean', { name: 'msc_is_hide', default: false })
+  @Column('boolean', { default: false })
   @ApiProperty({
     description: '수록곡 숨김 여부',
     type: Boolean,
@@ -133,7 +103,7 @@ export class MusicEntity extends BaseEntity {
     default: false,
   })
   isHide: boolean;
-  @Column('boolean', { name: 'msc_is_paid', default: false })
+  @Column('boolean', { default: false })
   @ApiProperty({
     description: '수록곡 유료신청곡 여부',
     type: Boolean,
@@ -159,6 +129,7 @@ export class MusicEntity extends BaseEntity {
   @ApiProperty({
     description: '수록곡 삭제타임스템프(ISO8601, YYYY-MM-DDTHH:mm:ss.sssZ)',
     type: String,
+    nullable: true,
     example: '2023-02-27T13:02:00.650Z',
   })
   deletedAt: Date;
@@ -174,13 +145,35 @@ export class MusicEntity extends BaseEntity {
   @ManyToOne(() => BookEntity, (book) => book.id)
   @JoinColumn({ name: 'bk_id' })
   @ApiProperty({
-    description: '노래책 ID (number)',
-    type: Number,
-    example: 123456789,
+    description: '노래책 ID (uuidv4)',
+    type: String,
+    example: '12341234-1234-1234-123412341234',
   })
   book: BookEntity;
+  @ManyToOne(
+    () => MusicSourceOriginalEntity,
+    (musicSourceOriginal) => musicSourceOriginal.songId,
+  )
+  @JoinColumn({ name: 'source_original_id' })
+  @ApiProperty({
+    description: '노래책 고유 음원 ID (uuidv4)',
+    type: String,
+    example: '12341234-1234-1234-123412341234',
+  })
+  musicSourceOriginal: MusicSourceOriginalEntity;
+  @ManyToOne(
+    () => MusicSourceMelonEntity,
+    (musicSourceMelon) => musicSourceMelon.songId,
+  )
+  @JoinColumn({ name: 'source_melon_id' })
+  @ApiProperty({
+    description: 'melon 음원 ID (number)',
+    type: Number,
+    example: 12345678,
+  })
+  musicSourceMelon: MusicSourceMelonEntity;
   @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.id)
-  musicLikes: MusicLikeEntity;
+  musicLikes: MusicLikeEntity[];
   @OneToMany(() => MusicLikeCountEntity, (musicLikeCount) => musicLikeCount.id)
-  musicLikeCounts: MusicLikeCountEntity;
+  musicLikeCounts: MusicLikeCountEntity[];
 }

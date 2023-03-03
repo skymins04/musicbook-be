@@ -22,42 +22,42 @@ import { BookLikeCountEntity } from '../musicbook/book-like-count.entity';
 
 @Entity('user')
 export class UserEntity extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid', { name: 'id' })
+  @PrimaryGeneratedColumn('uuid')
   @ApiProperty({
     description: '노래책 고유 사용자 ID (uuid v4)',
     type: String,
     example: '12341234-1234-1234-1234-123412341234',
   })
   id: string;
-  @Column({ name: 'display_name' })
+  @Column()
   @ApiProperty({
     description: '노래책 고유 사용자 이름',
     type: String,
     example: '홍길동',
   })
   displayName: string;
-  @Column({ name: 'profile_img_url', length: 512 })
+  @Column('text')
   @ApiProperty({
     description: '노래책 고유 사용자 프로필 이미지',
     type: String,
     example: 'http://example.com/example.png',
   })
   profileImgURL: string;
-  @Column({ name: 'email', unique: true })
+  @Column({ unique: true })
   @ApiProperty({
     description: '노래책 고유 사용자 이메일',
     type: String,
     example: 'example@example.com',
   })
   email: string;
-  @Column({ name: 'description', length: 512 })
+  @Column('text')
   @ApiProperty({
     description: '노래책 고유 사용자 설명',
     type: String,
     example: '이것은 설명 텍스트.',
   })
   description: string;
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn()
   @ApiProperty({
     description:
       '노래책 고유 사용자 생성타임스템프(ISO8601, YYYY-MM-DDTHH:mm:ss.sssZ)',
@@ -65,7 +65,7 @@ export class UserEntity extends BaseEntity {
     example: '2023-02-27T13:02:00.650Z',
   })
   createdAt: Date;
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn()
   @ApiProperty({
     description:
       '노래책 고유 사용자 수정타임스템프(ISO8601, YYYY-MM-DDTHH:mm:ss.sssZ)',
@@ -74,7 +74,7 @@ export class UserEntity extends BaseEntity {
     example: '2023-02-27T13:02:00.650Z',
   })
   updatedAt: Date;
-  @DeleteDateColumn({ name: 'deleted_at' })
+  @DeleteDateColumn()
   @ApiProperty({
     description:
       '노래책 고유 사용자 삭제타임스템프(ISO8601, YYYY-MM-DDTHH:mm:ss.sssZ)',

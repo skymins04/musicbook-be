@@ -12,7 +12,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('book-like')
 export class BookLikeEntity extends BaseEntity {
-  @PrimaryGeneratedColumn('increment', { name: 'id' })
+  @PrimaryGeneratedColumn('increment')
   @ApiProperty({
     description: '노래책 좋아요 ID (number)',
     type: Number,
@@ -39,9 +39,9 @@ export class BookLikeEntity extends BaseEntity {
   @ManyToOne(() => BookEntity, (book) => book.id)
   @JoinColumn({ name: 'bk_id' })
   @ApiProperty({
-    description: '노래책 ID (number)',
-    type: Number,
-    example: 123456789,
+    description: '노래책 ID (uuidv4)',
+    type: String,
+    example: '12341234-1234-1234-123412341234',
   })
   book: BookEntity;
 }

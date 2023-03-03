@@ -25,19 +25,40 @@ export class MusicBookRepositoryService {
     private readonly bookLikeCountRepository: Repository<BookLikeCountEntity>,
   ) {}
 
-  async createMusic(
+  async createMusicByMelonSource(
     _userId: string,
     _bookId: number,
+    _songId: number,
     _music: DeepPartial<MusicEntity>,
   ) {
-    if (_music.melonId && !_music.melonId.match(/^melon_song_[0-9]+$/))
-      throw new BadRequestException('invaild melon song id');
-
     const music = new MusicEntity();
+    for (const key of Object.keys(_music)) music[key] = _music[key];
     music.broadcaster.id = _userId;
     music.book.id = _bookId;
+    music.musicSourceMelon.songId = _songId;
+    try {
+      return music.save();
+    } catch (e) {
+      throw new BadRequestException();
+    }
+  }
+
+  async createMusicByOriginalSource(
+    _userId: string,
+    _bookId: number,
+    _songId: string,
+    _music: DeepPartial<MusicEntity>,
+  ) {
+    const music = new MusicEntity();
     for (const key of Object.keys(_music)) music[key] = _music[key];
-    return music.save();
+    music.broadcaster.id = _userId;
+    music.book.id = _bookId;
+    music.musicSourceOriginal.songId = _songId;
+    try {
+      return music.save();
+    } catch (e) {
+      throw new BadRequestException();
+    }
   }
 
   async updateMusic(
@@ -60,7 +81,7 @@ export class MusicBookRepositoryService {
 
   findOneMusicById(
     _musicId: number,
-    _option?: {
+    _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'book')[];
     },
@@ -68,19 +89,19 @@ export class MusicBookRepositoryService {
     return this.musicRepository.findOne({
       where: { id: _musicId },
       relations:
-        _option?.withJoin === undefined || _option?.withJoin
-          ? typeof _option?.withJoin === 'boolean' ||
-            _option?.withJoin === undefined
+        _options?.withJoin === undefined || _options?.withJoin
+          ? typeof _options?.withJoin === 'boolean' ||
+            _options?.withJoin === undefined
             ? ['broadcaster', 'book']
-            : _option?.withJoin
+            : _options?.withJoin
           : [],
-      withDeleted: _option?.withDeleted,
+      withDeleted: _options?.withDeleted,
     });
   }
 
   findOneMusicByUserId(
     _userId: string,
-    _option?: {
+    _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'book')[];
     },
@@ -88,19 +109,19 @@ export class MusicBookRepositoryService {
     return this.musicRepository.findOne({
       where: { broadcaster: { id: _userId } },
       relations:
-        _option?.withJoin === undefined || _option?.withJoin
-          ? typeof _option?.withJoin === 'boolean' ||
-            _option?.withJoin === undefined
+        _options?.withJoin === undefined || _options?.withJoin
+          ? typeof _options?.withJoin === 'boolean' ||
+            _options?.withJoin === undefined
             ? ['broadcaster', 'book']
-            : _option?.withJoin
+            : _options?.withJoin
           : [],
-      withDeleted: _option?.withDeleted,
+      withDeleted: _options?.withDeleted,
     });
   }
 
   findManyMusicByBookId(
     _bookId: number,
-    _option?: {
+    _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'book')[];
     },
@@ -108,33 +129,33 @@ export class MusicBookRepositoryService {
     return this.musicRepository.find({
       where: { book: { id: _bookId } },
       relations:
-        _option?.withJoin === undefined || _option?.withJoin
-          ? typeof _option?.withJoin === 'boolean' ||
-            _option?.withJoin === undefined
+        _options?.withJoin === undefined || _options?.withJoin
+          ? typeof _options?.withJoin === 'boolean' ||
+            _options?.withJoin === undefined
             ? ['broadcaster', 'book']
-            : _option?.withJoin
+            : _options?.withJoin
           : [],
-      withDeleted: _option?.withDeleted,
+      withDeleted: _options?.withDeleted,
     });
   }
 
   findManyMusicByMelonId(
-    _melonId: string,
-    _option?: {
+    _songId: number,
+    _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'book')[];
     },
   ) {
     return this.musicRepository.find({
-      where: { melonId: _melonId },
+      where: { musicSourceMelon: { songId: _songId } },
       relations:
-        _option?.withJoin === undefined || _option?.withJoin
-          ? typeof _option?.withJoin === 'boolean' ||
-            _option?.withJoin === undefined
+        _options?.withJoin === undefined || _options?.withJoin
+          ? typeof _options?.withJoin === 'boolean' ||
+            _options?.withJoin === undefined
             ? ['broadcaster', 'book']
-            : _option?.withJoin
+            : _options?.withJoin
           : [],
-      withDeleted: _option?.withDeleted,
+      withDeleted: _options?.withDeleted,
     });
   }
 
@@ -166,7 +187,7 @@ export class MusicBookRepositoryService {
 
   findOneBookById(
     _bookId: number,
-    _option?: {
+    _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'musics')[];
     },
@@ -174,19 +195,19 @@ export class MusicBookRepositoryService {
     return this.bookRepository.findOne({
       where: { id: _bookId },
       relations:
-        _option?.withJoin === undefined || _option?.withJoin
-          ? typeof _option?.withJoin === 'boolean' ||
-            _option?.withJoin === undefined
+        _options?.withJoin === undefined || _options?.withJoin
+          ? typeof _options?.withJoin === 'boolean' ||
+            _options?.withJoin === undefined
             ? ['broadcaster']
-            : _option?.withJoin
+            : _options?.withJoin
           : [],
-      withDeleted: _option?.withDeleted,
+      withDeleted: _options?.withDeleted,
     });
   }
 
   findOneBookByUserId(
     _userId: string,
-    _option?: {
+    _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'musics')[];
     },
@@ -194,19 +215,19 @@ export class MusicBookRepositoryService {
     return this.bookRepository.findOne({
       where: { broadcaster: { id: _userId } },
       relations:
-        _option?.withJoin === undefined || _option?.withJoin
-          ? typeof _option?.withJoin === 'boolean' ||
-            _option?.withJoin === undefined
+        _options?.withJoin === undefined || _options?.withJoin
+          ? typeof _options?.withJoin === 'boolean' ||
+            _options?.withJoin === undefined
             ? ['broadcaster']
-            : _option?.withJoin
+            : _options?.withJoin
           : [],
-      withDeleted: _option?.withDeleted,
+      withDeleted: _options?.withDeleted,
     });
   }
 
   findManyBookByCustomBookId(
     _customBookId: string,
-    _option?: {
+    _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'musics')[];
     },
@@ -214,13 +235,13 @@ export class MusicBookRepositoryService {
     return this.musicRepository.find({
       where: { book: { customId: _customBookId } },
       relations:
-        _option?.withJoin === undefined || _option?.withJoin
-          ? typeof _option?.withJoin === 'boolean' ||
-            _option?.withJoin === undefined
+        _options?.withJoin === undefined || _options?.withJoin
+          ? typeof _options?.withJoin === 'boolean' ||
+            _options?.withJoin === undefined
             ? ['broadcaster']
-            : _option?.withJoin
+            : _options?.withJoin
           : [],
-      withDeleted: _option?.withDeleted,
+      withDeleted: _options?.withDeleted,
     });
   }
 }

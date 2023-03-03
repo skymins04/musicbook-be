@@ -14,14 +14,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('music-like-count')
 export class MusicLikeCountEntity extends BaseEntity {
-  @PrimaryGeneratedColumn('increment', { name: 'id' })
+  @PrimaryGeneratedColumn('increment')
   @ApiProperty({
     description: '수록곡 좋아요 집계 ID (number)',
     type: Number,
     example: 123456,
   })
   id: number;
-  @Column('integer', { name: 'count' })
+  @Column('integer')
   @ApiProperty({
     description: '수록곡 좋아요 집계값',
     type: Number,
@@ -49,17 +49,17 @@ export class MusicLikeCountEntity extends BaseEntity {
   @ManyToOne(() => BookEntity, (book) => book.id)
   @JoinColumn({ name: 'bk_id' })
   @ApiProperty({
-    description: '수록곡의 노래책 ID (number)',
-    type: Number,
-    example: 123456789,
+    description: '수록곡의 노래책 ID (uuidv4)',
+    type: String,
+    example: '12341234-1234-1234-123412341234',
   })
   book: BookEntity;
   @ManyToOne(() => MusicEntity, (music) => music.id)
   @JoinColumn({ name: 'msc_id' })
   @ApiProperty({
-    description: '수록곡 ID (number)',
-    type: Number,
-    example: 123456789,
+    description: '수록곡 ID (uuidv4)',
+    type: String,
+    example: '12341234-1234-1234-123412341234',
   })
   music: MusicEntity;
 }

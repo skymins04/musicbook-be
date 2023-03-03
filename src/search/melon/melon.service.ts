@@ -4,13 +4,12 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { Redis } from 'ioredis';
 import {
-  ApiResponseDataDTO,
-  ApiResponsePagenationDataDTO,
-} from 'src/common/api-response/api-response-data.dto';
-import {
   SearchSongMelonSortEnum,
   SearchSongMelonSectionEnum,
+  SearchSongMelonResponseDataDTO,
 } from './dto/search-song-melon.dto';
+import { GetSongMelonResponseDataDTO } from './dto/get-song-melon.dto';
+import { GetAlbumMelonResponseDataDTO } from './dto/get-album-melon.dto';
 
 @Injectable()
 export class MelonService {
@@ -21,7 +20,7 @@ export class MelonService {
     _q: string,
     _page: number,
     _sort: keyof typeof SearchSongMelonSortEnum,
-  ) {
+  ): Promise<SearchSongMelonResponseDataDTO[]> {
     const encodedSearchQuery = encodeURIComponent(_q);
     const startIdx = 1 + 50 * (_page - 1);
 
@@ -33,8 +32,8 @@ export class MelonService {
       .then(async (res) => {
         const $ = cheerio.load(res);
         const songIds = Array.from(
-          $('tbody > tr > td:nth-of-type(1) input').map(
-            (i, el) => 'melon_song_' + $(el).attr('value').trim(),
+          $('tbody > tr > td:nth-of-type(1) input').map((i, el) =>
+            $(el).attr('value').trim(),
           ),
         );
         const songTitles = Array.from(
@@ -54,34 +53,113 @@ export class MelonService {
               .match(/(?<=goAlbumDetail\(\')[0-9]+(?=\'\))/)[0];
             return {
               title: $(el).attr('title').split(' - 페이지 ')[0].trim(),
-              id: 'melon_album_' + albumId,
+              id: albumId,
             };
           }),
         );
 
-        return new ApiResponsePagenationDataDTO<{
-          sort: keyof typeof SearchSongMelonSortEnum;
-        }>(
-          {
-            perPage: 50,
-            currentPage: _page,
-            sort: _sort,
-            pageItemCount: songTitles.length,
-          },
-          songTitles.map((itm, idx) => ({
-            id: songIds[idx],
-            songTitle: itm,
-            artist: artists[idx],
-            album: albums[idx],
-          })),
-        );
+        return songTitles.map((itm, idx) => ({
+          songId: songIds[idx],
+          songTitle: itm,
+          artist: artists[idx],
+          album: albums[idx],
+        }));
       });
   }
 
-  async getMelonAlbumInfo(_albumId: string) {
-    const albumId = _albumId.replace(/melon_album_/g, '');
+  async getMelonSongInfo(
+    _songId: string,
+  ): Promise<GetSongMelonResponseDataDTO> {
     return await axios
-      .get(`https://www.melon.com/album/detail.htm?albumId=${albumId}`)
+      .get(`https://www.melon.com/song/detail.htm?songId=${_songId}`)
+      .then((res) => res.data)
+      .then((res) => {
+        const $song = cheerio.load(res);
+        if (
+          !$song(
+            '#downloadfrm > div > div > div.entry > div.info > div.song_name',
+          ).length
+        )
+          throw new BadRequestException('not found song');
+        const songTitle = $song(
+          '#downloadfrm > div > div > div.entry > div.info > div.song_name',
+        )
+          .text()
+          .trim()
+          .split('\t')
+          .splice(-1)[0];
+        const albumTitle = $song(
+          '#downloadfrm > div > div > div.entry > div.meta > dl > dd:nth-child(2) > a',
+        )
+          .text()
+          .trim();
+        const artistName = $song(
+          '#downloadfrm > div > div > div.entry > div.info > div.artist > a > span:nth-child(1)',
+        )
+          .text()
+          .trim();
+        const artistThumbnail = $song(
+          '#downloadfrm > div > div > div.entry > div.info > div.artist > a > span.thumb_atist > img',
+        ).attr('src');
+
+        const releasedAt = new Date(
+          $song(
+            '#downloadfrm > div > div > div.entry > div.meta > dl > dd:nth-child(4)',
+          )
+            .text()
+            .trim(),
+        ).toISOString();
+
+        const category = $song(
+          '#downloadfrm > div > div > div.entry > div.meta > dl > dd:nth-child(6)',
+        )
+          .text()
+          .trim();
+
+        const lyrics = $song('#d_video_summary')
+          .html()
+          .replace(/\<\!\-\-.*\-\-\>/g, '')
+          .replace(/\<br ?\/?\>/g, '\n')
+          .replace(/\\t/g, '')
+          .trim();
+
+        const thumbnailRawURL = $song(
+          '#downloadfrm > div > div > div.thumb > a > img',
+        )
+          .attr('src')
+          .split('?')[0];
+        let thumbnailBaseURL = '';
+        if (thumbnailRawURL.match(/\_500\.jpg/)) {
+          thumbnailBaseURL = thumbnailRawURL.split('_500.jpg')[0];
+        } else if (thumbnailRawURL.match(/\_1000\.jpg/)) {
+          thumbnailBaseURL = thumbnailRawURL.split('_1000.jpg')[0];
+        } else {
+          thumbnailBaseURL = thumbnailRawURL.split('.jpg')[0];
+        }
+
+        return {
+          songId: _songId,
+          songTitle,
+          albumTitle,
+          artistName,
+          category,
+          releasedAt,
+          artistThumbnail,
+          thumbnail: {
+            '1000': `${thumbnailBaseURL}_1000.jpg`,
+            '500': `${thumbnailBaseURL}_500.jpg`,
+            '200': `${thumbnailBaseURL}.jpg`,
+          },
+          lyrics,
+        };
+      });
+  }
+
+  async getMelonAlbumInfo(
+    _albumId: string,
+  ): Promise<GetAlbumMelonResponseDataDTO> {
+    return await axios
+      .get(`https://www.melon.com/album/detail.htm?albumId=${_albumId}`)
       .then((res) => res.data)
       .then((res) => {
         const $album = cheerio.load(res);
@@ -119,8 +197,8 @@ export class MelonService {
           thumbnailBaseURL = thumbnailRawURL.split('.jpg')[0];
         }
 
-        return new ApiResponseDataDTO({
-          albumId: 'melon_album_' + _albumId,
+        return {
+          albumId: _albumId,
           albumTitle,
           artistName,
           artistThumbnail,
@@ -129,7 +207,7 @@ export class MelonService {
             '500': `${thumbnailBaseURL}_500.jpg`,
             '200': `${thumbnailBaseURL}.jpg`,
           },
-        });
+        };
       });
   }
 }

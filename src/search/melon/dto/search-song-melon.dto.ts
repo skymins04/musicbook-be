@@ -100,14 +100,13 @@ class SearchSongMelonResponseMetaDTO {
   pageItemCount: number;
 }
 
-class SearchSongMelonResponseDataDTO {
+export class SearchSongMelonResponseDataDTO {
   @ApiProperty({
-    description:
-      'melon 음원 ID. 실제 melon 음원 ID는 숫자로만 이루어져있지만, 노래책 안에서는 음원의 출처 구분을 위해 "melon_song_" prefix를 붙임. (형식: /^melon_song_[0-9]+$/)',
+    description: 'melon 음원 ID (numeric string)',
     type: String,
-    example: 'melon_song_12345678',
+    example: '12345678',
   })
-  id: string;
+  songId: string;
   @ApiProperty({
     description: 'melon 음원 제목',
     type: String,
@@ -121,11 +120,10 @@ class SearchSongMelonResponseDataDTO {
   })
   artist: string;
   @ApiProperty({
-    description:
-      'melon 음원 앨범 정보. 실제 melon 앨범 ID는 숫자로만 이루어져있지만, 노래책 안에서는 앨범의 출처 구분을 위해 "melon_album_" prefix를 붙임. (형식: /^melon_album_[0-9]+$/)',
+    description: 'melon 음원 앨범 정보. (id: numeric string)',
     example: {
       title: '앨범제목',
-      id: 'melon_album_12345678',
+      id: '12345678',
     },
   })
   album: {

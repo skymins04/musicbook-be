@@ -12,6 +12,9 @@ import { BookLikeEntity } from './musicbook/book-like.entity';
 import { MusicLikeCountEntity } from './musicbook/music-like-count.entity';
 import { BookLikeCountEntity } from './musicbook/book-like-count.entity';
 import { MusicBookRepositoryService } from './musicbook/musicbook-repository.service';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { MusicSourceMelonEntity } from './musicbook/music-source-melon.entity';
+import { MusicSourceOriginalEntity } from './musicbook/music-source-original.entity';
 
 @Global()
 @Module({
@@ -32,6 +35,8 @@ import { MusicBookRepositoryService } from './musicbook/musicbook-repository.ser
             UserTwitchEntity,
             UserGoogleEntity,
             MusicEntity,
+            MusicSourceOriginalEntity,
+            MusicSourceMelonEntity,
             BookEntity,
             MusicLikeEntity,
             BookLikeEntity,
@@ -41,6 +46,7 @@ import { MusicBookRepositoryService } from './musicbook/musicbook-repository.ser
           synchronize: false,
           logging: true,
           keepConnectionAlive: true,
+          namingStrategy: new SnakeNamingStrategy(),
         };
       },
     }),
@@ -49,6 +55,8 @@ import { MusicBookRepositoryService } from './musicbook/musicbook-repository.ser
       UserTwitchEntity,
       UserGoogleEntity,
       MusicEntity,
+      MusicSourceOriginalEntity,
+      MusicSourceMelonEntity,
       BookEntity,
       MusicLikeEntity,
       BookLikeEntity,
