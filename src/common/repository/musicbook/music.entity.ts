@@ -43,12 +43,23 @@ export class MusicEntity extends BaseEntity {
   })
   id: number;
 
+  @Column()
+  @ApiProperty({
+    description: '수록곡 제목',
+    type: String,
+    example: '수록곡 제목',
+  })
+  title: string;
+
+  @Column({ nullable: true })
   @ApiProperty({
     description: '수록곡 설명',
     type: String,
+    nullable: true,
     example: '이것은 설명 텍스트.',
   })
   description: string;
+
   @Column({ nullable: true })
   @ApiProperty({
     description: '수록곡 미리보기 URL',
@@ -57,6 +68,7 @@ export class MusicEntity extends BaseEntity {
     example: 'https://example.com',
   })
   previewURL: string;
+
   @Column('enum', {
     nullable: true,
     enum: EMusicPreviewType,
@@ -68,6 +80,7 @@ export class MusicEntity extends BaseEntity {
     example: 'YOUTUBE',
   })
   previewType: keyof typeof EMusicPreviewType;
+
   @Column({ nullable: true })
   @ApiProperty({
     description: '수록곡 음원소스 URL',
@@ -76,6 +89,7 @@ export class MusicEntity extends BaseEntity {
     example: 'https://example.com',
   })
   sourceURL: string;
+
   @Column('enum', {
     nullable: true,
     enum: EMusicSouceType,
@@ -87,6 +101,7 @@ export class MusicEntity extends BaseEntity {
     example: 'YOUTUBE',
   })
   sourceType: keyof typeof EMusicSouceType;
+
   @Column('boolean', { default: true })
   @ApiProperty({
     description: '수록곡 신청곡 요청 가능 여부',

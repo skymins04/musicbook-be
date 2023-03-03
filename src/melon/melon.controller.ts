@@ -58,7 +58,8 @@ export class MelonController {
   @Get('song/:id')
   @ApiOperation({
     summary: 'melon 음원 조회',
-    description: 'melon 음원 조회하는 엔드포인트',
+    description:
+      'melon 음원 조회하는 엔드포인트. 조회된 melon 음원은 music-source-melon에 캐싱됨.',
   })
   @ApiOkResponse({
     description: 'melon 음원 조회 성공',

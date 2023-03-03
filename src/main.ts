@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import * as fs from 'fs';
 import { MusicModule } from './music/music.module';
 import { MelonModule } from './melon/melon.module';
+import { BookModule } from './book/book.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -40,7 +41,7 @@ async function bootstrap() {
       .addBearerAuth()
       .build(),
     {
-      include: [UserModule, MelonModule, MusicModule],
+      include: [UserModule, MelonModule, MusicModule, BookModule],
     },
   );
   SwaggerModule.setup('docs', app, swaggerDocument);
