@@ -4,12 +4,13 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { RedisModule } from '@nestjs-modules/ioredis';
-import { SearchModule } from './search/search.module';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ApiResponseInterceptor } from './common/api-response/api-response.interceptor';
 import { JwtAuthModule } from './common/jwt-auth/jwt-auth.module';
 import { UserModule } from './user/user.module';
 import { RepositoryModule } from './common/repository/repository.module';
+import { MusicModule } from './music/music.module';
+import { MelonModule } from './melon/melon.module';
 
 @Module({
   imports: [
@@ -41,8 +42,9 @@ import { RepositoryModule } from './common/repository/repository.module';
     }),
     RepositoryModule,
     JwtAuthModule,
-    SearchModule,
+    MelonModule,
     UserModule,
+    MusicModule,
   ],
   controllers: [AppController],
   providers: [

@@ -4,10 +4,11 @@ import { RedisIoAdapter } from './common/redis-socket.io/redis-io.adapter';
 import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { SearchModule } from './search/search.module';
 import * as cookieParser from 'cookie-parser';
 import { UserModule } from './user/user.module';
 import * as fs from 'fs';
+import { MusicModule } from './music/music.module';
+import { MelonModule } from './melon/melon.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -39,7 +40,7 @@ async function bootstrap() {
       .addBearerAuth()
       .build(),
     {
-      include: [SearchModule, UserModule],
+      include: [UserModule, MelonModule, MusicModule],
     },
   );
   SwaggerModule.setup('docs', app, swaggerDocument);
