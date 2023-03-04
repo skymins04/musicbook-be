@@ -16,14 +16,14 @@ export class MusicBookRepositoryService {
   async createMusicByMelonSource(
     _userId: string,
     _bookId: number,
-    _songId: number,
+    _sourceId: number,
     _music: DeepPartial<MusicEntity>,
   ) {
     const music = new MusicEntity();
     for (const key of Object.keys(_music)) music[key] = _music[key];
     music.broadcaster.id = _userId;
     music.book.id = _bookId;
-    music.musicSourceMelon.songId = _songId;
+    music.musicSourceMelon.songId = _sourceId;
     try {
       return music.save();
     } catch (e) {
@@ -34,14 +34,14 @@ export class MusicBookRepositoryService {
   async createMusicByOriginalSource(
     _userId: string,
     _bookId: number,
-    _songId: string,
+    _sourceId: string,
     _music: DeepPartial<MusicEntity>,
   ) {
     const music = new MusicEntity();
     for (const key of Object.keys(_music)) music[key] = _music[key];
     music.broadcaster.id = _userId;
     music.book.id = _bookId;
-    music.musicSourceOriginal.songId = _songId;
+    music.musicSourceOriginal.songId = _sourceId;
     try {
       return music.save();
     } catch (e) {
@@ -128,14 +128,14 @@ export class MusicBookRepositoryService {
   }
 
   findManyMusicByMelonId(
-    _songId: number,
+    _sourceId: number,
     _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'book')[];
     },
   ) {
     return this.musicRepository.find({
-      where: { musicSourceMelon: { songId: _songId } },
+      where: { musicSourceMelon: { songId: _sourceId } },
       relations:
         _options?.withJoin === undefined || _options?.withJoin
           ? typeof _options?.withJoin === 'boolean' ||
