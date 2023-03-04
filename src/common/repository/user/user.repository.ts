@@ -6,7 +6,7 @@ import { UserTwitchEntity } from './user-twitch.entity';
 import { UserGoogleEntity } from './user-google.entity';
 
 @Injectable()
-export class UserRepositoryService {
+export class UserRepository {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,

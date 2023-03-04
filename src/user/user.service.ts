@@ -3,13 +3,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { Redis } from 'ioredis';
 import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
-import { UserRepositoryService } from 'src/common/repository/user/user-repository.service';
+import { UserRepository } from 'src/common/repository/user/user.repository';
 import { UserMeUpdateDTO } from './dto/user-me.dto';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly userRepositoryService: UserRepositoryService,
+    private readonly userRepositoryService: UserRepository,
     private readonly jwtAuthService: JwtAuthService,
     @InjectRedis() private readonly redis: Redis,
   ) {}

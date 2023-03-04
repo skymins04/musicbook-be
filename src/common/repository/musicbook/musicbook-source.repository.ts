@@ -5,7 +5,7 @@ import { MusicSourceMelonEntity } from './music-source-melon.entity';
 import { DeepPartial, Repository } from 'typeorm';
 
 @Injectable()
-export class MusicBookSourceRepositoryService {
+export class MusicBookSourceRepository {
   constructor(
     @InjectRepository(MusicSourceOriginalEntity)
     private readonly musicSourceOriginRepository: Repository<MusicSourceOriginalEntity>,

@@ -5,7 +5,7 @@ import { MusicEntity } from './music.entity';
 import { BookEntity } from './book.entity';
 
 @Injectable()
-export class MusicBookRepositoryService {
+export class MusicBookRepository {
   constructor(
     @InjectRepository(MusicEntity)
     private readonly musicRepository: Repository<MusicEntity>,

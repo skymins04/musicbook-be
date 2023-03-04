@@ -10,14 +10,14 @@ import {
 } from './dto/search-song-melon.dto';
 import { GetSongMelonResponseDataDTO } from './dto/get-song-melon.dto';
 import { GetAlbumMelonResponseDataDTO } from './dto/get-album-melon.dto';
-import { MusicBookSourceRepositoryService } from 'src/common/repository/musicbook/musicbook-source-repository.service';
+import { MusicBookSourceRepository } from 'src/common/repository/musicbook/musicbook-source.repository';
 import { MusicSourceMelonEntity } from 'src/common/repository/musicbook/music-source-melon.entity';
 
 @Injectable()
 export class MelonService {
   constructor(
     @InjectRedis() private readonly redisCache: Redis,
-    private readonly musicbookSourceRepositoryService: MusicBookSourceRepositoryService,
+    private readonly musicbookSourceRepositoryService: MusicBookSourceRepository,
   ) {}
 
   async searchSongByMelon(

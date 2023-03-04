@@ -4,18 +4,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './user/user.entity';
 import { UserTwitchEntity } from './user/user-twitch.entity';
 import { UserGoogleEntity } from './user/user-google.entity';
-import { UserRepositoryService } from './user/user-repository.service';
+import { UserRepository } from './user/user.repository';
 import { MusicEntity } from './musicbook/music.entity';
 import { BookEntity } from './musicbook/book.entity';
 import { MusicLikeEntity } from './musicbook/music-like.entity';
 import { BookLikeEntity } from './musicbook/book-like.entity';
 import { MusicLikeCountEntity } from './musicbook/music-like-count.entity';
 import { BookLikeCountEntity } from './musicbook/book-like-count.entity';
-import { MusicBookRepositoryService } from './musicbook/musicbook-repository.service';
+import { MusicBookRepository } from './musicbook/musicbook.repository';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { MusicSourceMelonEntity } from './musicbook/music-source-melon.entity';
 import { MusicSourceOriginalEntity } from './musicbook/music-source-original.entity';
-import { MusicBookSourceRepositoryService } from './musicbook/musicbook-source-repository.service';
+import { MusicBookSourceRepository } from './musicbook/musicbook-source.repository';
 
 @Global()
 @Module({
@@ -65,16 +65,12 @@ import { MusicBookSourceRepositoryService } from './musicbook/musicbook-source-r
       BookLikeCountEntity,
     ]),
   ],
-  providers: [
-    UserRepositoryService,
-    MusicBookRepositoryService,
-    MusicBookSourceRepositoryService,
-  ],
+  providers: [UserRepository, MusicBookRepository, MusicBookSourceRepository],
   exports: [
     TypeOrmModule,
-    UserRepositoryService,
-    MusicBookRepositoryService,
-    MusicBookSourceRepositoryService,
+    UserRepository,
+    MusicBookRepository,
+    MusicBookSourceRepository,
   ],
 })
 export class RepositoryModule {}
