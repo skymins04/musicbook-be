@@ -1,10 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MusicLikeEntity } from './music-like.entity';
-import { Repository } from 'typeorm';
-import { MusicLikeCountEntity } from './music-like-count.entity';
+import { LessThanOrEqual, Repository } from 'typeorm';
 import { BookLikeEntity } from './book-like.entity';
-import { BookLikeCountEntity } from './book-like-count.entity';
 import { MusicBookRepository } from './musicbook.repository';
 
 @Injectable()
@@ -12,12 +10,8 @@ export class MusicBookLikeRepository {
   constructor(
     @InjectRepository(MusicLikeEntity)
     private readonly musicLikeRepository: Repository<MusicLikeEntity>,
-    @InjectRepository(MusicLikeCountEntity)
-    private readonly musicLikeCountRepository: Repository<MusicLikeCountEntity>,
     @InjectRepository(BookLikeEntity)
     private readonly bookLikeRepository: Repository<BookLikeEntity>,
-    @InjectRepository(BookLikeCountEntity)
-    private readonly bookLikeCountRepository: Repository<BookLikeCountEntity>,
     private readonly musicbookRepository: MusicBookRepository,
   ) {}
 
@@ -61,9 +55,27 @@ export class MusicBookLikeRepository {
     });
   }
 
+  getCountMusicLikeByUserId(_userId: string, _date?: Date) {
+    return this.musicLikeRepository.count({
+      where: {
+        viewer: { id: _userId },
+        createdAt: _date ? LessThanOrEqual(_date) : undefined,
+      },
+    });
+  }
+
   findManyMusicLikeByMusicId(_musicId: string) {
     return this.musicLikeRepository.find({
       where: { music: { id: _musicId } },
+    });
+  }
+
+  getCountMusicLikeByMusicId(_musicId: string, _date?: Date) {
+    return this.musicLikeRepository.count({
+      where: {
+        music: { id: _musicId },
+        createdAt: _date ? LessThanOrEqual(_date) : undefined,
+      },
     });
   }
 
@@ -102,9 +114,29 @@ export class MusicBookLikeRepository {
     });
   }
 
+  getCountBookLikeByUserId(_userId: string, _date?: Date) {
+    return this.bookLikeRepository.count({
+      where: {
+        viewer: { id: _userId },
+        createdAt: _date ? LessThanOrEqual(_date) : undefined,
+      },
+    });
+  }
+
   findManyBookLikeByBookId(_bookId: string) {
     return this.bookLikeRepository.find({
       where: { book: { id: _bookId } },
+    });
+  }
+
+  getCountBookLikeByBookId(_bookId: string, _date?: Date) {
+    return this.bookLikeRepository.count({
+      where: {
+        book: {
+          id: _bookId,
+          createdAt: _date ? LessThanOrEqual(_date) : undefined,
+        },
+      },
     });
   }
 }
