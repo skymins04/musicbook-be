@@ -7,11 +7,11 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ApiResponseInterceptor } from './common/api-response/api-response.interceptor';
 import { JwtAuthModule } from './common/jwt-auth/jwt-auth.module';
-import { UserModule } from './user/user.module';
+import { UserModule } from './route/user/user.module';
 import { RepositoryModule } from './common/repository/repository.module';
-import { MusicModule } from './music/music.module';
-import { MelonModule } from './melon/melon.module';
-import { BookModule } from './book/book.module';
+import { MusicModule } from './route/music/music.module';
+import { MelonModule } from './route/melon/melon.module';
+import { BookModule } from './route/book/book.module';
 
 @Module({
   imports: [

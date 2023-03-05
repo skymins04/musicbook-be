@@ -5,11 +5,11 @@ import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
-import { UserModule } from './user/user.module';
+import { UserModule } from './route/user/user.module';
 import * as fs from 'fs';
-import { MusicModule } from './music/music.module';
-import { MelonModule } from './melon/melon.module';
-import { BookModule } from './book/book.module';
+import { MusicModule } from './route/music/music.module';
+import { MelonModule } from './route/melon/melon.module';
+import { BookModule } from './route/book/book.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
