@@ -78,15 +78,13 @@ export class MusicController {
   })
   deleteMusic() {}
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id/like')
-  @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 수록곡 좋아요 여부 조회',
+    summary: '(wip) 수록곡 좋아요 개수 조회',
     description:
-      '특정 수록곡에 대한 좋아요 여부를 조회하는 엔드포인트. 존재하지 않는 수록곡일 경우 400에러 발생.',
+      '특정 수록곡에 대한 좋아요 개수를 조회하는 엔드포인트. 존재하지 않는 수록곡일 경우 400에러 발생.',
   })
-  getLikeOfMusic() {}
+  getLikeCountOfMusic() {}
 
   @UseGuards(JwtAuthGuard)
   @Post(':id/like')
@@ -107,4 +105,14 @@ export class MusicController {
       '특정 수록곡에 대한 좋아요를 삭제하는 엔드포인트. 존재하지 않는 수록곡일 경우 400에러 발생.',
   })
   deleteLikeOfMusic() {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/like/me')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '(wip) 수록곡 좋아요 여부 조회',
+    description:
+      '특정 수록곡에 대한 좋아요 여부를 조회하는 엔드포인트. 존재하지 않는 수록곡일 경우 400에러 발생.',
+  })
+  getMyLikeOfMusic() {}
 }

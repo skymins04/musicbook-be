@@ -68,15 +68,13 @@ export class BookController {
   })
   getBook() {}
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id/like')
-  @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 노래책 좋아요 여부 조회',
+    summary: '(wip) 노래책 좋아요 개수 조회',
     description:
-      '특정 노래책에 대한 좋아요 여부를 조회하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
+      '특정 노래책에 대한 좋아요 개수를 조회하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
-  getLikeOfMusic() {}
+  getLikeCountOfMusic() {}
 
   @UseGuards(JwtAuthGuard)
   @Post(':id/like')
@@ -97,4 +95,14 @@ export class BookController {
       '특정 노래책에 대한 좋아요를 삭제하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
   deleteLikeOfMusic() {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/like/me')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '(wip) 노래책 좋아요 여부 조회',
+    description:
+      '특정 노래책에 대한 좋아요 여부를 조회하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
+  })
+  getLikeOfMusic() {}
 }
