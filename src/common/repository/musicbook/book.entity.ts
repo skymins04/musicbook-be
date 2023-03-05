@@ -106,7 +106,7 @@ export class BookEntity extends BaseEntity {
   })
   deletedAt: Date;
 
-  @OneToOne(() => UserEntity, (user) => user.id)
+  @OneToOne(() => UserEntity, (user) => user.book)
   @JoinColumn({ name: 'broadcaster_id' })
   @ApiProperty({
     description: '스트리머 사용자 ID (numeric string)',
@@ -114,14 +114,17 @@ export class BookEntity extends BaseEntity {
     example: '123456789',
   })
   broadcaster: UserEntity;
-  @OneToMany(() => MusicEntity, (music) => music.id)
+  @OneToMany(() => MusicEntity, (music) => music.book)
   musics: MusicEntity[];
-  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.id)
+  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.book)
   musicLikes: MusicLikeEntity[];
-  @OneToMany(() => MusicLikeCountEntity, (musicLikeCount) => musicLikeCount.id)
+  @OneToMany(
+    () => MusicLikeCountEntity,
+    (musicLikeCount) => musicLikeCount.book,
+  )
   musicLikeCounts: MusicLikeCountEntity[];
-  @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.id)
+  @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.book)
   bookLikes: BookLikeEntity[];
-  @OneToMany(() => BookLikeCountEntity, (bookLikeCount) => bookLikeCount.id)
+  @OneToMany(() => BookLikeCountEntity, (bookLikeCount) => bookLikeCount.book)
   bookLikeCounts: BookLikeCountEntity[];
 }

@@ -4,21 +4,51 @@ import {
   Get,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
+import { BookService } from './book.service';
+import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
+import { GetBooksDTO, GetBooksResponseDTO } from './dto/book.dto';
+import { ApiResponsePagenationDataDTO } from 'src/common/api-response/api-response-data.dto';
 
 @Controller('book')
 @ApiTags('Book')
 export class BookController {
+  constructor(
+    private readonly bookSerivce: BookService,
+    private readonly jwtAuthService: JwtAuthService,
+  ) {}
+
   @Get()
-  @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 노래책 목록 조회',
+    summary: '노래책 목록 조회',
     description: '최신순/추천순/인기순 노래책 목록 조회 엔드포인트',
   })
-  getBooks() {}
+  @ApiOkResponse({
+    description: '노래책 목록 조회 성공',
+    type: GetBooksResponseDTO,
+  })
+  async getBooks(@Query() _query: GetBooksDTO) {
+    const { perPage = 30, page = 1, sort = 'newest' } = _query;
+    const books = await this.bookSerivce.getBooks(perPage, page, sort);
+    return new ApiResponsePagenationDataDTO<{ sort: MusicbookSortMethod }>(
+      {
+        perPage,
+        currentPage: page,
+        sort,
+        pageItemCount: books.length,
+      },
+      books,
+    );
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post()

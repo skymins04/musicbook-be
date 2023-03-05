@@ -116,6 +116,6 @@ export class MusicSourceMelonEntity extends BaseEntity {
   })
   deletedAt: Date;
 
-  @OneToMany(() => MusicEntity, (music) => music.id)
+  @OneToMany(() => MusicEntity, (music) => music.musicSourceMelon)
   musics: MusicEntity[];
 }

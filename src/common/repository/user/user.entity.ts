@@ -98,16 +98,22 @@ export class UserEntity extends BaseEntity {
     type: UserGoogleEntity,
   })
   google: UserGoogleEntity;
-  @OneToMany(() => MusicEntity, (music) => music.id)
+  @OneToMany(() => MusicEntity, (music) => music.broadcaster)
   musics: MusicEntity;
-  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.id)
+  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.viewer)
   musicLikes: MusicLikeEntity;
-  @OneToMany(() => MusicLikeCountEntity, (musicLikeCount) => musicLikeCount.id)
+  @OneToMany(
+    () => MusicLikeCountEntity,
+    (musicLikeCount) => musicLikeCount.broadcaster,
+  )
   musicLikeCounts: MusicLikeCountEntity;
-  @OneToOne(() => BookEntity, (book) => book.id)
+  @OneToOne(() => BookEntity, (book) => book.broadcaster)
   book: BookEntity;
-  @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.id)
+  @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.viewer)
   bookLikes: BookLikeEntity;
-  @OneToMany(() => BookLikeCountEntity, (bookLikeCount) => bookLikeCount.id)
+  @OneToMany(
+    () => BookLikeCountEntity,
+    (bookLikeCount) => bookLikeCount.broadcaster,
+  )
   bookLikeCounts: BookLikeCountEntity;
 }

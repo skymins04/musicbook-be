@@ -36,7 +36,7 @@ export class BookLikeCountEntity extends BaseEntity {
   })
   createdAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.id)
+  @ManyToOne(() => UserEntity, (user) => user.bookLikeCounts)
   @JoinColumn({ name: 'broadcaster_id' })
   @ApiProperty({
     description:
@@ -45,7 +45,7 @@ export class BookLikeCountEntity extends BaseEntity {
     example: '123456789',
   })
   broadcaster: UserEntity;
-  @ManyToOne(() => BookEntity, (book) => book.id)
+  @ManyToOne(() => BookEntity, (book) => book.bookLikeCounts)
   @JoinColumn({ name: 'bk_id' })
   @ApiProperty({
     description: '노래책 ID (uuidv4)',

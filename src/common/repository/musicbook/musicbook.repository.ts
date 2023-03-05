@@ -197,6 +197,8 @@ export class MusicBookRepository {
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')
       .groupBy('music.id')
+      .skip((_page - 1) * _perPage)
+      .take(_perPage)
       .getMany();
   }
 
@@ -319,6 +321,8 @@ export class MusicBookRepository {
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')
       .groupBy('book.id')
+      .skip((_page - 1) * _perPage)
+      .take(_perPage)
       .getMany();
   }
 }

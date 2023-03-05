@@ -37,7 +37,7 @@ export class MusicLikeCountEntity extends BaseEntity {
   })
   createdAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.id)
+  @ManyToOne(() => UserEntity, (user) => user.musicLikeCounts)
   @JoinColumn({ name: 'broadcaster_id' })
   @ApiProperty({
     description:
@@ -46,7 +46,7 @@ export class MusicLikeCountEntity extends BaseEntity {
     example: '123456789',
   })
   broadcaster: UserEntity;
-  @ManyToOne(() => BookEntity, (book) => book.id)
+  @ManyToOne(() => BookEntity, (book) => book.musicLikeCounts)
   @JoinColumn({ name: 'bk_id' })
   @ApiProperty({
     description: '수록곡의 노래책 ID (uuidv4)',
@@ -54,7 +54,7 @@ export class MusicLikeCountEntity extends BaseEntity {
     example: '12341234-1234-1234-123412341234',
   })
   book: BookEntity;
-  @ManyToOne(() => MusicEntity, (music) => music.id)
+  @ManyToOne(() => MusicEntity, (music) => music.musicLikeCounts)
   @JoinColumn({ name: 'msc_id' })
   @ApiProperty({
     description: '수록곡 ID (uuidv4)',
