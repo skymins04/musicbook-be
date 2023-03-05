@@ -26,7 +26,7 @@ export class BookEntity extends BaseEntity {
     type: String,
     example: '12341234-1234-1234-123412341234',
   })
-  id: number;
+  id: string;
   @Column({ nullable: true, unique: true })
   @ApiProperty({
     description: '노래책 커스텀 ID (string)',

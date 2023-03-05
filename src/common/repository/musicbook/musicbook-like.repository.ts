@@ -21,7 +21,7 @@ export class MusicBookLikeRepository {
     private readonly musicbookRepository: MusicBookRepository,
   ) {}
 
-  async createMusicLike(_userId: string, _musicId: number) {
+  async createMusicLike(_userId: string, _musicId: string) {
     const isExistingLike = await this.musicLikeRepository.exist({
       where: { viewer: { id: _userId }, music: { id: _musicId } },
     });
@@ -38,15 +38,18 @@ export class MusicBookLikeRepository {
     await like.save();
   }
 
-  async deleteMusicLike(_userId: string, _musicId: number) {
-    const like = await this.musicLikeRepository.findOne({
-      where: { viewer: { id: _userId }, music: { id: _musicId } },
-    });
-    if (like) await like.remove();
-    else throw new BadRequestException();
+  async deleteMusicLike(_userId: string, _musicId: string) {
+    await this.musicLikeRepository
+      .delete({
+        viewer: { id: _userId },
+        music: { id: _musicId },
+      })
+      .then((res) => {
+        if (!res.affected) throw new BadRequestException();
+      });
   }
 
-  findOneMusicLike(_userId: string, _musicId: number) {
+  findOneMusicLike(_userId: string, _musicId: string) {
     return this.musicLikeRepository.findOne({
       where: { viewer: { id: _userId }, music: { id: _musicId } },
     });
@@ -58,9 +61,50 @@ export class MusicBookLikeRepository {
     });
   }
 
-  findManyMusicLikeByMusicId(_musicId: number) {
+  findManyMusicLikeByMusicId(_musicId: string) {
     return this.musicLikeRepository.find({
       where: { music: { id: _musicId } },
+    });
+  }
+
+  async createBookLike(_userId: string, _bookId: string) {
+    const isExistingLike = await this.bookLikeRepository.exist({
+      where: { viewer: { id: _userId }, book: { id: _bookId } },
+    });
+    if (isExistingLike) throw new BadRequestException();
+
+    const like = new MusicLikeEntity();
+    like.viewer.id = _userId;
+    like.book.id = _bookId;
+    await like.save();
+  }
+
+  async deleteBookLike(_userId: string, _bookId: string) {
+    await this.bookLikeRepository
+      .delete({
+        viewer: { id: _userId },
+        book: { id: _bookId },
+      })
+      .then((res) => {
+        if (!res.affected) throw new BadRequestException();
+      });
+  }
+
+  findOneBookLike(_userId: string, _bookId: string) {
+    return this.bookLikeRepository.findOne({
+      where: { viewer: { id: _userId }, book: { id: _bookId } },
+    });
+  }
+
+  findManyBookLikeByUserId(_userId: string) {
+    return this.bookLikeRepository.find({
+      where: { viewer: { id: _userId } },
+    });
+  }
+
+  findManyBookLikeByBookId(_bookId: string) {
+    return this.bookLikeRepository.find({
+      where: { book: { id: _bookId } },
     });
   }
 }

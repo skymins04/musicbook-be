@@ -15,7 +15,7 @@ export class MusicBookRepository {
 
   async createMusicByMelonSource(
     _userId: string,
-    _bookId: number,
+    _bookId: string,
     _sourceId: number,
     _music: DeepPartial<MusicEntity>,
   ) {
@@ -33,7 +33,7 @@ export class MusicBookRepository {
 
   async createMusicByOriginalSource(
     _userId: string,
-    _bookId: number,
+    _bookId: string,
     _sourceId: string,
     _music: DeepPartial<MusicEntity>,
   ) {
@@ -63,12 +63,12 @@ export class MusicBookRepository {
     await this.musicRepository.update(_music.id, _music);
   }
 
-  async deleteMusicById(_musicId: number) {
+  async deleteMusicById(_musicId: string) {
     await this.musicRepository.softDelete(_musicId);
   }
 
   findOneMusicById(
-    _musicId: number,
+    _musicId: string,
     _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'book')[];
@@ -108,7 +108,7 @@ export class MusicBookRepository {
   }
 
   findManyMusicByBookId(
-    _bookId: number,
+    _bookId: string,
     _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'book')[];
@@ -170,13 +170,13 @@ export class MusicBookRepository {
     await this.bookRepository.update(_where, _book);
   }
 
-  async deleteBookById(_bookId: number) {
+  async deleteBookById(_bookId: string) {
     await this.bookRepository.softDelete(_bookId);
     await this.musicRepository.softDelete({ book: { id: _bookId } });
   }
 
   findOneBookById(
-    _bookId: number,
+    _bookId: string,
     _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'musics')[];
