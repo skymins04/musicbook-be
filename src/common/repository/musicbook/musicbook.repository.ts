@@ -67,6 +67,10 @@ export class MusicBookRepository {
     await this.musicRepository.softDelete(_musicId);
   }
 
+  async deleteMusicByUserId(_userId: string) {
+    await this.musicRepository.softDelete({ broadcaster: { id: _userId } });
+  }
+
   findOneMusicById(
     _musicId: string,
     _options?: {
@@ -224,6 +228,11 @@ export class MusicBookRepository {
     await this.musicRepository.softDelete({ book: { id: _bookId } });
   }
 
+  async deleteBookByUserId(_userId: string) {
+    await this.bookRepository.softDelete({ broadcaster: { id: _userId } });
+    await this.musicRepository.softDelete({ broadcaster: { id: _userId } });
+  }
+
   findOneBookById(
     _bookId: string,
     _options?: {
@@ -295,7 +304,7 @@ export class MusicBookRepository {
   }
 
   findManySuggestBook(_perPage = 30, _page = 1) {
-    return this.musicRepository
+    return this.bookRepository
       .createQueryBuilder('book')
       .orderBy('RAND()')
       .skip((_perPage - 1) * _page)

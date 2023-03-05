@@ -25,3 +25,5 @@ declare interface MusicbookJwtPayload {
   provider: string;
   providerId: string;
 }
+
+declare type MusicbookSortMethod = 'newest' | 'suggest' | 'popular';

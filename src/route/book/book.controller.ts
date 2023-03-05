@@ -74,7 +74,7 @@ export class BookController {
     description:
       '특정 노래책에 대한 좋아요 개수를 조회하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
-  getLikeCountOfMusic() {}
+  getLikeCountOfBook() {}
 
   @UseGuards(JwtAuthGuard)
   @Post(':id/like')
@@ -84,7 +84,7 @@ export class BookController {
     description:
       '특정 노래책에 대한 좋아요를 생성하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
-  createLikeOfMusic() {}
+  createLikeOfBook() {}
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id/like')
@@ -94,7 +94,7 @@ export class BookController {
     description:
       '특정 노래책에 대한 좋아요를 삭제하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
-  deleteLikeOfMusic() {}
+  deleteLikeOfBook() {}
 
   @UseGuards(JwtAuthGuard)
   @Get(':id/like/me')
@@ -104,5 +104,5 @@ export class BookController {
     description:
       '특정 노래책에 대한 좋아요 여부를 조회하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
-  getLikeOfMusic() {}
+  getMyLikeOfBook() {}
 }
