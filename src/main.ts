@@ -10,6 +10,9 @@ import * as fs from 'fs';
 import { MusicModule } from './route/music/music.module';
 import { MelonModule } from './route/melon/melon.module';
 import { BookModule } from './route/book/book.module';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,8 +28,13 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
+      disableErrorMessages: process.env.NODE_ENV === 'production',
+      whitelist: true,
+      forbidNonWhitelisted: true,
     }),
   );
+
+  console.log(process.env.NODE_ENV);
 
   const redisIoAdapter = new RedisIoAdapter(app);
   await redisIoAdapter.connectToRedis();
@@ -45,7 +53,8 @@ async function bootstrap() {
     },
   );
   SwaggerModule.setup('docs', app, swaggerDocument);
-  fs.writeFileSync('./swagger-spec.json', JSON.stringify(swaggerDocument));
+  if (process.env.NODE_ENV !== 'production')
+    fs.writeFileSync('./swagger-spec.json', JSON.stringify(swaggerDocument));
 
   await app.listen(3000);
 }

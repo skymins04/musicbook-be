@@ -147,6 +147,55 @@ export class MusicBookRepository {
     });
   }
 
+  findManyNewestMusic(_perPage = 30, _page = 1) {
+    return this.musicRepository.find({
+      skip: (_perPage - 1) * _page,
+      take: _perPage,
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  findManySuggestMusic(_perPage = 30, _page = 1, _category?: string) {
+    let musicQueryBuilder = this.musicRepository.createQueryBuilder('music');
+    if (_category) {
+      if (_category.match(/[^ㄱ-ㅎ|ㅏ-ㅣ|가-힣|a-z|A-Z|0-9|-|_| ]/))
+        throw new BadRequestException();
+      musicQueryBuilder = musicQueryBuilder.where(
+        'music.category = :category',
+        {
+          category: _category,
+        },
+      );
+    }
+    return musicQueryBuilder
+      .orderBy('RAND()')
+      .skip((_perPage - 1) * _page)
+      .take(_perPage)
+      .getMany();
+  }
+
+  findManyPopularMusic(_perPage = 30, _page = 1, _category?: string) {
+    let musicQueryBuilder = this.musicRepository.createQueryBuilder('music');
+    if (_category) {
+      if (_category.match(/[^ㄱ-ㅎ|ㅏ-ㅣ|가-힣|a-z|A-Z|0-9|-|_| ]/))
+        throw new BadRequestException();
+      musicQueryBuilder = musicQueryBuilder.where(
+        'music.category = :category',
+        {
+          category: _category,
+        },
+      );
+    }
+    return musicQueryBuilder
+      .leftJoinAndSelect('music.musicLikes', 'likes')
+      .addSelect('COUNT(likes.id)', 'likeCount')
+      .orderBy('likeCount', 'DESC')
+      .groupBy('music.id')
+      .getMany();
+  }
+
   async createBook(_userId: string, _book: DeepPartial<BookEntity>) {
     if (this.bookRepository.exist({ where: { broadcaster: { id: _userId } } }))
       throw new BadRequestException('already created');
@@ -233,5 +282,34 @@ export class MusicBookRepository {
           : [],
       withDeleted: _options?.withDeleted,
     });
+  }
+
+  findManyNewestBook(_perPage = 30, _page = 1) {
+    return this.bookRepository.find({
+      skip: (_perPage - 1) * _page,
+      take: _perPage,
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  findManySuggestBook(_perPage = 30, _page = 1) {
+    return this.musicRepository
+      .createQueryBuilder('book')
+      .orderBy('RAND()')
+      .skip((_perPage - 1) * _page)
+      .take(_perPage)
+      .getMany();
+  }
+
+  findManyPopularBook(_perPage = 30, _page = 1) {
+    return this.bookRepository
+      .createQueryBuilder('book')
+      .leftJoinAndSelect('book.bookLikes', 'likes')
+      .addSelect('COUNT(likes.id)', 'likeCount')
+      .orderBy('likeCount', 'DESC')
+      .groupBy('book.id')
+      .getMany();
   }
 }

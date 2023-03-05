@@ -51,6 +51,14 @@ export class MusicEntity extends BaseEntity {
   })
   title: string;
 
+  @Column()
+  @ApiProperty({
+    description: '수록곡 카테고리',
+    type: String,
+    example: '수록곡 카테고리',
+  })
+  category: string;
+
   @Column({ nullable: true })
   @ApiProperty({
     description: '수록곡 설명',
