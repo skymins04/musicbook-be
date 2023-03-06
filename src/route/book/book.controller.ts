@@ -1,14 +1,18 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   Patch,
   Post,
   Query,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiConsumes,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -16,8 +20,10 @@ import {
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
 import { BookService } from './book.service';
 import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
-import { GetBooksDTO, GetBooksResponseDTO } from './dto/book.dto';
+import { GetBooksDTO, GetBooksResponseDTO } from './dto/get-books.dto';
 import { ApiResponsePagenationDataDTO } from 'src/common/api-response/api-response-data.dto';
+import { ImageFilesInterceptor } from 'src/common/multer/image-files.interceptor';
+import { CreateBookDTO } from './dto/create-book.dto';
 
 @Controller('book')
 @ApiTags('Book')
@@ -50,15 +56,33 @@ export class BookController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post()
-  @ApiBearerAuth()
+  // @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
-    summary: '(wip) 노래책 생성',
+    summary: '노래책 생성',
     description:
       '노래책 생성 엔드포인트. 한 사용자 당 하나의 노래책만 생성 가능. 복수개의 노래책 생성 시도시 400에러 발생.',
   })
-  createBook() {}
+  @UseInterceptors(
+    ImageFilesInterceptor([
+      { name: 'thumbnail', maxCount: 1 },
+      { name: 'background', maxCount: 1 },
+    ]),
+  )
+  createBook(
+    @UploadedFiles()
+    _files: {
+      thumbnail?: Express.Multer.File[];
+      background?: Express.Multer.File[];
+    },
+    @Body() _body: CreateBookDTO,
+  ) {
+    console.log(_files.thumbnail);
+    console.log(_files.background);
+    console.log(_body);
+  }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

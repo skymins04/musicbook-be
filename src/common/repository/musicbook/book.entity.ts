@@ -61,7 +61,14 @@ export class BookEntity extends BaseEntity {
     type: String,
     example: 'https://example.com/example.png',
   })
-  thumbnail_url: string;
+  thumbnailURL: string;
+  @Column()
+  @ApiProperty({
+    description: '노래책 배경 커버이미지 URL',
+    type: String,
+    example: 'https://example.com/example.png',
+  })
+  backgroundImgURL: string;
   @Column('boolean', { default: true })
   @ApiProperty({
     description: '노래책 신청곡 허용 여부',

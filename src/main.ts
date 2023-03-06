@@ -34,8 +34,6 @@ async function bootstrap() {
     }),
   );
 
-  console.log(process.env.NODE_ENV);
-
   const redisIoAdapter = new RedisIoAdapter(app);
   await redisIoAdapter.connectToRedis();
   app.useWebSocketAdapter(redisIoAdapter);

@@ -12,6 +12,12 @@ import { RepositoryModule } from './common/repository/repository.module';
 import { MusicModule } from './route/music/music.module';
 import { MelonModule } from './route/melon/melon.module';
 import { BookModule } from './route/book/book.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { CloudflareModule } from './common/cloudflare/cloudflare.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronjobService } from './common/cronjob/cronjob.service';
 
 @Module({
   imports: [
@@ -19,8 +25,8 @@ import { BookModule } from './route/book/book.module';
       isGlobal: true,
       envFilePath: '.env',
       validationSchema: Joi.object({
-        // DATABASE_URL: Joi.string().required(),
         API_ADDRESS: Joi.string().required(),
+        STATIC_SERVE_ROOT: Joi.string().required(),
         MYSQL_HOST: Joi.string().required(),
         MYSQL_PORT: Joi.number().required(),
         MYSQL_USERNAME: Joi.string().required(),
@@ -33,6 +39,8 @@ import { BookModule } from './route/book/book.module';
         TWITCH_CLIENT_SECRET: Joi.string().required(),
         GOOGLE_CLIENT_ID: Joi.string().required(),
         GOOGLE_CLIENT_SECRET: Joi.string().required(),
+        CLOUDFLARE_ACCOUNT_ID: Joi.string().required(),
+        CLOUDFLARE_IMAGES_TOKEN: Joi.string().required(),
       }),
     }),
     RedisModule.forRoot({
@@ -42,15 +50,27 @@ import { BookModule } from './route/book/book.module';
       },
     }),
     RepositoryModule,
+    MulterModule.register({
+      limits: {
+        fileSize: 50 * 1024 * 1024,
+      },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '.uploads'),
+      serveRoot: `/${process.env.STATIC_SERVE_ROOT}`,
+    }),
+    ScheduleModule.forRoot(),
     JwtAuthModule,
     MelonModule,
     UserModule,
     MusicModule,
     BookModule,
+    CloudflareModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    CronjobService,
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,

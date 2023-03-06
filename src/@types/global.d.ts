@@ -3,6 +3,7 @@ declare namespace NodeJS {
     // DATABASE_URL: string;
     NODE_ENV: string;
     API_ADDRESS: string;
+    STATIC_SERVE_ROOT: string;
     MYSQL_HOST: string;
     MYSQL_PORT: number;
     MYSQL_USERNAME: string;
@@ -15,6 +16,8 @@ declare namespace NodeJS {
     TWITCH_CLIENT_SECRET: string;
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
+    CLOUDFLARE_ACCOUNT_ID: string;
+    CLOUDFLARE_IMAGES_TOKEN: string;
   }
 }
 
