@@ -18,7 +18,6 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
 import { BookService } from './book.service';
-import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
 import { GetBooksDTO, GetBooksResponseDTO } from './dto/get-books.dto';
 import {
   ApiResponseDataDTO,
@@ -34,14 +33,12 @@ import {
   BookResponseDTO,
 } from './dto/book.dto';
 import { UpdateMyBookDTO } from './dto/update-my-book.dto';
+import { Jwt } from 'src/common/jwt-auth/jwt.decorator';
 
 @Controller('book')
 @ApiTags('Book')
 export class BookController {
-  constructor(
-    private readonly bookSerivce: BookService,
-    private readonly jwtAuthService: JwtAuthService,
-  ) {}
+  constructor(private readonly bookSerivce: BookService) {}
 
   @Get()
   @ApiOperation({
@@ -79,12 +76,11 @@ export class BookController {
     type: GetURLsForBookImgDirectUploadingResponseDTO,
   })
   async getURLsForBookImgDirectUploading(
+    @Jwt() _jwt: MusicbookJwtPayload,
     @Req() _req: Request,
   ): Promise<GetURLsForBookImgDirectUploadingResponseDTO> {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    const ip = _req.ip;
     return new ApiResponseDataDTO(
-      await this.bookSerivce.getURLsForBookImgDirectUploading(jwt, ip),
+      await this.bookSerivce.getURLsForBookImgDirectUploading(_jwt, _req.ip),
     );
   }
 
@@ -101,12 +97,11 @@ export class BookController {
     type: BookResponseDTO,
   })
   async createBook(
-    @Req() _req: Request,
+    @Jwt() _jwt: MusicbookJwtPayload,
     @Body() _body: CreateBookDTO,
   ): Promise<BookResponseDTO> {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
     return new ApiResponseDataDTO(
-      await this.bookSerivce.createBook(jwt, _body),
+      await this.bookSerivce.createBook(_jwt, _body),
     );
   }
 
@@ -122,9 +117,8 @@ export class BookController {
     description: '노래책 조회 성공',
     type: BookResponseDTO,
   })
-  async getMyBook(@Req() _req: Request): Promise<BookResponseDTO> {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    return new ApiResponseDataDTO(await this.bookSerivce.getMyBook(jwt));
+  async getMyBook(@Jwt() _jwt: MusicbookJwtPayload): Promise<BookResponseDTO> {
+    return new ApiResponseDataDTO(await this.bookSerivce.getMyBook(_jwt));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -138,9 +132,11 @@ export class BookController {
   @ApiOkResponse({
     description: '노래책 수정 성공',
   })
-  async updateMyBook(@Req() _req: Request, @Body() _body: UpdateMyBookDTO) {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    await this.bookSerivce.updateMyBook(jwt, _body);
+  async updateMyBook(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Body() _body: UpdateMyBookDTO,
+  ) {
+    await this.bookSerivce.updateMyBook(_jwt, _body);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -151,9 +147,8 @@ export class BookController {
     description:
       '사용자 본인의 노래책 삭제. 생성된 노래책이 없을 경우 400에러 발생.',
   })
-  async deleteMyBook(@Req() _req: Request) {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    await this.bookSerivce.deleteMyBook(jwt);
+  async deleteMyBook(@Jwt() _jwt: MusicbookJwtPayload) {
+    await this.bookSerivce.deleteMyBook(_jwt);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -169,11 +164,10 @@ export class BookController {
     type: BookLikeCountResponseDTO,
   })
   async getMyBookLikeCount(
-    @Req() _req: Request,
+    @Jwt() _jwt: MusicbookJwtPayload,
   ): Promise<BookLikeCountResponseDTO> {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
     return new ApiResponseDataDTO(
-      await this.bookSerivce.getMyBookLikeCount(jwt),
+      await this.bookSerivce.getMyBookLikeCount(_jwt),
     );
   }
 
@@ -222,10 +216,12 @@ export class BookController {
   @ApiOkResponse({
     description: '노래책 좋아요 여부 생성 성공',
   })
-  async createLikeOfBook(@Req() _req: Request, @Param() _param: BookIdDTO) {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+  async createLikeOfBook(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Param() _param: BookIdDTO,
+  ) {
     const { id } = _param;
-    await this.bookSerivce.createLikeOfBook(jwt, id);
+    await this.bookSerivce.createLikeOfBook(_jwt, id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -236,10 +232,12 @@ export class BookController {
     description:
       '특정 노래책에 대한 좋아요를 삭제하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
-  async deleteLikeOfBook(@Req() _req: Request, @Param() _param: BookIdDTO) {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+  async deleteLikeOfBook(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Param() _param: BookIdDTO,
+  ) {
     const { id } = _param;
-    await this.bookSerivce.deleteLikeOfBook(jwt, id);
+    await this.bookSerivce.deleteLikeOfBook(_jwt, id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -255,13 +253,12 @@ export class BookController {
     type: BookLikeStatusResponseDTO,
   })
   async getMyLikeOfBook(
-    @Req() _req: Request,
+    @Jwt() _jwt: MusicbookJwtPayload,
     @Param() _param: BookIdDTO,
   ): Promise<BookLikeStatusResponseDTO> {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
     const { id } = _param;
     return new ApiResponseDataDTO(
-      await this.bookSerivce.getMyLikeOfBook(jwt, id),
+      await this.bookSerivce.getMyLikeOfBook(_jwt, id),
     );
   }
 }

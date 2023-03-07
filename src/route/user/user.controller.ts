@@ -7,14 +7,13 @@ import {
   Post,
   Query,
   Redirect,
-  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import * as dotenv from 'dotenv';
 import { UserLoginCallbackQueryDTO } from './dto/user-login.dto';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { ApiResponseDataDTO } from 'src/common/api-response/api-response-data.dto';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
 import {
@@ -24,8 +23,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserMeResponseDTO, UserMeUpdateDTO } from './dto/user-me.dto';
-import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
 import { UserLinkaCallbackResponseDTO } from './dto/user-link.dto';
+import { Jwt } from 'src/common/jwt-auth/jwt.decorator';
 
 dotenv.config();
 
@@ -43,10 +42,7 @@ const GOOGLE_CLIENT_SCOPES = ['openid', 'profile', 'email'].join('+');
 @Controller('user')
 @ApiTags('User')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    private readonly jwtAuthService: JwtAuthService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get('logout')
   @ApiOperation({
@@ -124,9 +120,8 @@ export class UserController {
     type: UserMeResponseDTO,
   })
   @Get('me')
-  async getMeInfo(@Req() _req: Request) {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    return new ApiResponseDataDTO(await this.userService.getMeInfo(jwt));
+  async getMeInfo(@Jwt() _jwt: MusicbookJwtPayload) {
+    return new ApiResponseDataDTO(await this.userService.getMeInfo(_jwt));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -136,9 +131,11 @@ export class UserController {
     description: `사용자 본인의 정보를 업데이트하는 엔드포인트.`,
   })
   @Patch('me')
-  async updateMeInfo(@Req() _req: Request, @Body() _body: UserMeUpdateDTO) {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    await this.userService.updateMeInfo(jwt, _body);
+  async updateMeInfo(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Body() _body: UserMeUpdateDTO,
+  ) {
+    await this.userService.updateMeInfo(_jwt, _body);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -184,12 +181,11 @@ export class UserController {
   })
   @Post('/link/twitch')
   async linkTwitchToUserApply(
-    @Req() _req: Request,
+    @Jwt() _jwt: MusicbookJwtPayload,
     @Query() _query: UserLoginCallbackQueryDTO,
   ) {
     const { code } = _query;
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    await this.userService.linkTwitchToUserApply(jwt, code);
+    await this.userService.linkTwitchToUserApply(_jwt, code);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -199,9 +195,8 @@ export class UserController {
     description: '트위치 계정 사용자 연동 해제',
   })
   @Delete('/link/twitch')
-  async unlinkTwitchToUser(@Req() _req: Request) {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    await this.userService.unlinkTwitchToUser(jwt);
+  async unlinkTwitchToUser(@Jwt() _jwt: MusicbookJwtPayload) {
+    await this.userService.unlinkTwitchToUser(_jwt);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -247,12 +242,11 @@ export class UserController {
   })
   @Post('/link/google')
   async linkGoogleToUserApply(
-    @Req() _req: Request,
+    @Jwt() _jwt: MusicbookJwtPayload,
     @Query() _query: UserLoginCallbackQueryDTO,
   ) {
     const { code } = _query;
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    await this.userService.linkGoogleToUserApply(jwt, code);
+    await this.userService.linkGoogleToUserApply(_jwt, code);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -262,8 +256,7 @@ export class UserController {
     description: '구글 계정 사용자 연동 해제',
   })
   @Delete('/link/google')
-  async unlinkGoogleToUser(@Req() _req: Request) {
-    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
-    await this.userService.unlinkGoogleToUser(jwt);
+  async unlinkGoogleToUser(@Jwt() _jwt: MusicbookJwtPayload) {
+    await this.userService.unlinkGoogleToUser(_jwt);
   }
 }
