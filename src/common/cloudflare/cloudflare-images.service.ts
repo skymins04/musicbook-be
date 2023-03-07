@@ -3,33 +3,45 @@ import axios from 'axios';
 
 @Injectable()
 export class CloudflareImagesService {
-  uploadImageByURL(_imageURL: string, _meta?: Record<string, string>) {
+  getDirectUploadURL(_options?: {
+    meta?: Record<string, string | number>;
+    signedURL?: boolean;
+  }) {
     const formData = new FormData();
-    formData.append('url', _imageURL);
-    if (_meta) formData.append('meta', JSON.stringify(_meta));
+    if (_options?.signedURL)
+      formData.append(
+        'requireSignedURLs',
+        _options.signedURL ? 'true' : 'false',
+      );
+    if (_options?.meta)
+      formData.append('metadata', JSON.stringify(_options.meta));
 
-    return axios
-      .post(
-        `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v1`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${process.env.CLOUDFLARE_IMAGES_TOKEN}`,
-          },
-        },
-      )
-      .then(
-        (res) =>
-          ({
-            id: res.data.result.id,
-            filename: res.data.result.filename,
-            metadata: res.data.result.metadata,
-          } as { id: string; filename: string; metadata: string }),
-      )
+    return axios({
+      method: 'POST',
+      url: `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v2/direct_upload`,
+      headers: {
+        Authorization: `Bearer ${process.env.CLOUDFLARE_IMAGES_TOKEN}`,
+        'Content-Type': 'multipart/form-data',
+      },
+      data: formData,
+    })
+      .then((res) => ({
+        id: res.data.result.id as string,
+        uploadURL: res.data.result.uploadURL as string,
+      }))
       .catch((err) => {
-        console.log(err);
-        throw new Error('failed upload to cloudflare images');
+        throw new Error(err);
       });
+  }
+
+  getImageInfo(_imgId: string) {
+    return axios({
+      method: 'GET',
+      url: `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/images/v1/${_imgId}`,
+      headers: {
+        Authorization: `Bearer ${process.env.CLOUDFLARE_IMAGES_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((res) => res.data);
   }
 }

@@ -117,5 +117,9 @@ export class MusicSourceMelonEntity extends BaseEntity {
   deletedAt: Date;
 
   @OneToMany(() => MusicEntity, (music) => music.musicSourceMelon)
+  @ApiProperty({
+    description: '수록곡 배열',
+    type: () => [MusicEntity],
+  })
   musics: MusicEntity[];
 }

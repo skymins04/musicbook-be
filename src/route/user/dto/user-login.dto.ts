@@ -9,4 +9,12 @@ export class UserLoginCallbackQueryDTO {
     example: 'awofhoiawehfoinaocibwebaoiweboinaweaweiofh',
   })
   code: string;
+
+  @IsString()
+  @ApiProperty({
+    description: 'OAuth callback scope',
+    type: String,
+    example: 'profile+email',
+  })
+  scope: string;
 }

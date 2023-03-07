@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { UserRepository } from '../repository/user/user.repository';
 
 const ExtractJwtFromAuthHeader = ExtractJwt.fromAuthHeaderAsBearerToken();
 
@@ -17,7 +18,7 @@ const ExtractJwtFromCookie = (cookie_name: string) => (request: Request) => {
 
 @Injectable()
 export class JwtAuthStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly userRepository: UserRepository) {
     super({
       jwtFromRequest: ExtractJwtFromCookie('jwt'),
       ignoreExpiration: false,
@@ -25,7 +26,14 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any): Promise<MusicbookJwtPayload> {
+  async validate(payload: any): Promise<MusicbookJwtPayload | boolean> {
+    if (
+      !(await this.userRepository.findOneUserById(payload.id, {
+        withDeleted: false,
+        withJoin: false,
+      }))
+    )
+      return false;
     return {
       id: payload.id,
       displayName: payload.displayName,

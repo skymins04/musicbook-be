@@ -68,5 +68,9 @@ export class UserGoogleEntity extends BaseEntity {
   deletedAt: Date;
 
   @OneToOne(() => UserEntity, (user) => user.google, { eager: true })
+  @ApiProperty({
+    description: '노래책 고유 사용자',
+    type: () => UserEntity,
+  })
   user: UserEntity;
 }

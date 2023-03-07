@@ -129,7 +129,7 @@ export class UserRepository {
     return this.userRepository.findOne({
       where: { id: _id },
       relations:
-        _options?.withDeleted === undefined || _options?.withDeleted
+        _options?.withJoin === undefined || _options?.withJoin
           ? ['twitch', 'google']
           : [],
       withDeleted: _options?.withDeleted,
@@ -143,7 +143,7 @@ export class UserRepository {
     return this.userRepository.findOne({
       where: { email: _email },
       relations:
-        _options?.withDeleted === undefined || _options?.withDeleted
+        _options?.withJoin === undefined || _options?.withJoin
           ? ['twitch', 'google']
           : [],
       withDeleted: _options?.withDeleted,
@@ -157,7 +157,7 @@ export class UserRepository {
     return this.userRepository.findOne({
       where: { twitch: { twitchId: _twitchId } },
       relations:
-        _options?.withDeleted === undefined || _options?.withDeleted
+        _options?.withJoin === undefined || _options?.withJoin
           ? ['twitch', 'google']
           : [],
       withDeleted: _options?.withDeleted,
@@ -174,7 +174,7 @@ export class UserRepository {
         { twitch: { twitchId: _twitch.twitchId } },
       ],
       relations:
-        _options?.withDeleted === undefined || _options?.withDeleted
+        _options?.withJoin === undefined || _options?.withJoin
           ? ['twitch', 'google']
           : [],
       withDeleted: _options?.withDeleted,
@@ -188,7 +188,7 @@ export class UserRepository {
     return this.userRepository.findOne({
       where: { google: { googleId: _googleId } },
       relations:
-        _options?.withDeleted === undefined || _options?.withDeleted
+        _options?.withJoin === undefined || _options?.withJoin
           ? ['twitch', 'google']
           : [],
       withDeleted: _options?.withDeleted,
@@ -205,7 +205,7 @@ export class UserRepository {
         { google: { googleId: _google.googleId } },
       ],
       relations:
-        _options?.withDeleted === undefined || _options?.withDeleted
+        _options?.withJoin === undefined || _options?.withJoin
           ? ['twitch', 'google']
           : [],
       withDeleted: _options?.withDeleted,

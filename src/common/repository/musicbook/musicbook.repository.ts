@@ -14,16 +14,14 @@ export class MusicBookRepository {
   ) {}
 
   async createMusicByMelonSource(
-    _userId: string,
-    _bookId: string,
-    _sourceId: number,
-    _music: DeepPartial<MusicEntity>,
+    _music: DeepPartial<MusicEntity> & {
+      broadcater: { id: string };
+      book: { id: string };
+      musicSourceMelon: { songId: number };
+    },
   ) {
     const music = new MusicEntity();
     for (const key of Object.keys(_music)) music[key] = _music[key];
-    music.broadcaster.id = _userId;
-    music.book.id = _bookId;
-    music.musicSourceMelon.songId = _sourceId;
     try {
       return music.save();
     } catch (e) {
@@ -32,16 +30,14 @@ export class MusicBookRepository {
   }
 
   async createMusicByOriginalSource(
-    _userId: string,
-    _bookId: string,
-    _sourceId: string,
-    _music: DeepPartial<MusicEntity>,
+    _music: DeepPartial<MusicEntity> & {
+      broadcater: { id: string };
+      book: { id: string };
+      musicSourceOriginal: { songId: string };
+    },
   ) {
     const music = new MusicEntity();
     for (const key of Object.keys(_music)) music[key] = _music[key];
-    music.broadcaster.id = _userId;
-    music.book.id = _bookId;
-    music.musicSourceOriginal.songId = _sourceId;
     try {
       return music.save();
     } catch (e) {
@@ -64,11 +60,11 @@ export class MusicBookRepository {
   }
 
   async deleteMusicById(_musicId: string) {
-    await this.musicRepository.softDelete(_musicId);
+    await this.musicRepository.delete(_musicId);
   }
 
   async deleteMusicByUserId(_userId: string) {
-    await this.musicRepository.softDelete({ broadcaster: { id: _userId } });
+    await this.musicRepository.delete({ broadcaster: { id: _userId } });
   }
 
   findOneMusicById(
@@ -91,6 +87,18 @@ export class MusicBookRepository {
     });
   }
 
+  existMusicById(
+    _musicId: string,
+    _options?: {
+      withDeleted?: boolean;
+    },
+  ) {
+    return this.musicRepository.exist({
+      where: { id: _musicId },
+      withDeleted: _options?.withDeleted,
+    });
+  }
+
   findOneMusicByUserId(
     _userId: string,
     _options?: {
@@ -107,6 +115,18 @@ export class MusicBookRepository {
             ? ['broadcaster', 'book']
             : _options?.withJoin
           : [],
+      withDeleted: _options?.withDeleted,
+    });
+  }
+
+  existMusicByUserId(
+    _userId: string,
+    _options?: {
+      withDeleted?: boolean;
+    },
+  ) {
+    return this.musicRepository.exist({
+      where: { broadcaster: { id: _userId } },
       withDeleted: _options?.withDeleted,
     });
   }
@@ -153,6 +173,7 @@ export class MusicBookRepository {
 
   findManyNewestMusic(_perPage = 30, _page = 1) {
     return this.musicRepository.find({
+      where: { isHide: false },
       skip: (_perPage - 1) * _page,
       take: _perPage,
       order: {
@@ -174,6 +195,7 @@ export class MusicBookRepository {
       );
     }
     return musicQueryBuilder
+      .where('music.is_hide = 0')
       .orderBy('RAND()')
       .skip((_perPage - 1) * _page)
       .take(_perPage)
@@ -193,6 +215,7 @@ export class MusicBookRepository {
       );
     }
     return musicQueryBuilder
+      .where('music.is_hide = 0')
       .leftJoinAndSelect('music.musicLikes', 'likes')
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')
@@ -202,11 +225,10 @@ export class MusicBookRepository {
       .getMany();
   }
 
-  async createBook(_userId: string, _book: DeepPartial<BookEntity>) {
-    if (this.bookRepository.exist({ where: { broadcaster: { id: _userId } } }))
-      throw new BadRequestException('already created');
+  async createBook(
+    _book: DeepPartial<BookEntity> & { broadcaster: { id: string } },
+  ) {
     const book = new BookEntity();
-    book.broadcaster.id = _userId;
     for (const key of Object.keys(_book)) book[key] = _book[key];
     return book.save();
   }
@@ -226,13 +248,13 @@ export class MusicBookRepository {
   }
 
   async deleteBookById(_bookId: string) {
-    await this.bookRepository.softDelete(_bookId);
-    await this.musicRepository.softDelete({ book: { id: _bookId } });
+    await this.bookRepository.delete(_bookId);
+    await this.musicRepository.delete({ book: { id: _bookId } });
   }
 
   async deleteBookByUserId(_userId: string) {
-    await this.bookRepository.softDelete({ broadcaster: { id: _userId } });
-    await this.musicRepository.softDelete({ broadcaster: { id: _userId } });
+    await this.bookRepository.delete({ broadcaster: { id: _userId } });
+    await this.musicRepository.delete({ broadcaster: { id: _userId } });
   }
 
   findOneBookById(
@@ -251,6 +273,18 @@ export class MusicBookRepository {
             ? ['broadcaster']
             : _options?.withJoin
           : [],
+      withDeleted: _options?.withDeleted,
+    });
+  }
+
+  existBookById(
+    _bookId: string,
+    _options?: {
+      withDeleted?: boolean;
+    },
+  ) {
+    return this.bookRepository.exist({
+      where: { id: _bookId },
       withDeleted: _options?.withDeleted,
     });
   }
@@ -275,6 +309,18 @@ export class MusicBookRepository {
     });
   }
 
+  existBookByUserId(
+    _userId: string,
+    _options?: {
+      withDeleted?: boolean;
+    },
+  ) {
+    return this.bookRepository.exist({
+      where: { broadcaster: { id: _userId } },
+      withDeleted: _options?.withDeleted,
+    });
+  }
+
   findManyBookByCustomBookId(
     _customBookId: string,
     _options?: {
@@ -295,8 +341,21 @@ export class MusicBookRepository {
     });
   }
 
+  existBookByCustomId(
+    _customId: string,
+    _options?: {
+      withDeleted?: boolean;
+    },
+  ) {
+    return this.bookRepository.exist({
+      where: { customId: _customId },
+      withDeleted: _options?.withDeleted,
+    });
+  }
+
   findManyNewestBook(_perPage = 30, _page = 1) {
     return this.bookRepository.find({
+      where: { isHide: false },
       skip: (_perPage - 1) * _page,
       take: _perPage,
       order: {
@@ -308,6 +367,7 @@ export class MusicBookRepository {
   findManySuggestBook(_perPage = 30, _page = 1) {
     return this.bookRepository
       .createQueryBuilder('book')
+      .where('book.is_hide = 0')
       .orderBy('RAND()')
       .skip((_perPage - 1) * _page)
       .take(_perPage)
@@ -317,6 +377,7 @@ export class MusicBookRepository {
   findManyPopularBook(_perPage = 30, _page = 1) {
     return this.bookRepository
       .createQueryBuilder('book')
+      .where('book.is_hide = 0')
       .leftJoinAndSelect('book.bookLikes', 'likes')
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')

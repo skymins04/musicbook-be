@@ -39,18 +39,15 @@ export class BookLikeCountEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (user) => user.bookLikeCounts)
   @JoinColumn({ name: 'broadcaster_id' })
   @ApiProperty({
-    description:
-      '노래책 좋아요 집계에 해당하는 스트리머 사용자 ID (numeric string)',
-    type: String,
-    example: '123456789',
+    description: '노래책 좋아요 집계에 해당하는 스트리머 사용자',
+    type: () => UserEntity,
   })
   broadcaster: UserEntity;
   @ManyToOne(() => BookEntity, (book) => book.bookLikeCounts)
   @JoinColumn({ name: 'bk_id' })
   @ApiProperty({
-    description: '노래책 ID (uuidv4)',
-    type: String,
-    example: '12341234-1234-1234-123412341234',
+    description: '노래책',
+    type: () => BookEntity,
   })
   book: BookEntity;
 }

@@ -3,16 +3,15 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Patch,
   Post,
   Query,
-  UploadedFiles,
+  Req,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiConsumes,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -21,9 +20,15 @@ import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
 import { BookService } from './book.service';
 import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
 import { GetBooksDTO, GetBooksResponseDTO } from './dto/get-books.dto';
-import { ApiResponsePagenationDataDTO } from 'src/common/api-response/api-response-data.dto';
-import { ImageFilesInterceptor } from 'src/common/multer/image-files.interceptor';
+import {
+  ApiResponseDataDTO,
+  ApiResponsePagenationDataDTO,
+} from 'src/common/api-response/api-response-data.dto';
 import { CreateBookDTO } from './dto/create-book.dto';
+import { Request } from 'express';
+import { GetURLsForBookImgDirectUploadingResponseDTO } from './dto/get-direct-upload-url';
+import { BookIdDTO, BookResponseDTO } from './dto/book.dto';
+import { UpdateMyBookDTO } from './dto/update-my-book.dto';
 
 @Controller('book')
 @ApiTags('Book')
@@ -56,71 +61,110 @@ export class BookController {
     );
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @Get('/img_upload_url')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '노래책 썸네일 및 배경 이미지 Direct upload URL 획득',
+    description:
+      '노래책 썸네일 및 배경 이미지를 Cloudflare images에 Direct upload하기 위한 URL 획득 엔드포인트. 10분 동안 최대 3번 요청 가능.',
+  })
+  @ApiOkResponse({
+    description: 'Direct upload URL 획득',
+    type: GetURLsForBookImgDirectUploadingResponseDTO,
+  })
+  async getURLsForBookImgDirectUploading(
+    @Req() _req: Request,
+  ): Promise<GetURLsForBookImgDirectUploadingResponseDTO> {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    const ip = _req.ip;
+    return new ApiResponseDataDTO(
+      await this.bookSerivce.getURLsForBookImgDirectUploading(jwt, ip),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
-  // @ApiBearerAuth()
-  @ApiConsumes('multipart/form-data')
+  @ApiBearerAuth()
   @ApiOperation({
     summary: '노래책 생성',
     description:
       '노래책 생성 엔드포인트. 한 사용자 당 하나의 노래책만 생성 가능. 복수개의 노래책 생성 시도시 400에러 발생.',
   })
-  @UseInterceptors(
-    ImageFilesInterceptor([
-      { name: 'thumbnail', maxCount: 1 },
-      { name: 'background', maxCount: 1 },
-    ]),
-  )
-  createBook(
-    @UploadedFiles()
-    _files: {
-      thumbnail?: Express.Multer.File[];
-      background?: Express.Multer.File[];
-    },
+  @ApiOkResponse({
+    description: '노래책 생성 성공',
+    type: BookResponseDTO,
+  })
+  async createBook(
+    @Req() _req: Request,
     @Body() _body: CreateBookDTO,
-  ) {
-    console.log(_files.thumbnail);
-    console.log(_files.background);
-    console.log(_body);
+  ): Promise<BookResponseDTO> {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    return new ApiResponseDataDTO(
+      await this.bookSerivce.createBook(jwt, _body),
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get('me')
   @ApiOperation({
-    summary: '(wip) 본인 노래책 조회',
+    summary: '본인 노래책 조회',
     description:
       '사용자 본인의 노래책 조회. JWT를 통해 노래책 조회. 생성된 노래책이 없을 경우 400에러 발생.',
   })
-  getMyBook() {}
+  @ApiOkResponse({
+    description: '노래책 조회 성공',
+    type: BookResponseDTO,
+  })
+  async getMyBook(@Req() _req: Request): Promise<BookResponseDTO> {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    return new ApiResponseDataDTO(await this.bookSerivce.getMyBook(jwt));
+  }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Patch('me')
   @ApiOperation({
-    summary: '(wip) 본인 노래책 수정',
+    summary: '본인 노래책 수정',
     description:
       '사용자 본인의 노래책 수정. 생성된 노래책이 없을 경우 400에러 발생.',
   })
-  updateMyBook() {}
+  @ApiOkResponse({
+    description: '노래책 수정 성공',
+  })
+  async updateMyBook(@Req() _req: Request, @Body() _body: UpdateMyBookDTO) {
+    const jwt = await this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    await this.bookSerivce.updateMyBook(jwt, _body);
+  }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Delete('me')
   @ApiOperation({
-    summary: '(wip) 본인 노래책 삭제',
+    summary: '본인 노래책 삭제',
     description:
       '사용자 본인의 노래책 삭제. 생성된 노래책이 없을 경우 400에러 발생.',
   })
-  deleteMyBook() {}
+  async deleteMyBook(@Req() _req: Request) {
+    const jwt = await this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    await this.bookSerivce.deleteMyBook(jwt);
+  }
 
   @Get(':id')
   @ApiOperation({
-    summary: '(wip) 특정 사용자 노래책 조회',
+    summary: '특정 사용자 노래책 조회',
     description:
       '특정 사용자의 노래책 조회. 생성된 노래책이 없을 경우 404에러 발생.',
   })
-  getBook() {}
+  @ApiOkResponse({
+    description: '노래책 조회 성공',
+    type: BookResponseDTO,
+  })
+  async getBook(@Param() _body: BookIdDTO) {
+    const { id } = _body;
+    return new ApiResponseDataDTO(await this.bookSerivce.getBook(id));
+  }
 
   @Get(':id/like')
   @ApiOperation({

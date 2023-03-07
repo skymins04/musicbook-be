@@ -99,21 +99,45 @@ export class UserEntity extends BaseEntity {
   })
   google: UserGoogleEntity;
   @OneToMany(() => MusicEntity, (music) => music.broadcaster)
-  musics: MusicEntity;
+  @ApiProperty({
+    description: '수록곡 배열',
+    type: () => [MusicEntity],
+  })
+  musics: MusicEntity[];
   @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.viewer)
+  @ApiProperty({
+    description: '수록곡 좋아요 배열',
+    type: () => [MusicLikeEntity],
+  })
   musicLikes: MusicLikeEntity;
   @OneToMany(
     () => MusicLikeCountEntity,
     (musicLikeCount) => musicLikeCount.broadcaster,
   )
+  @ApiProperty({
+    description: '수록곡 좋아요 집계 배열',
+    type: () => [MusicLikeCountEntity],
+  })
   musicLikeCounts: MusicLikeCountEntity;
   @OneToOne(() => BookEntity, (book) => book.broadcaster)
+  @ApiProperty({
+    description: '노래책',
+    type: () => BookEntity,
+  })
   book: BookEntity;
   @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.viewer)
-  bookLikes: BookLikeEntity;
+  @ApiProperty({
+    description: '노래책 좋아요 배열',
+    type: () => [BookLikeEntity],
+  })
+  bookLikes: BookLikeEntity[];
   @OneToMany(
     () => BookLikeCountEntity,
     (bookLikeCount) => bookLikeCount.broadcaster,
   )
-  bookLikeCounts: BookLikeCountEntity;
+  @ApiProperty({
+    description: '노래책 좋아요 집계 배열',
+    type: () => [BookLikeCountEntity],
+  })
+  bookLikeCounts: BookLikeCountEntity[];
 }

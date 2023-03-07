@@ -13,11 +13,11 @@ import { MusicModule } from './route/music/music.module';
 import { MelonModule } from './route/melon/melon.module';
 import { BookModule } from './route/book/book.module';
 import { MulterModule } from '@nestjs/platform-express';
-import { CloudflareModule } from './common/cloudflare/cloudflare.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronjobService } from './common/cronjob/cronjob.service';
+import { CloudflareModule } from './common/cloudflare/cloudflare.module';
 
 @Module({
   imports: [

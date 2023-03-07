@@ -100,5 +100,9 @@ export class MusicSourceOriginalEntity extends BaseEntity {
   deletedAt: Date;
 
   @OneToMany(() => MusicEntity, (music) => music.musicSourceOriginal)
+  @ApiProperty({
+    description: '수록곡 배열',
+    type: () => [MusicEntity],
+  })
   musics: MusicEntity[];
 }

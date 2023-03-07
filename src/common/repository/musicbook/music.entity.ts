@@ -160,17 +160,15 @@ export class MusicEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (user) => user.musics)
   @JoinColumn({ name: 'broadcaster_id' })
   @ApiProperty({
-    description: '스트리머 사용자 ID (numeric string)',
-    type: String,
-    example: '123456789',
+    description: '스트리머 사용자',
+    type: () => UserEntity,
   })
   broadcaster: UserEntity;
   @ManyToOne(() => BookEntity, (book) => book.musics)
   @JoinColumn({ name: 'bk_id' })
   @ApiProperty({
-    description: '노래책 ID (uuidv4)',
-    type: String,
-    example: '12341234-1234-1234-123412341234',
+    description: '노래책',
+    type: () => BookEntity,
   })
   book: BookEntity;
   @ManyToOne(
@@ -179,9 +177,8 @@ export class MusicEntity extends BaseEntity {
   )
   @JoinColumn({ name: 'source_original_id' })
   @ApiProperty({
-    description: '노래책 고유 음원 ID (uuidv4)',
-    type: String,
-    example: '12341234-1234-1234-123412341234',
+    description: '노래책 고유 음원',
+    type: () => MusicSourceOriginalEntity,
   })
   musicSourceOriginal: MusicSourceOriginalEntity;
   @ManyToOne(
@@ -190,16 +187,23 @@ export class MusicEntity extends BaseEntity {
   )
   @JoinColumn({ name: 'source_melon_id' })
   @ApiProperty({
-    description: 'melon 음원 ID (number)',
-    type: Number,
-    example: 12345678,
+    description: 'melon 음원',
+    type: () => MusicSourceMelonEntity,
   })
   musicSourceMelon: MusicSourceMelonEntity;
   @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.music)
+  @ApiProperty({
+    description: '노래책 좋아요 배열',
+    type: () => [MusicLikeEntity],
+  })
   musicLikes: MusicLikeEntity[];
   @OneToMany(
     () => MusicLikeCountEntity,
     (musicLikeCount) => musicLikeCount.music,
   )
+  @ApiProperty({
+    description: '노래책 좋아요 집계 배열',
+    type: () => [MusicLikeCountEntity],
+  })
   musicLikeCounts: MusicLikeCountEntity[];
 }

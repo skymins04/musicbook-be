@@ -116,22 +116,41 @@ export class BookEntity extends BaseEntity {
   @OneToOne(() => UserEntity, (user) => user.book)
   @JoinColumn({ name: 'broadcaster_id' })
   @ApiProperty({
-    description: '스트리머 사용자 ID (numeric string)',
-    type: String,
-    example: '123456789',
+    description: '스트리머 사용자',
+    type: () => UserEntity,
   })
   broadcaster: UserEntity;
   @OneToMany(() => MusicEntity, (music) => music.book)
+  @ApiProperty({
+    description: '수록곡 배열',
+    type: () => [MusicEntity],
+  })
   musics: MusicEntity[];
   @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.book)
+  @ApiProperty({
+    description: '수록곡 좋아요 배열',
+    type: () => [MusicLikeEntity],
+  })
   musicLikes: MusicLikeEntity[];
   @OneToMany(
     () => MusicLikeCountEntity,
     (musicLikeCount) => musicLikeCount.book,
   )
+  @ApiProperty({
+    description: '수록곡 좋아요 집계 배열',
+    type: () => [MusicLikeCountEntity],
+  })
   musicLikeCounts: MusicLikeCountEntity[];
   @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.book)
+  @ApiProperty({
+    description: '노래책 좋아요 배열',
+    type: () => [BookLikeEntity],
+  })
   bookLikes: BookLikeEntity[];
   @OneToMany(() => BookLikeCountEntity, (bookLikeCount) => bookLikeCount.book)
+  @ApiProperty({
+    description: '노래책 좋아요 집계 배열',
+    type: () => [BookLikeCountEntity],
+  })
   bookLikeCounts: BookLikeCountEntity[];
 }
