@@ -30,15 +30,15 @@ export class UserMeUpdateDTO {
     example: 'http://example.com/example.png',
   })
   profileImgURL?: string;
-  @IsEmail()
-  @IsOptional()
-  @ApiProperty({
-    description: '노래책 고유 사용자 이메일',
-    type: String,
-    nullable: true,
-    example: 'example@example.com',
-  })
-  email?: string;
+  // @IsEmail()
+  // @IsOptional()
+  // @ApiProperty({
+  //   description: '노래책 고유 사용자 이메일',
+  //   type: String,
+  //   nullable: true,
+  //   example: 'example@example.com',
+  // })
+  // email?: string;
   @IsString()
   @IsOptional()
   @ApiProperty({

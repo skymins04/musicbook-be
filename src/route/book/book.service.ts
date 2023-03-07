@@ -154,6 +154,10 @@ export class BookService {
     await this.musicbookRepository.deleteBookByUserId(_jwt.id);
   }
 
+  getMyBookLikeCount(_jwt: MusicbookJwtPayload) {
+    return this.musicbookLikeRepository.getCountBookLikeByUserId(_jwt.id);
+  }
+
   getBook(_bookId: string) {
     const book = this.musicbookRepository.findOneBookById(_bookId, {
       withJoin: ['broadcaster', 'musics'],
@@ -174,11 +178,7 @@ export class BookService {
     await this.musicbookLikeRepository.deleteBookLike(_jwt.id, _bookId);
   }
 
-  async getMyLikeOfBook(_jwt: MusicbookJwtPayload, _bookId: string) {
-    const like = await this.musicbookLikeRepository.findOneBookLike(
-      _jwt.id,
-      _bookId,
-    );
-    return !!like;
+  getMyLikeOfBook(_jwt: MusicbookJwtPayload, _bookId: string) {
+    return this.musicbookLikeRepository.existBookLike(_jwt.id, _bookId);
   }
 }

@@ -26,25 +26,36 @@ export class MusicBookLikeRepository {
     if (!music || !music.book) throw new BadRequestException();
 
     const like = new MusicLikeEntity();
-    like.viewer.id = _userId;
+    like.viewer = { id: _userId } as any;
     like.book = music.book;
     like.music = music;
-    await like.save();
+    music.likeCount += 1;
+    await this.musicLikeRepository.save(like);
+    await music.save();
   }
 
   async deleteMusicLike(_userId: string, _musicId: string) {
-    await this.musicLikeRepository
-      .delete({
-        viewer: { id: _userId },
-        music: { id: _musicId },
-      })
-      .then((res) => {
-        if (!res.affected) throw new BadRequestException();
-      });
+    const res = await this.musicLikeRepository.delete({
+      viewer: { id: _userId },
+      music: { id: _musicId },
+    });
+    if (!res.affected) throw new BadRequestException();
+    const music = await this.musicbookRepository.findOneMusicById(_musicId, {
+      withJoin: false,
+    });
+    if (!music) throw new BadRequestException();
+    music.likeCount -= 1;
+    await music.save();
   }
 
   findOneMusicLike(_userId: string, _musicId: string) {
     return this.musicLikeRepository.findOne({
+      where: { viewer: { id: _userId }, music: { id: _musicId } },
+    });
+  }
+
+  existMusicLike(_userId: string, _musicId: string) {
+    return this.musicLikeRepository.exist({
       where: { viewer: { id: _userId }, music: { id: _musicId } },
     });
   }
@@ -84,26 +95,42 @@ export class MusicBookLikeRepository {
       where: { viewer: { id: _userId }, book: { id: _bookId } },
     });
     if (isExistingLike) throw new BadRequestException();
+    const book = await this.musicbookRepository.findOneBookById(_bookId, {
+      withJoin: false,
+    });
+    if (!book) throw new BadRequestException();
 
     const like = new MusicLikeEntity();
-    like.viewer.id = _userId;
-    like.book.id = _bookId;
-    await like.save();
+    like.viewer = { id: _userId } as any;
+    like.book = book;
+    book.likeCount += 1;
+    await this.bookLikeRepository.save(like);
+    await book.save();
   }
 
   async deleteBookLike(_userId: string, _bookId: string) {
-    await this.bookLikeRepository
-      .delete({
-        viewer: { id: _userId },
-        book: { id: _bookId },
-      })
-      .then((res) => {
-        if (!res.affected) throw new BadRequestException();
-      });
+    const res = await this.bookLikeRepository.delete({
+      viewer: { id: _userId },
+      book: { id: _bookId },
+    });
+    if (!res.affected) throw new BadRequestException();
+
+    const book = await this.musicbookRepository.findOneBookById(_bookId, {
+      withJoin: false,
+    });
+    if (!book) throw new BadRequestException();
+    book.likeCount -= 1;
+    await book.save();
   }
 
   findOneBookLike(_userId: string, _bookId: string) {
     return this.bookLikeRepository.findOne({
+      where: { viewer: { id: _userId }, book: { id: _bookId } },
+    });
+  }
+
+  existBookLike(_userId: string, _bookId: string) {
+    return this.bookLikeRepository.exist({
       where: { viewer: { id: _userId }, book: { id: _bookId } },
     });
   }

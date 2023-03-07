@@ -174,7 +174,7 @@ export class MusicBookRepository {
   findManyNewestMusic(_perPage = 30, _page = 1) {
     return this.musicRepository.find({
       where: { isHide: false },
-      skip: (_perPage - 1) * _page,
+      skip: _perPage * (_page - 1),
       take: _perPage,
       order: {
         createdAt: 'DESC',
@@ -197,7 +197,7 @@ export class MusicBookRepository {
     return musicQueryBuilder
       .where('music.is_hide = 0')
       .orderBy('RAND()')
-      .skip((_perPage - 1) * _page)
+      .skip(_perPage * (_page - 1))
       .take(_perPage)
       .getMany();
   }
@@ -220,7 +220,7 @@ export class MusicBookRepository {
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')
       .groupBy('music.id')
-      .skip((_page - 1) * _perPage)
+      .skip(_perPage * (_page - 1))
       .take(_perPage)
       .getMany();
   }
@@ -356,7 +356,7 @@ export class MusicBookRepository {
   findManyNewestBook(_perPage = 30, _page = 1) {
     return this.bookRepository.find({
       where: { isHide: false },
-      skip: (_perPage - 1) * _page,
+      skip: _perPage * (_page - 1),
       take: _perPage,
       order: {
         createdAt: 'DESC',
@@ -369,7 +369,7 @@ export class MusicBookRepository {
       .createQueryBuilder('book')
       .where('book.is_hide = 0')
       .orderBy('RAND()')
-      .skip((_perPage - 1) * _page)
+      .skip(_perPage * (_page - 1))
       .take(_perPage)
       .getMany();
   }
@@ -382,7 +382,7 @@ export class MusicBookRepository {
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')
       .groupBy('book.id')
-      .skip((_page - 1) * _perPage)
+      .skip(_perPage * (_page - 1))
       .take(_perPage)
       .getMany();
   }

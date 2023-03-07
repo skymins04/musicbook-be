@@ -27,7 +27,12 @@ import {
 import { CreateBookDTO } from './dto/create-book.dto';
 import { Request } from 'express';
 import { GetURLsForBookImgDirectUploadingResponseDTO } from './dto/get-direct-upload-url';
-import { BookIdDTO, BookResponseDTO } from './dto/book.dto';
+import {
+  BookIdDTO,
+  BookLikeCountResponseDTO,
+  BookLikeStatusResponseDTO,
+  BookResponseDTO,
+} from './dto/book.dto';
 import { UpdateMyBookDTO } from './dto/update-my-book.dto';
 
 @Controller('book')
@@ -134,7 +139,7 @@ export class BookController {
     description: '노래책 수정 성공',
   })
   async updateMyBook(@Req() _req: Request, @Body() _body: UpdateMyBookDTO) {
-    const jwt = await this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
     await this.bookSerivce.updateMyBook(jwt, _body);
   }
 
@@ -147,8 +152,29 @@ export class BookController {
       '사용자 본인의 노래책 삭제. 생성된 노래책이 없을 경우 400에러 발생.',
   })
   async deleteMyBook(@Req() _req: Request) {
-    const jwt = await this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
     await this.bookSerivce.deleteMyBook(jwt);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me/like')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '본인 노래책 좋아요 개수 조회',
+    description:
+      '특정 노래책에 대한 좋아요 개수를 조회하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
+  })
+  @ApiOkResponse({
+    description: '노래책 좋아요 개수 조회 성공',
+    type: BookLikeCountResponseDTO,
+  })
+  async getMyBookLikeCount(
+    @Req() _req: Request,
+  ): Promise<BookLikeCountResponseDTO> {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    return new ApiResponseDataDTO(
+      await this.bookSerivce.getMyBookLikeCount(jwt),
+    );
   }
 
   @Get(':id')
@@ -161,46 +187,81 @@ export class BookController {
     description: '노래책 조회 성공',
     type: BookResponseDTO,
   })
-  async getBook(@Param() _body: BookIdDTO) {
-    const { id } = _body;
+  async getBook(@Param() _param: BookIdDTO) {
+    const { id } = _param;
     return new ApiResponseDataDTO(await this.bookSerivce.getBook(id));
   }
 
   @Get(':id/like')
   @ApiOperation({
-    summary: '(wip) 노래책 좋아요 개수 조회',
+    summary: '노래책 좋아요 개수 조회',
     description:
       '특정 노래책에 대한 좋아요 개수를 조회하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
-  getLikeCountOfBook() {}
+  @ApiOkResponse({
+    description: '노래책 조회 성공',
+    type: BookLikeCountResponseDTO,
+  })
+  async getLikeCountOfBook(
+    @Param() _param: BookIdDTO,
+  ): Promise<BookLikeCountResponseDTO> {
+    const { id } = _param;
+    return new ApiResponseDataDTO(
+      await this.bookSerivce.getLikeCountOfBook(id),
+    );
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post(':id/like')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 노래책 좋아요 생성',
+    summary: '노래책 좋아요 생성',
     description:
       '특정 노래책에 대한 좋아요를 생성하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
-  createLikeOfBook() {}
+  @ApiOkResponse({
+    description: '노래책 좋아요 여부 생성 성공',
+  })
+  async createLikeOfBook(@Req() _req: Request, @Param() _param: BookIdDTO) {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    const { id } = _param;
+    await this.bookSerivce.createLikeOfBook(jwt, id);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id/like')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 노래책 좋아요 삭제',
+    summary: '노래책 좋아요 삭제',
     description:
       '특정 노래책에 대한 좋아요를 삭제하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
-  deleteLikeOfBook() {}
+  async deleteLikeOfBook(@Req() _req: Request, @Param() _param: BookIdDTO) {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    const { id } = _param;
+    await this.bookSerivce.deleteLikeOfBook(jwt, id);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id/like/me')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 노래책 좋아요 여부 조회',
+    summary: '노래책 좋아요 여부 조회',
     description:
       '특정 노래책에 대한 좋아요 여부를 조회하는 엔드포인트. 존재하지 않는 노래책일 경우 400에러 발생.',
   })
-  getMyLikeOfBook() {}
+  @ApiOkResponse({
+    description: '노래책 좋아요 여부 조회 성공',
+    type: BookLikeStatusResponseDTO,
+  })
+  async getMyLikeOfBook(
+    @Req() _req: Request,
+    @Param() _param: BookIdDTO,
+  ): Promise<BookLikeStatusResponseDTO> {
+    const jwt = this.jwtAuthService.getJwtAndVerifyFromReq(_req);
+    const { id } = _param;
+    return new ApiResponseDataDTO(
+      await this.bookSerivce.getMyLikeOfBook(jwt, id),
+    );
+  }
 }

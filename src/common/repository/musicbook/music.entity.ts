@@ -110,6 +110,14 @@ export class MusicEntity extends BaseEntity {
   })
   sourceType: keyof typeof EMusicSouceType;
 
+  @Column('integer', { default: 0 })
+  @ApiProperty({
+    description: '노래책 좋아요 개수',
+    type: Number,
+    example: 100,
+  })
+  likeCount: number;
+
   @Column('boolean', { default: true })
   @ApiProperty({
     description: '수록곡 신청곡 요청 가능 여부',

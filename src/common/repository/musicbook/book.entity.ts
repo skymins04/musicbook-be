@@ -76,6 +76,13 @@ export class BookEntity extends BaseEntity {
     example: true,
   })
   isRequestable: boolean;
+  @Column('integer', { default: 0 })
+  @ApiProperty({
+    description: '노래책 좋아요 개수',
+    type: Number,
+    example: 100,
+  })
+  likeCount: number;
   @Column('boolean', { default: false })
   @ApiProperty({
     description: '노래책 숨김 여부',

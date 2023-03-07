@@ -31,3 +31,11 @@ export class BookLikeCountResponseDTO implements ApiResponseDataDTO {
   })
   data: number;
 }
+
+export class BookLikeStatusResponseDTO implements ApiResponseDataDTO {
+  @ApiProperty({
+    description: '노래책 좋아요 여부',
+    type: Boolean,
+  })
+  data: boolean;
+}

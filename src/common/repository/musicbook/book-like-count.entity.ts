@@ -11,7 +11,7 @@ import { UserEntity } from '../user/user.entity';
 import { BookEntity } from './book.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
-@Entity('book-like-entity')
+@Entity('book-like-count')
 export class BookLikeCountEntity extends BaseEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
