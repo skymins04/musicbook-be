@@ -3,6 +3,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeepPartial,
   DeleteDateColumn,
   Entity,
   OneToMany,
@@ -13,6 +14,16 @@ import { MusicEntity } from './music.entity';
 
 @Entity('music-source-original')
 export class MusicSourceOriginalEntity extends BaseEntity {
+  constructor(
+    _musicSourceOriginalEntity?: DeepPartial<MusicSourceOriginalEntity>,
+  ) {
+    super();
+    if (_musicSourceOriginalEntity)
+      for (const key of Object.keys(_musicSourceOriginalEntity)) {
+        this[key] = _musicSourceOriginalEntity[key];
+      }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty({
     description: '노래책 고유 음원 ID (uuidv4)',
@@ -99,7 +110,9 @@ export class MusicSourceOriginalEntity extends BaseEntity {
   })
   deletedAt: Date;
 
-  @OneToMany(() => MusicEntity, (music) => music.musicSourceOriginal)
+  @OneToMany(() => MusicEntity, (music) => music.musicSourceOriginal, {
+    cascade: true,
+  })
   @ApiProperty({
     description: '수록곡 배열',
     type: () => [MusicEntity],

@@ -2,6 +2,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeepPartial,
   DeleteDateColumn,
   Entity,
   JoinColumn,
@@ -20,8 +21,31 @@ import { BookLikeEntity } from '../musicbook/book-like.entity';
 import { MusicLikeCountEntity } from '../musicbook/music-like-count.entity';
 import { BookLikeCountEntity } from '../musicbook/book-like-count.entity';
 
+export const UserEntityFixture: DeepPartial<UserEntity>[] = [
+  {
+    id: '12341234-1234-1234-123412341234',
+    displayName: '테스트유저',
+    profileImgURL: 'https://example.com/example.png',
+    email: 'example@example.com',
+    description: '테스트설명글',
+  },
+];
+
+export async function loadUserEntityFixture() {
+  const fixture = UserEntityFixture.map((data) => new UserEntity(data));
+  await UserEntity.save(fixture);
+}
+
 @Entity('user')
 export class UserEntity extends BaseEntity {
+  constructor(_userEntity?: DeepPartial<UserEntity>) {
+    super();
+    if (_userEntity)
+      for (const key of Object.keys(_userEntity)) {
+        this[key] = _userEntity[key];
+      }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty({
     description: '노래책 고유 사용자 ID (uuid v4)',
@@ -84,44 +108,46 @@ export class UserEntity extends BaseEntity {
   })
   deletedAt: Date;
 
-  @OneToOne(() => UserTwitchEntity, (userTwitch) => userTwitch.user)
+  @OneToOne(() => UserTwitchEntity, (userTwitch) => userTwitch.user, {
+    cascade: true,
+  })
   @JoinColumn({ name: 'twitch_id' })
   @ApiProperty({
     description: '트위치 사용자 연동 정보',
     type: UserTwitchEntity,
   })
   twitch: UserTwitchEntity;
-  @OneToOne(() => UserGoogleEntity, (userGoogle) => userGoogle.user)
+  @OneToOne(() => UserGoogleEntity, (userGoogle) => userGoogle.user, {
+    cascade: true,
+  })
   @JoinColumn({ name: 'google_id' })
   @ApiProperty({
     description: '구글 사용자 연동 정보',
     type: UserGoogleEntity,
   })
   google: UserGoogleEntity;
-  @OneToMany(() => MusicEntity, (music) => music.broadcaster)
-  @ApiProperty({
-    description: '수록곡 배열',
-    type: () => [MusicEntity],
-  })
+  @OneToMany(() => MusicEntity, (music) => music.broadcaster, { cascade: true })
   musics: MusicEntity[];
-  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.viewer)
+  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.viewer, {
+    cascade: true,
+  })
   musicLikes: MusicLikeEntity;
   @OneToMany(
     () => MusicLikeCountEntity,
     (musicLikeCount) => musicLikeCount.broadcaster,
+    { cascade: true },
   )
   musicLikeCounts: MusicLikeCountEntity;
-  @OneToOne(() => BookEntity, (book) => book.broadcaster)
-  @ApiProperty({
-    description: '노래책',
-    type: () => BookEntity,
-  })
+  @OneToOne(() => BookEntity, (book) => book.broadcaster, { cascade: true })
   book: BookEntity;
-  @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.viewer)
+  @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.viewer, {
+    cascade: true,
+  })
   bookLikes: BookLikeEntity[];
   @OneToMany(
     () => BookLikeCountEntity,
     (bookLikeCount) => bookLikeCount.broadcaster,
+    { cascade: true },
   )
   bookLikeCounts: BookLikeCountEntity[];
 }

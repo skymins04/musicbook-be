@@ -106,8 +106,8 @@ export class BookController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @Get('me')
+  @ApiBearerAuth()
   @ApiOperation({
     summary: '본인 노래책 조회',
     description:
@@ -122,8 +122,8 @@ export class BookController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @Patch('me')
+  @ApiBearerAuth()
   @ApiOperation({
     summary: '본인 노래책 수정',
     description:
@@ -140,8 +140,8 @@ export class BookController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @Delete('me')
+  @ApiBearerAuth()
   @ApiOperation({
     summary: '본인 노래책 삭제',
     description:

@@ -2,6 +2,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeepPartial,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -14,6 +15,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('music-like-count')
 export class MusicLikeCountEntity extends BaseEntity {
+  constructor(_musicLikeCountEntity?: DeepPartial<MusicLikeCountEntity>) {
+    super();
+    if (_musicLikeCountEntity)
+      for (const key of Object.keys(_musicLikeCountEntity)) {
+        this[key] = _musicLikeCountEntity[key];
+      }
+  }
+
   @PrimaryGeneratedColumn('increment')
   @ApiProperty({
     description: '수록곡 좋아요 집계 ID (number)',
@@ -37,21 +46,27 @@ export class MusicLikeCountEntity extends BaseEntity {
   })
   createdAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.musicLikeCounts)
+  @ManyToOne(() => UserEntity, (user) => user.musicLikeCounts, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'broadcaster_id' })
   @ApiProperty({
     description: '수록곡 좋아요 집계에 해당하는 스트리머 사용자',
     type: () => UserEntity,
   })
   broadcaster: UserEntity;
-  @ManyToOne(() => BookEntity, (book) => book.musicLikeCounts)
+  @ManyToOne(() => BookEntity, (book) => book.musicLikeCounts, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'bk_id' })
   @ApiProperty({
     description: '수록곡의 노래책',
     type: () => BookEntity,
   })
   book: BookEntity;
-  @ManyToOne(() => MusicEntity, (music) => music.musicLikeCounts)
+  @ManyToOne(() => MusicEntity, (music) => music.musicLikeCounts, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'msc_id' })
   @ApiProperty({
     description: '수록곡',

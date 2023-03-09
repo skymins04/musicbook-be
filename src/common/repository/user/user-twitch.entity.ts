@@ -2,6 +2,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeepPartial,
   DeleteDateColumn,
   Entity,
   OneToOne,
@@ -13,6 +14,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('user_twitch')
 export class UserTwitchEntity extends BaseEntity {
+  constructor(_userTwitchEntity?: DeepPartial<UserTwitchEntity>) {
+    super();
+    if (_userTwitchEntity)
+      for (const key of Object.keys(_userTwitchEntity)) {
+        this[key] = _userTwitchEntity[key];
+      }
+  }
+
   @PrimaryColumn()
   @ApiProperty({
     description: '트위치 사용자 ID (numeric string)',
@@ -124,6 +133,6 @@ export class UserTwitchEntity extends BaseEntity {
   })
   deletedAt: Date;
 
-  @OneToOne(() => UserEntity, (user) => user.twitch, { eager: true })
+  @OneToOne(() => UserEntity, (user) => user.twitch, { onDelete: 'CASCADE' })
   user: UserEntity;
 }

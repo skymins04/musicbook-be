@@ -110,6 +110,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('me')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '사용자 본인의 정보 획득',
@@ -119,18 +120,17 @@ export class UserController {
     description: '조회 성공',
     type: UserMeResponseDTO,
   })
-  @Get('me')
   async getMeInfo(@Jwt() _jwt: MusicbookJwtPayload) {
     return new ApiResponseDataDTO(await this.userService.getMeInfo(_jwt));
   }
 
   @UseGuards(JwtAuthGuard)
+  @Patch('me')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '사용자 본인의 정보 업데이트',
     description: `사용자 본인의 정보를 업데이트하는 엔드포인트.`,
   })
-  @Patch('me')
   async updateMeInfo(
     @Jwt() _jwt: MusicbookJwtPayload,
     @Body() _body: UserMeUpdateDTO,
@@ -139,21 +139,22 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/link/twitch')
+  @Redirect(
+    `https://id.twitch.tv/oauth2/authorize?client_id=${process.env.TWITCH_CLIENT_ID}&redirect_uri=${process.env.API_ADDRESS}/user/link/twitch/cb&response_type=code&scope=${TWITCH_CLIENT_SCOPES}&force_verify=true`,
+  )
   @ApiBearerAuth()
   @ApiOperation({
     summary: '트위치 계정 사용자 연동',
     description:
       '트위치 계정을 노래책 사용자에 연동하는 엔드포인트. 트위치 OAuth 페이지로 리다이렉트 후, /user/link/twitch/cb로 콜백됨.',
   })
-  @Get('/link/twitch')
-  @Redirect(
-    `https://id.twitch.tv/oauth2/authorize?client_id=${process.env.TWITCH_CLIENT_ID}&redirect_uri=${process.env.API_ADDRESS}/user/link/twitch/cb&response_type=code&scope=${TWITCH_CLIENT_SCOPES}&force_verify=true`,
-  )
   async linkTwitchToUser() {
     return;
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/link/twitch/cb')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '트위치 계정 사용자 연동 oauth callback',
@@ -164,7 +165,6 @@ export class UserController {
     description: 'OAuth 인증 성공',
     type: UserLinkaCallbackResponseDTO,
   })
-  @Get('/link/twitch/cb')
   async linkTwitchToUserCallback(@Query() _query: UserLoginCallbackQueryDTO) {
     const { code } = _query;
     return new ApiResponseDataDTO(
@@ -173,13 +173,13 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('/link/twitch')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '트위치 계정 사용자 연동 적용',
     description:
       'GET /user/link/twitch를 통해 발급된 code를 전달하면 트위치 계정 사용자 연동이 적용되는 엔드포인트',
   })
-  @Post('/link/twitch')
   async linkTwitchToUserApply(
     @Jwt() _jwt: MusicbookJwtPayload,
     @Query() _query: UserLoginCallbackQueryDTO,
@@ -189,32 +189,33 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Delete('/link/twitch')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '트위치 계정 사용자 연동 해제',
     description: '트위치 계정 사용자 연동 해제',
   })
-  @Delete('/link/twitch')
   async unlinkTwitchToUser(@Jwt() _jwt: MusicbookJwtPayload) {
     await this.userService.unlinkTwitchToUser(_jwt);
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/link/google')
+  @Redirect(
+    `https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=${process.env.API_ADDRESS}/user/link/google/cb&scope=${GOOGLE_CLIENT_SCOPES}&client_id=${process.env.GOOGLE_CLIENT_ID}&service=lso&o2v=2&flowName=GeneralOAuthFlow&prompt=select_account`,
+  )
   @ApiBearerAuth()
   @ApiOperation({
     summary: '구글 계정 사용자 연동',
     description:
       '구글 계정을 노래책 사용자에 연동하는 엔드포인트. 구글 OAuth 페이지로 리다이렉트 후, /user/link/google/cb로 콜백됨.',
   })
-  @Get('/link/google')
-  @Redirect(
-    `https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=${process.env.API_ADDRESS}/user/link/google/cb&scope=${GOOGLE_CLIENT_SCOPES}&client_id=${process.env.GOOGLE_CLIENT_ID}&service=lso&o2v=2&flowName=GeneralOAuthFlow&prompt=select_account`,
-  )
   async linkGoogleToUser() {
     return;
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/link/google/cb')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '구글 계정 사용자 연동 oauth callback',
@@ -225,7 +226,6 @@ export class UserController {
     description: 'OAuth 인증 성공',
     type: UserLinkaCallbackResponseDTO,
   })
-  @Get('/link/google/cb')
   async linkGoogleToUserCallback(@Query() _query: UserLoginCallbackQueryDTO) {
     const { code } = _query;
     return new ApiResponseDataDTO(
@@ -234,13 +234,13 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('/link/google')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '구글 계정 사용자 연동 적용',
     description:
       'GET /user/link/google을 통해 발급된 code를 전달하면 구글 계정 사용자 연동이 적용되는 엔드포인트',
   })
-  @Post('/link/google')
   async linkGoogleToUserApply(
     @Jwt() _jwt: MusicbookJwtPayload,
     @Query() _query: UserLoginCallbackQueryDTO,
@@ -250,12 +250,12 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Delete('/link/google')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '구글 계정 사용자 연동 해제',
     description: '구글 계정 사용자 연동 해제',
   })
-  @Delete('/link/google')
   async unlinkGoogleToUser(@Jwt() _jwt: MusicbookJwtPayload) {
     await this.userService.unlinkGoogleToUser(_jwt);
   }

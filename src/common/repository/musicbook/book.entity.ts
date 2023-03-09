@@ -2,6 +2,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeepPartial,
   DeleteDateColumn,
   Entity,
   JoinColumn,
@@ -18,8 +19,40 @@ import { MusicLikeCountEntity } from './music-like-count.entity';
 import { BookLikeCountEntity } from './book-like-count.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
+export const BookEntityFixture: DeepPartial<BookEntity>[] = [
+  {
+    id: '12341234-1234-1234-123412341234',
+    customId: '@test',
+    title: '테스트노래책',
+    description: '테스트설명글',
+    requestCommandPrefix: '!노래책',
+    thumbnailURL: 'https://example.com/example.png',
+    backgroundImgURL: 'https://example.com/example.png',
+    likeCount: 0,
+    isRequestable: true,
+    isHide: false,
+    isPaid: false,
+    broadcaster: {
+      id: '12341234-1234-1234-123412341234',
+    },
+  },
+];
+
+export async function loadBookEntityFixture() {
+  const fixture = BookEntityFixture.map((data) => new BookEntity(data));
+  await BookEntity.save(fixture);
+}
+
 @Entity('book')
 export class BookEntity extends BaseEntity {
+  constructor(_bookEntity?: DeepPartial<BookEntity>) {
+    super();
+    if (_bookEntity)
+      for (const key of Object.keys(_bookEntity)) {
+        this[key] = _bookEntity[key];
+      }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty({
     description: '노래책 고유 ID (uuidv4)',
@@ -120,24 +153,35 @@ export class BookEntity extends BaseEntity {
   })
   deletedAt: Date;
 
-  @OneToOne(() => UserEntity, (user) => user.book)
+  @OneToOne(() => UserEntity, (user) => user.book, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'broadcaster_id' })
+  @ApiProperty({
+    description: '스트리머 사용자',
+    type: () => UserEntity,
+  })
   broadcaster: UserEntity;
-  @OneToMany(() => MusicEntity, (music) => music.book)
+  @OneToMany(() => MusicEntity, (music) => music.book, { cascade: true })
   @ApiProperty({
     description: '수록곡 배열',
     type: () => [MusicEntity],
   })
   musics: MusicEntity[];
-  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.book)
+  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.book, {
+    cascade: true,
+  })
   musicLikes: MusicLikeEntity[];
   @OneToMany(
     () => MusicLikeCountEntity,
     (musicLikeCount) => musicLikeCount.book,
+    { cascade: true },
   )
   musicLikeCounts: MusicLikeCountEntity[];
-  @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.book)
+  @OneToMany(() => BookLikeEntity, (bookLike) => bookLike.book, {
+    cascade: true,
+  })
   bookLikes: BookLikeEntity[];
-  @OneToMany(() => BookLikeCountEntity, (bookLikeCount) => bookLikeCount.book)
+  @OneToMany(() => BookLikeCountEntity, (bookLikeCount) => bookLikeCount.book, {
+    cascade: true,
+  })
   bookLikeCounts: BookLikeCountEntity[];
 }

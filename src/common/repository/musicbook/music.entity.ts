@@ -3,6 +3,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeepPartial,
   DeleteDateColumn,
   Entity,
   JoinColumn,
@@ -35,6 +36,14 @@ enum EMusicSouceType {
 
 @Entity('music')
 export class MusicEntity extends BaseEntity {
+  constructor(_musicEntity?: DeepPartial<MusicEntity>) {
+    super();
+    if (_musicEntity)
+      for (const key of Object.keys(_musicEntity)) {
+        this[key] = _musicEntity[key];
+      }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty({
     description: '수록곡 고유 ID (uuidv4)',
@@ -165,14 +174,14 @@ export class MusicEntity extends BaseEntity {
   })
   deletedAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.musics)
+  @ManyToOne(() => UserEntity, (user) => user.musics, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'broadcaster_id' })
   @ApiProperty({
     description: '스트리머 사용자',
     type: () => UserEntity,
   })
   broadcaster: UserEntity;
-  @ManyToOne(() => BookEntity, (book) => book.musics)
+  @ManyToOne(() => BookEntity, (book) => book.musics, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'bk_id' })
   @ApiProperty({
     description: '노래책',
@@ -182,6 +191,7 @@ export class MusicEntity extends BaseEntity {
   @ManyToOne(
     () => MusicSourceOriginalEntity,
     (musicSourceOriginal) => musicSourceOriginal.musics,
+    { onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'source_original_id' })
   @ApiProperty({
@@ -192,6 +202,7 @@ export class MusicEntity extends BaseEntity {
   @ManyToOne(
     () => MusicSourceMelonEntity,
     (musicSourceMelon) => musicSourceMelon.musics,
+    { onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'source_melon_id' })
   @ApiProperty({
@@ -199,7 +210,9 @@ export class MusicEntity extends BaseEntity {
     type: () => MusicSourceMelonEntity,
   })
   musicSourceMelon: MusicSourceMelonEntity;
-  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.music)
+  @OneToMany(() => MusicLikeEntity, (musicLike) => musicLike.music, {
+    cascade: true,
+  })
   @ApiProperty({
     description: '노래책 좋아요 배열',
     type: () => [MusicLikeEntity],
@@ -208,6 +221,7 @@ export class MusicEntity extends BaseEntity {
   @OneToMany(
     () => MusicLikeCountEntity,
     (musicLikeCount) => musicLikeCount.music,
+    { cascade: true },
   )
   @ApiProperty({
     description: '노래책 좋아요 집계 배열',

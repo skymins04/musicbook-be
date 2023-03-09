@@ -2,6 +2,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeepPartial,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -13,6 +14,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('book-like-count')
 export class BookLikeCountEntity extends BaseEntity {
+  constructor(_bookLikeCountEntity?: DeepPartial<BookLikeCountEntity>) {
+    super();
+    if (_bookLikeCountEntity)
+      for (const key of Object.keys(_bookLikeCountEntity)) {
+        this[key] = _bookLikeCountEntity[key];
+      }
+  }
+
   @PrimaryGeneratedColumn('increment')
   id: number;
   @ApiProperty({
@@ -36,14 +45,18 @@ export class BookLikeCountEntity extends BaseEntity {
   })
   createdAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.bookLikeCounts)
+  @ManyToOne(() => UserEntity, (user) => user.bookLikeCounts, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'broadcaster_id' })
   @ApiProperty({
     description: '노래책 좋아요 집계에 해당하는 스트리머 사용자',
     type: () => UserEntity,
   })
   broadcaster: UserEntity;
-  @ManyToOne(() => BookEntity, (book) => book.bookLikeCounts)
+  @ManyToOne(() => BookEntity, (book) => book.bookLikeCounts, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'bk_id' })
   @ApiProperty({
     description: '노래책',

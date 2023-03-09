@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
 import { MusicEntity } from './music.entity';
 import { BookEntity } from './book.entity';
+import { MusicBookSourceRepository } from './musicbook-source.repository';
 
 @Injectable()
 export class MusicBookRepository {
@@ -11,6 +12,7 @@ export class MusicBookRepository {
     private readonly musicRepository: Repository<MusicEntity>,
     @InjectRepository(BookEntity)
     private readonly bookRepository: Repository<BookEntity>,
+    private readonly musicbookSourceRepository: MusicBookSourceRepository,
   ) {}
 
   async createMusicByMelonSource(
@@ -20,8 +22,14 @@ export class MusicBookRepository {
       musicSourceMelon: { songId: number };
     },
   ) {
-    const music = new MusicEntity();
-    for (const key of Object.keys(_music)) music[key] = _music[key];
+    const source = await this.musicbookSourceRepository.findOneSourceMelonById(
+      _music.musicSourceMelon.songId,
+    );
+    if (!source) throw new BadRequestException();
+
+    const music = new MusicEntity(_music);
+    music.category = source.category;
+
     try {
       return music.save();
     } catch (e) {
@@ -36,8 +44,7 @@ export class MusicBookRepository {
       musicSourceOriginal: { songId: string };
     },
   ) {
-    const music = new MusicEntity();
-    for (const key of Object.keys(_music)) music[key] = _music[key];
+    const music = new MusicEntity(_music);
     try {
       return music.save();
     } catch (e) {
@@ -228,8 +235,7 @@ export class MusicBookRepository {
   async createBook(
     _book: DeepPartial<BookEntity> & { broadcaster: { id: string } },
   ) {
-    const book = new BookEntity();
-    for (const key of Object.keys(_book)) book[key] = _book[key];
+    const book = new BookEntity(_book);
     return book.save();
   }
 
