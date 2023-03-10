@@ -7,6 +7,6 @@ import { UserRepository } from 'src/common/repository/user/user.repository';
 @Global()
 @Module({
   controllers: [UserController],
-  providers: [JwtAuthService, UserService, UserRepository, JwtAuthService],
+  providers: [JwtAuthService, UserService, UserRepository],
 })
 export class UserModule {}
