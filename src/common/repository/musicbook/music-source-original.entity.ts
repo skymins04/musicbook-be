@@ -52,7 +52,7 @@ export class MusicSourceOriginalEntity extends BaseEntity {
     nullable: true,
     example: 'https://example.com/thumbnail.jpg',
   })
-  artistThumbmail: string;
+  artistThumbnail: string;
   @Column()
   @ApiProperty({
     description: '노래책 고유 음원 장르',

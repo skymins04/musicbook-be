@@ -5,9 +5,7 @@ import { BookEntity } from 'src/common/repository/musicbook/book.entity';
 
 export class BookIdDTO {
   @IsString()
-  @Matches(
-    /^[a-f\d]{8}-[a-f\d]{4}-4[a-f\d]{3}-[8|9|aA|bB][a-f\d]{3}-[a-f\d]{12}$/i,
-  )
+  @Matches(/^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$/i)
   @ApiProperty({
     description: '노래책 ID (uuidv4)',
     type: String,

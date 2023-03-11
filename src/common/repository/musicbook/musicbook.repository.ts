@@ -138,6 +138,18 @@ export class MusicBookRepository {
     });
   }
 
+  findManyMusicByUserId(
+    _userId: string,
+    _options?: {
+      withDeleted?: boolean;
+    },
+  ) {
+    return this.musicRepository.find({
+      where: { broadcaster: { id: _userId } },
+      withDeleted: _options?.withDeleted,
+    });
+  }
+
   findManyMusicByBookId(
     _bookId: string,
     _options?: {

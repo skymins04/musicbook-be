@@ -6,7 +6,6 @@ import {
 import { BookEntity } from 'src/common/repository/musicbook/book.entity';
 import { MusicBookLikeRepository } from 'src/common/repository/musicbook/musicbook-like.repository';
 import { MusicBookRepository } from 'src/common/repository/musicbook/musicbook.repository';
-import { DeepPartial } from 'typeorm';
 import { CreateBookDTO } from './dto/create-book.dto';
 import { CloudflareImagesService } from 'src/common/cloudflare/cloudflare-images.service';
 import { GetURLsForBookImgDirectUploadingResponseDataDTO } from './dto/get-direct-upload-url';
@@ -43,9 +42,6 @@ export class BookService {
     _jwt: MusicbookJwtPayload,
     _ip: string,
   ): Promise<GetURLsForBookImgDirectUploadingResponseDataDTO> {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 3);
-
     const [thumbnail, background] = await Promise.all([
       this.cloudflareImagesService.getDirectUploadURL({
         meta: {
@@ -158,16 +154,18 @@ export class BookService {
     return this.musicbookLikeRepository.getCountBookLikeByUserId(_jwt.id);
   }
 
-  getBook(_bookId: string) {
-    const book = this.musicbookRepository.findOneBookById(_bookId, {
+  async getBook(_bookId: string) {
+    const book = await this.musicbookRepository.findOneBookById(_bookId, {
       withJoin: ['broadcaster', 'musics'],
     });
     if (!book) throw new NotFoundException();
     return book;
   }
 
-  getLikeCountOfBook(_bookId: string) {
-    return this.musicbookLikeRepository.getCountBookLikeByBookId(_bookId);
+  async getLikeCountOfBook(_bookId: string) {
+    const book = await this.musicbookRepository.findOneBookById(_bookId);
+    if (!book) throw new BadRequestException();
+    return book.likeCount;
   }
 
   async createLikeOfBook(_jwt: MusicbookJwtPayload, _bookId: string) {
@@ -178,7 +176,9 @@ export class BookService {
     await this.musicbookLikeRepository.deleteBookLike(_jwt.id, _bookId);
   }
 
-  getMyLikeOfBook(_jwt: MusicbookJwtPayload, _bookId: string) {
+  async getMyLikeOfBook(_jwt: MusicbookJwtPayload, _bookId: string) {
+    if (!(await this.musicbookRepository.existBookById(_bookId)))
+      throw new BadRequestException();
     return this.musicbookLikeRepository.existBookLike(_jwt.id, _bookId);
   }
 }
