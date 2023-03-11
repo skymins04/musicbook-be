@@ -4,21 +4,45 @@ import {
   Get,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
+import { GetMusicsDTO, GetMusicsResponseDTO } from './dto/get-musics.dto';
+import { MusicService } from './music.service';
+import { ApiResponsePagenationDataDTO } from 'src/common/api-response/api-response-data.dto';
 
 @Controller('music')
 @ApiTags('Music')
 export class MusicController {
+  constructor(private readonly musciService: MusicService) {}
+
   @Get()
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 수록곡 목록 조회',
+    summary: '수록곡 목록 조회',
     description: '최신순/추천순/인기순 수록곡 목록 조회 엔드포인트',
   })
-  getMusics() {}
+  @ApiOkResponse({
+    description: '수록곡 목록 조회 성공',
+    type: GetMusicsResponseDTO,
+  })
+  async getMusics(
+    @Query() _query: GetMusicsDTO,
+  ): Promise<GetMusicsResponseDTO> {
+    const { perPage = 30, page = 1, sort = 'newest' } = _query;
+    const musics = await this.musciService.getMusics(perPage, page, sort);
+    return new ApiResponsePagenationDataDTO<{ sort: MusicbookSortMethod }>(
+      { perPage, currentPage: page, sort, pageItemCount: musics.length },
+      musics,
+    );
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post('original')

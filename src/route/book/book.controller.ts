@@ -49,12 +49,12 @@ export class BookController {
     description: '노래책 목록 조회 성공',
     type: GetBooksResponseDTO,
   })
-  async getBooks(@Query() _query: GetBooksDTO) {
-    const { perPage = 30, page = 1, sort = 'newest' } = _query;
-    const books = await this.bookSerivce.getBooks(perPage, page, sort);
+  async getBooks(@Query() _query: GetBooksDTO): Promise<GetBooksResponseDTO> {
+    const { page = 1, sort = 'newest' } = _query;
+    const books = await this.bookSerivce.getBooks(50, page, sort);
     return new ApiResponsePagenationDataDTO<{ sort: MusicbookSortMethod }>(
       {
-        perPage,
+        perPage: 50,
         currentPage: page,
         sort,
         pageItemCount: books.length,
