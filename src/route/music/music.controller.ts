@@ -37,6 +37,7 @@ import {
   CreateMelonSourceDTO,
   CreateOriginalSourceDTO,
 } from './dto/create-music-source.dto';
+import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
 
 @Controller('music')
 @ApiTags('Music')
@@ -55,9 +56,11 @@ export class MusicController {
   async getMusics(
     @Query() _query: GetMusicsDTO,
   ): Promise<GetMusicsResponseDTO> {
-    const { perPage = 30, page = 1, sort = 'newest' } = _query;
+    const { perPage = 30, page = 1, sort = 'NEWEST' } = _query;
     const musics = await this.musciService.getMusics(perPage, page, sort);
-    return new ApiResponsePagenationDataDTO<{ sort: MusicbookSortMethod }>(
+    return new ApiResponsePagenationDataDTO<{
+      sort: keyof typeof EMusicbookSortMethod;
+    }>(
       { perPage, currentPage: page, sort, pageItemCount: musics.length },
       musics,
     );

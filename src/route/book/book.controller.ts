@@ -34,6 +34,7 @@ import {
 } from './dto/book.dto';
 import { UpdateMyBookDTO } from './dto/update-my-book.dto';
 import { Jwt } from 'src/common/jwt-auth/jwt.decorator';
+import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
 
 @Controller('book')
 @ApiTags('Book')
@@ -50,9 +51,11 @@ export class BookController {
     type: GetBooksResponseDTO,
   })
   async getBooks(@Query() _query: GetBooksDTO): Promise<GetBooksResponseDTO> {
-    const { page = 1, sort = 'newest' } = _query;
+    const { page = 1, sort = 'NEWEST' } = _query;
     const books = await this.bookSerivce.getBooks(50, page, sort);
-    return new ApiResponsePagenationDataDTO<{ sort: MusicbookSortMethod }>(
+    return new ApiResponsePagenationDataDTO<{
+      sort: keyof typeof EMusicbookSortMethod;
+    }>(
       {
         perPage: 50,
         currentPage: page,

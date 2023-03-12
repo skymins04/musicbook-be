@@ -11,6 +11,7 @@ import { MusicBookSourceRepository } from 'src/common/repository/musicbook/music
 import { CreateOriginalSourceDTO } from './dto/create-music-source.dto';
 import { CloudflareImagesService } from 'src/common/cloudflare/cloudflare-images.service';
 import { GetURLsForMusicSourceImgDirectUploadingResponseDataDTO } from './dto/get-direct-upload-url';
+import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
 
 @Injectable()
 export class MusicService {
@@ -23,25 +24,31 @@ export class MusicService {
   ) {}
 
   private getMusicsSortHandler: Record<
-    MusicbookSortMethod,
+    keyof typeof EMusicbookSortMethod,
     (_perPage: number, _page: number) => Promise<MusicEntity[]>
   > = {
-    newest: (_perPage, _page) => {
+    NEWEST: (_perPage, _page) => {
       return this.musicbookRepository.findManyNewestMusic(_perPage, _page);
     },
-    suggest: (_perPage, _page) => {
+    SUGGEST: (_perPage, _page) => {
       return this.musicbookRepository.findManySuggestMusic(_perPage, _page);
     },
-    popular: (_perPage, _page) => {
+    POPULAR: (_perPage, _page) => {
       return this.musicbookRepository.findManyPopularMusic(_perPage, _page);
     },
   };
 
-  getMusics(_perPage: number, _page: number, _sort: MusicbookSortMethod) {
+  getMusics(
+    _perPage: number,
+    _page: number,
+    _sort: keyof typeof EMusicbookSortMethod,
+  ) {
     return this.getMusicsSortHandler[_sort](_perPage, _page);
   }
 
-  createMusic() {}
+  createMusic(_jwt: MusicbookJwtPayload) {
+    // this.musicbookRepository.createMusic;
+  }
 
   async getURLsForMusicImgDirectUploading(
     _jwt: MusicbookJwtPayload,

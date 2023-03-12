@@ -10,6 +10,7 @@ import { CreateBookDTO } from './dto/create-book.dto';
 import { CloudflareImagesService } from 'src/common/cloudflare/cloudflare-images.service';
 import { GetURLsForBookImgDirectUploadingResponseDataDTO } from './dto/get-direct-upload-url';
 import { UpdateMyBookDTO } from './dto/update-my-book.dto';
+import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
 
 @Injectable()
 export class BookService {
@@ -20,21 +21,25 @@ export class BookService {
   ) {}
 
   private getBooksSortHandler: Record<
-    MusicbookSortMethod,
+    keyof typeof EMusicbookSortMethod,
     (_perPage: number, _page: number) => Promise<BookEntity[]>
   > = {
-    newest: (_perPage, _page) => {
+    NEWEST: (_perPage, _page) => {
       return this.musicbookRepository.findManyNewestBook(_perPage, _page);
     },
-    suggest: (_perPage, _page) => {
+    SUGGEST: (_perPage, _page) => {
       return this.musicbookRepository.findManySuggestBook(_perPage, _page);
     },
-    popular: (_perPage, _page) => {
+    POPULAR: (_perPage, _page) => {
       return this.musicbookRepository.findManyPopularBook(_perPage, _page);
     },
   };
 
-  getBooks(_perPage: number, _page: number, _sort: MusicbookSortMethod) {
+  getBooks(
+    _perPage: number,
+    _page: number,
+    _sort: keyof typeof EMusicbookSortMethod,
+  ) {
     return this.getBooksSortHandler[_sort](_perPage, _page);
   }
 

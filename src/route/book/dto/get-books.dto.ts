@@ -9,12 +9,7 @@ import {
 } from 'class-validator';
 import { ApiResponsePagenationDataDTO } from 'src/common/api-response/api-response-data.dto';
 import { BookEntity } from 'src/common/repository/musicbook/book.entity';
-
-enum EBookSortMethod {
-  newest = 'newest',
-  suggest = 'suggest',
-  popular = 'popular',
-}
+import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
 
 export class GetBooksDTO {
   // @Type(() => Number)
@@ -44,17 +39,17 @@ export class GetBooksDTO {
   page?: number;
 
   @IsString()
-  @IsEnum(EBookSortMethod)
+  @IsEnum(EMusicbookSortMethod)
   @IsOptional()
   @ApiProperty({
     description:
-      '노래책 목록 정렬 방법 (newest: "최신순", suggest: "추천순", popular: "인기순")',
-    enum: EBookSortMethod,
-    example: 'newest',
-    default: 'newest',
+      '노래책 목록 정렬 방법 (NEWEST: "최신순", SUGGEST: "추천순", POPULAR: "인기순")',
+    enum: EMusicbookSortMethod,
+    example: 'NEWEST',
+    default: 'NEWEST',
     nullable: true,
   })
-  sort?: keyof typeof EBookSortMethod;
+  sort?: keyof typeof EMusicbookSortMethod;
 }
 
 class GetBooksResponseMetaDTO {
@@ -72,11 +67,11 @@ class GetBooksResponseMetaDTO {
   currentPage: number;
   @ApiProperty({
     description:
-      '노래책 목록 정렬 방법 (newest: "최신순", suggest: "추천순", popular: "인기순")',
-    enum: EBookSortMethod,
-    example: 'newest',
+      '노래책 목록 정렬 방법 (NEWEST: "최신순", SUGGEST: "추천순", POPULAR: "인기순")',
+    enum: EMusicbookSortMethod,
+    example: 'NEWEST',
   })
-  sort: keyof typeof EBookSortMethod;
+  sort: keyof typeof EMusicbookSortMethod;
   @ApiProperty({
     description: '현재 응답의 페이지 내 item 개수',
     type: Number,

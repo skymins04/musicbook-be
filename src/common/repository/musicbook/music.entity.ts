@@ -19,13 +19,18 @@ import { MusicLikeCountEntity } from './music-like-count.entity';
 import { MusicSourceOriginalEntity } from './music-source-original.entity';
 import { MusicSourceMelonEntity } from './music-source-melon.entity';
 
-enum EMusicPreviewType {
+export enum EMusicSourceType {
+  MELON = 'MELON',
+  ORIGINAL = 'ORIGINAL',
+}
+
+export enum EMusicPreviewType {
   YOUTUBE = 'YOUTUBE',
   SOUNDCLOUD = 'SOUNDCLOUD',
   FILe = 'FILE',
 }
 
-enum EMusicSouceType {
+export enum EMusicMRType {
   YOUTUBE = 'YOUTUBE',
   SOUNDCLOUD = 'SOUNDCLOUD',
   SPOTIFY = 'SPOTIFY',
@@ -100,24 +105,24 @@ export class MusicEntity extends BaseEntity {
 
   @Column({ nullable: true })
   @ApiProperty({
-    description: '수록곡 음원소스 URL',
+    description: '수록곡 MR URL',
     type: String,
     nullable: true,
     example: 'https://example.com',
   })
-  sourceURL: string;
+  mrURL: string;
 
   @Column('enum', {
     nullable: true,
-    enum: EMusicSouceType,
+    enum: EMusicMRType,
   })
   @ApiProperty({
-    description: '수록곡 음원소스 URL',
-    enum: EMusicSouceType,
+    description: '수록곡 MR URL',
+    enum: EMusicMRType,
     nullable: true,
     example: 'YOUTUBE',
   })
-  sourceType: keyof typeof EMusicSouceType;
+  mrType: keyof typeof EMusicMRType;
 
   @Column('integer', { default: 0 })
   @ApiProperty({
