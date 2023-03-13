@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ApiResponsePagenationDataDTO } from 'src/common/api-response/api-response-data.dto';
-import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
+import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 import { MusicEntity } from 'src/common/repository/musicbook/music.entity';
 
 export class GetMusicsDTO {

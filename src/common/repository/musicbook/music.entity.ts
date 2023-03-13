@@ -18,26 +18,7 @@ import { MusicLikeEntity } from './music-like.entity';
 import { MusicLikeCountEntity } from './music-like-count.entity';
 import { MusicSourceOriginalEntity } from './music-source-original.entity';
 import { MusicSourceMelonEntity } from './music-source-melon.entity';
-
-export enum EMusicSourceType {
-  MELON = 'MELON',
-  ORIGINAL = 'ORIGINAL',
-}
-
-export enum EMusicPreviewType {
-  YOUTUBE = 'YOUTUBE',
-  SOUNDCLOUD = 'SOUNDCLOUD',
-  FILe = 'FILE',
-}
-
-export enum EMusicMRType {
-  YOUTUBE = 'YOUTUBE',
-  SOUNDCLOUD = 'SOUNDCLOUD',
-  SPOTIFY = 'SPOTIFY',
-  FLAC = 'FLAC',
-  WAV = 'WAV',
-  MP3 = 'MP3',
-}
+import { EMusicMRType, EMusicPreviewType } from './musicbook.enum';
 
 @Entity('music')
 export class MusicEntity extends BaseEntity {
@@ -53,7 +34,7 @@ export class MusicEntity extends BaseEntity {
   @ApiProperty({
     description: '수록곡 고유 ID (uuidv4)',
     type: String,
-    example: '12341234-1234-1234-123412341234',
+    example: '12341234-1234-1234-1234-123412341234',
   })
   id: string;
 

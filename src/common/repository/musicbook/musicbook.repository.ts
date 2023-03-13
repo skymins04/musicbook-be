@@ -4,6 +4,7 @@ import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
 import { MusicEntity } from './music.entity';
 import { BookEntity } from './book.entity';
 import { MusicBookSourceRepository } from './musicbook-source.repository';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class MusicBookRepository {
@@ -13,11 +14,12 @@ export class MusicBookRepository {
     @InjectRepository(BookEntity)
     private readonly bookRepository: Repository<BookEntity>,
     private readonly musicbookSourceRepository: MusicBookSourceRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async createMusicByMelonSource(
     _music: DeepPartial<MusicEntity> & {
-      broadcater: { id: string };
+      broadcaster: { id: string };
       book: { id: string };
       musicSourceMelon: { songId: number };
     },
@@ -28,6 +30,7 @@ export class MusicBookRepository {
     if (!source) throw new BadRequestException();
 
     const music = new MusicEntity(_music);
+    if (!_music.title) music.title = source.songTitle;
     music.category = source.category;
 
     try {
@@ -39,12 +42,21 @@ export class MusicBookRepository {
 
   async createMusicByOriginalSource(
     _music: DeepPartial<MusicEntity> & {
-      broadcater: { id: string };
+      broadcaster: { id: string };
       book: { id: string };
       musicSourceOriginal: { songId: string };
     },
   ) {
+    const source =
+      await this.musicbookSourceRepository.findOneSourceOrigialById(
+        _music.musicSourceOriginal.songId,
+      );
+    if (!source) throw new BadRequestException();
+
     const music = new MusicEntity(_music);
+    if (!_music.title) music.title = source.songTitle;
+    music.category = source.category;
+
     try {
       return music.save();
     } catch (e) {
@@ -63,15 +75,28 @@ export class MusicBookRepository {
       | FindOptionsWhere<MusicEntity>,
     _music: DeepPartial<MusicEntity>,
   ) {
-    await this.musicRepository.update(_music.id, _music);
+    const result = await this.musicRepository.update(_where, _music);
+    if (!result.affected) throw new BadRequestException();
+  }
+
+  async deleteMusic(_userId: string, _musicId: string) {
+    const result = await this.musicRepository.softDelete({
+      id: _musicId,
+      broadcaster: { id: _userId },
+    });
+    if (!result.affected) throw new BadRequestException();
   }
 
   async deleteMusicById(_musicId: string) {
-    await this.musicRepository.delete(_musicId);
+    const result = await this.musicRepository.softDelete(_musicId);
+    if (!result.affected) throw new BadRequestException();
   }
 
   async deleteMusicByUserId(_userId: string) {
-    await this.musicRepository.delete({ broadcaster: { id: _userId } });
+    const result = await this.musicRepository.softDelete({
+      broadcaster: { id: _userId },
+    });
+    if (!result.affected) throw new BadRequestException();
   }
 
   findOneMusicById(
@@ -198,6 +223,12 @@ export class MusicBookRepository {
       order: {
         createdAt: 'DESC',
       },
+      relations: [
+        'broadcaster',
+        'book',
+        'musicSourceOriginal',
+        'musicSourceMelon',
+      ],
     });
   }
 
@@ -262,7 +293,8 @@ export class MusicBookRepository {
       | FindOptionsWhere<BookEntity>,
     _book: DeepPartial<BookEntity>,
   ) {
-    await this.bookRepository.update(_where, _book);
+    const result = await this.bookRepository.update(_where, _book);
+    if (!result.affected) throw new BadRequestException();
   }
 
   async deleteBookById(_bookId: string) {

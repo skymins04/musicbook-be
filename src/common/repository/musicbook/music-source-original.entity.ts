@@ -28,7 +28,7 @@ export class MusicSourceOriginalEntity extends BaseEntity {
   @ApiProperty({
     description: '노래책 고유 음원 ID (uuidv4)',
     type: String,
-    example: '12341234-1234-1234-123412341234',
+    example: '12341234-1234-1234-1234-123412341234',
   })
   songId: string;
   @Column()

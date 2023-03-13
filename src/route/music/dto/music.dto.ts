@@ -5,11 +5,11 @@ import { MusicEntity } from 'src/common/repository/musicbook/music.entity';
 
 export class MusicIdDTO {
   @IsString()
-  @Matches(/^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$/i)
+  @Matches(/^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$/i)
   @ApiProperty({
     description: '수록곡 ID (uuidv4)',
     type: String,
-    example: '12341234-1234-1234-123412341234',
+    example: '12341234-1234-1234-1234-123412341234',
   })
   id: string;
 }

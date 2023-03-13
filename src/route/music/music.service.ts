@@ -11,7 +11,15 @@ import { MusicBookSourceRepository } from 'src/common/repository/musicbook/music
 import { CreateOriginalSourceDTO } from './dto/create-music-source.dto';
 import { CloudflareImagesService } from 'src/common/cloudflare/cloudflare-images.service';
 import { GetURLsForMusicSourceImgDirectUploadingResponseDataDTO } from './dto/get-direct-upload-url';
-import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
+import {
+  EMusicMRType,
+  EMusicPreviewType,
+  EMusicSourceType,
+  EMusicbookSortMethod,
+} from 'src/common/repository/musicbook/musicbook.enum';
+import { CreateMusicDTO } from './dto/create-music.dto';
+import { BookEntity } from 'src/common/repository/musicbook/book.entity';
+import { UpdateMyMusicDTO } from './dto/update-my-music.dto';
 
 @Injectable()
 export class MusicService {
@@ -46,8 +54,89 @@ export class MusicService {
     return this.getMusicsSortHandler[_sort](_perPage, _page);
   }
 
-  createMusic(_jwt: MusicbookJwtPayload) {
-    // this.musicbookRepository.createMusic;
+  private createMusicTypeHandler: Record<
+    keyof typeof EMusicSourceType,
+    (
+      _userId: string,
+      _book: BookEntity,
+      _music: CreateMusicDTO,
+    ) => Promise<MusicEntity>
+  > = {
+    MELON: (_userId, _book, _music) => {
+      return this.musicbookRepository.createMusicByMelonSource({
+        broadcaster: {
+          id: _userId,
+        },
+        book: _book,
+        musicSourceMelon: {
+          songId: _music.sourceMelonId,
+        },
+        title: _music.title,
+        description: _music.description,
+        previewURL: _music.previewURL,
+        previewType: _music.previewType,
+        mrURL: _music.mrURL,
+        mrType: _music.mrType,
+      });
+    },
+    ORIGINAL: (_userId, _book, _music) => {
+      return this.musicbookRepository.createMusicByOriginalSource({
+        broadcaster: {
+          id: _userId,
+        },
+        book: _book,
+        musicSourceOriginal: {
+          songId: _music.sourceOriginalId,
+        },
+        title: _music.title,
+        description: _music.description,
+        previewURL: _music.previewURL,
+        previewType: _music.previewType,
+        mrURL: _music.mrURL,
+        mrType: _music.mrType,
+      });
+    },
+  };
+
+  private validateURLTypeHandler: Record<
+    keyof typeof EMusicPreviewType | keyof typeof EMusicMRType,
+    (_url: string) => [boolean, string | null]
+  > = {
+    YOUTUBE: (_url) => {
+      const match = !!_url.match(
+        /(http:|https:)?(\/\/)?(www\.)?(youtube.com|youtu.be)\/(watch|embed)?(\?v=|\/)?(\S+)?/g,
+      );
+      const id = match
+        ? _url.match(
+            /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/,
+          )[7]
+        : null;
+      return [match, id];
+    },
+  };
+
+  async createMusic(_jwt: MusicbookJwtPayload, _music: CreateMusicDTO) {
+    const book = await this.musicbookRepository.findOneBookByUserId(_jwt.id);
+    if (!book) throw new BadRequestException();
+
+    if (_music.mrURL && _music.mrType) {
+      const [result, id] = this.validateURLTypeHandler[_music.mrType](
+        _music.mrURL,
+      );
+      if (result) _music.mrURL = id;
+      else throw new BadRequestException();
+    } else if (_music.mrURL && !_music.mrType) throw new BadRequestException();
+
+    if (_music.previewURL && _music.previewType) {
+      const [result, id] = this.validateURLTypeHandler[_music.previewType](
+        _music.previewURL,
+      );
+      if (result) _music.previewURL = id;
+      else throw new BadRequestException();
+    } else if (_music.previewURL && !_music.previewType)
+      throw new BadRequestException();
+
+    return this.createMusicTypeHandler[_music.type](_jwt.id, book, _music);
   }
 
   async getURLsForMusicImgDirectUploading(
@@ -125,8 +214,37 @@ export class MusicService {
     return music;
   }
 
-  updateMusic() {}
-  deleteMusic() {}
+  async updateMyMusic(
+    _jwt: MusicbookJwtPayload,
+    _musicId: string,
+    _music: UpdateMyMusicDTO,
+  ) {
+    if (_music.mrURL && _music.mrType) {
+      const [result, id] = this.validateURLTypeHandler[_music.mrType](
+        _music.mrURL,
+      );
+      if (result) _music.mrURL = id;
+      else throw new BadRequestException();
+    } else if (_music.mrURL && !_music.mrType) throw new BadRequestException();
+
+    if (_music.previewURL && _music.previewType) {
+      const [result, id] = this.validateURLTypeHandler[_music.previewType](
+        _music.previewURL,
+      );
+      if (result) _music.previewURL = id;
+      else throw new BadRequestException();
+    } else if (_music.previewURL && !_music.previewType)
+      throw new BadRequestException();
+
+    await this.musicbookRepository.updateMusic(
+      { id: _musicId, broadcaster: { id: _jwt.id } },
+      _music,
+    );
+  }
+
+  async deleteMusic(_jwt: MusicbookJwtPayload, _musicId: string) {
+    await this.musicbookRepository.deleteMusic(_jwt.id, _musicId);
+  }
 
   async getLikeCountOfMusic(_musicId: string) {
     const music = await this.musicbookRepository.findOneBookById(_musicId);

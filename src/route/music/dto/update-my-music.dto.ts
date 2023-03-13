@@ -1,54 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import {
   IsEnum,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
   Length,
-  ValidateIf,
 } from 'class-validator';
 import {
   EMusicMRType,
   EMusicPreviewType,
-  EMusicSourceType,
 } from 'src/common/repository/musicbook/musicbook.enum';
 
-export class CreateMusicDTO {
-  @IsEnum(EMusicSourceType)
-  @ApiProperty({
-    description:
-      '수록곡 source type ("MELON": melon 음원, "ORIGINAL": 고유 음원)',
-    enum: EMusicSourceType,
-    example: 'MELON',
-  })
-  type: keyof typeof EMusicSourceType;
-
-  @ValidateIf((o: CreateMusicDTO) => o.type === 'MELON')
-  @Type(() => Number)
-  @IsNumber()
-  @ApiProperty({
-    description:
-      'melon 음원 ID (number, type이 "MELON"일때만 이 프로퍼티를 이용)',
-    type: Number,
-    nullable: true,
-    example: 12345,
-  })
-  sourceMelonId: number;
-
-  @ValidateIf((o: CreateMusicDTO) => o.type === 'ORIGINAL')
-  @IsString()
-  @ApiProperty({
-    description:
-      '고유 음원 ID (uuidv4), type이 "ORIGINAL"일때만 이 프로퍼티를 이용)',
-    type: String,
-    nullable: true,
-    example: '12341234-1234-1234-1234-123412341234',
-  })
-  sourceOriginalId: string;
-
+export class UpdateMyMusicDTO {
   @IsString()
   @Length(1, 50)
   @IsNotEmpty()

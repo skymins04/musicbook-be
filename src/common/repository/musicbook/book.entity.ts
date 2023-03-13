@@ -57,7 +57,7 @@ export class BookEntity extends BaseEntity {
   @ApiProperty({
     description: '노래책 고유 ID (uuidv4)',
     type: String,
-    example: '12341234-1234-1234-123412341234',
+    example: '12341234-1234-1234-1234-123412341234',
   })
   id: string;
   @Column({ nullable: true, unique: true })

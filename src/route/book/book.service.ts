@@ -10,7 +10,7 @@ import { CreateBookDTO } from './dto/create-book.dto';
 import { CloudflareImagesService } from 'src/common/cloudflare/cloudflare-images.service';
 import { GetURLsForBookImgDirectUploadingResponseDataDTO } from './dto/get-direct-upload-url';
 import { UpdateMyBookDTO } from './dto/update-my-book.dto';
-import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
+import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 
 @Injectable()
 export class BookService {

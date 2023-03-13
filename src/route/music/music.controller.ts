@@ -37,7 +37,9 @@ import {
   CreateMelonSourceDTO,
   CreateOriginalSourceDTO,
 } from './dto/create-music-source.dto';
-import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
+import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
+import { CreateMusicDTO } from './dto/create-music.dto';
+import { UpdateMyMusicDTO } from './dto/update-my-music.dto';
 
 @Controller('music')
 @ApiTags('Music')
@@ -70,14 +72,39 @@ export class MusicController {
   @Post()
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 수록곡 생성',
+    summary: '수록곡 생성',
     description:
       '수록곡 생성 엔드포인트. 노래책이 생성되지 않은 사용자는 400에러 발생.',
   })
-  createMusic() {}
+  @ApiOkResponse({
+    description: '수록곡 목록 조회 성공',
+    type: MusicResponseDTO,
+  })
+  async createMusic(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Body() _body: CreateMusicDTO,
+  ): Promise<MusicResponseDTO> {
+    return new ApiResponseDataDTO(
+      await this.musciService.createMusic(_jwt, _body),
+    );
+  }
 
   @UseGuards(JwtAuthGuard)
-  @Get('img_upload_url')
+  @Post('source/original')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '고유 수록곡 source 생성',
+    description: 'original source 생성 엔드포인트.',
+  })
+  @ApiOkResponse({
+    description: '생성 성공',
+  })
+  async createOriginalSource(@Body() _body: CreateOriginalSourceDTO) {
+    await this.musciService.createOriginalSource(_body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('source/original/img_upload_url')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '고유 수록곡 source의 이미지 Direct upload URL 획득',
@@ -95,20 +122,6 @@ export class MusicController {
     return new ApiResponseDataDTO(
       await this.musciService.getURLsForMusicImgDirectUploading(_jwt, _req.ip),
     );
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('source/original')
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: '고유 수록곡 source 생성',
-    description: 'original source 생성 엔드포인트.',
-  })
-  @ApiOkResponse({
-    description: '생성 성공',
-  })
-  async createOriginalSource(@Body() _body: CreateOriginalSourceDTO) {
-    await this.musciService.createOriginalSource(_body);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -160,21 +173,34 @@ export class MusicController {
   @Patch(':id')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 본인 수록곡 수정',
+    summary: '본인 수록곡 수정',
     description:
-      '사용자 본인의 수록곡 수정 엔드포인트. 존재하지 않는 수록곡일 경우 404에러 발생.',
+      '사용자 본인의 수록곡 수정 엔드포인트. 존재하지 않는 수록곡일 경우 400에러 발생.',
   })
-  updateMusic() {}
+  async updateMyMusic(
+    @Jwt() _jwt,
+    @Param() _param: MusicIdDTO,
+    @Body() _body: UpdateMyMusicDTO,
+  ) {
+    const { id } = _param;
+    await this.musciService.updateMyMusic(_jwt, id, _body);
+  }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 본인 수록곡 삭제',
+    summary: '본인 수록곡 삭제',
     description:
       '사용자 본인의 수록곡 삭제 엔드포인트. 존재하지 않는 수록곡일 경우 400에러 발생.',
   })
-  deleteMusic() {}
+  @ApiOkResponse({
+    description: '수록곡 삭제 성공',
+  })
+  async deleteMusic(@Jwt() _jwt, @Param() _param: MusicIdDTO) {
+    const { id } = _param;
+    await this.musciService.deleteMusic(_jwt, id);
+  }
 
   @Get(':id/like')
   @ApiOperation({

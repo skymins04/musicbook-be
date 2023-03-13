@@ -34,7 +34,7 @@ import {
 } from './dto/book.dto';
 import { UpdateMyBookDTO } from './dto/update-my-book.dto';
 import { Jwt } from 'src/common/jwt-auth/jwt.decorator';
-import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
+import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 
 @Controller('book')
 @ApiTags('Book')

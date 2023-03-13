@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { ApiResponsePagenationDataDTO } from 'src/common/api-response/api-response-data.dto';
 import { BookEntity } from 'src/common/repository/musicbook/book.entity';
-import { EMusicbookSortMethod } from 'src/common/repository/musicbook/enum';
+import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 
 export class GetBooksDTO {
   // @Type(() => Number)
