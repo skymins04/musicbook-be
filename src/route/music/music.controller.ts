@@ -109,8 +109,11 @@ export class MusicController {
   @ApiOkResponse({
     description: '생성 성공',
   })
-  async createOriginalSource(@Body() _body: CreateOriginalSourceDTO) {
-    await this.musciService.createOriginalSource(_body);
+  async createOriginalSource(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Body() _body: CreateOriginalSourceDTO,
+  ) {
+    await this.musciService.createOriginalSource(_jwt, _body);
   }
 
   @UseGuards(JwtAuthGuard)

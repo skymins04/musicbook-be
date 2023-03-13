@@ -56,22 +56,16 @@ export class BookService {
     );
 
     const [thumbnail, background] = await Promise.all([
-      this.cloudflareImagesService.getDirectUploadURL({
-        meta: {
-          type: 'book_thumbnail',
-          uploader: _jwt.id,
-          ip: _ip,
-          timestamp: new Date().toISOString(),
-        },
-      }),
-      this.cloudflareImagesService.getDirectUploadURL({
-        meta: {
-          type: 'book_background',
-          uploader: _jwt.id,
-          ip: _ip,
-          timestamp: new Date().toISOString(),
-        },
-      }),
+      this.cloudflareImagesService.getDirectUploadURLWithMetadata(
+        'book_thumbnail',
+        _jwt.id,
+        _ip,
+      ),
+      this.cloudflareImagesService.getDirectUploadURLWithMetadata(
+        'book_background',
+        _jwt.id,
+        _ip,
+      ),
     ]);
 
     return {
@@ -80,17 +74,20 @@ export class BookService {
     };
   }
 
-  async checkBookImagesValidation(_thumbnail: string, _background?: string) {
-    const imgIds: string[] = [];
-    if (_thumbnail) imgIds.push(_thumbnail);
-    if (_background) imgIds.push(_background);
-    for (const id of imgIds) {
-      try {
-        const { result } = await this.cloudflareImagesService.getImageInfo(id);
-        if (result.draft) throw new BadRequestException('invaild image');
-      } catch (err) {
-        throw new BadRequestException('invaild image');
-      }
+  async checkBookImagesValidation(
+    _jwt: MusicbookJwtPayload,
+    _thumbnail: string,
+    _background?: string,
+  ) {
+    const imgs: { id: string; type: string }[] = [];
+    if (_thumbnail) imgs.push({ id: _thumbnail, type: 'book_thumbnail' });
+    if (_background) imgs.push({ id: _background, type: 'book_background' });
+    for (const img of imgs) {
+      await this.cloudflareImagesService.validateImage(
+        img.id,
+        _jwt.id,
+        img.type,
+      );
     }
 
     return {
@@ -109,7 +106,11 @@ export class BookService {
       throw new BadRequestException('already created');
 
     const { thumbnailImgURL, backroundImgURL } =
-      await this.checkBookImagesValidation(_book.thumbnail, _book.background);
+      await this.checkBookImagesValidation(
+        _jwt,
+        _book.thumbnail,
+        _book.background,
+      );
 
     return this.musicbookRepository.createBook({
       broadcaster: {
@@ -139,7 +140,11 @@ export class BookService {
     if (!book) throw new BadRequestException();
 
     const { thumbnailImgURL, backroundImgURL } =
-      await this.checkBookImagesValidation(_book.thumbnail, _book.background);
+      await this.checkBookImagesValidation(
+        _jwt,
+        _book.thumbnail,
+        _book.background,
+      );
 
     if (_book.thumbnail) {
       book.thumbnailURL = thumbnailImgURL;

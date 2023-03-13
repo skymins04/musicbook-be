@@ -181,22 +181,16 @@ export class MusicService {
     );
 
     const [artistThumbnail, albumThumbnail] = await Promise.all([
-      this.cloudflareImagesService.getDirectUploadURL({
-        meta: {
-          type: 'music_source_artistThumbnail',
-          uploader: _jwt.id,
-          ip: _ip,
-          timestamp: new Date().toISOString(),
-        },
-      }),
-      this.cloudflareImagesService.getDirectUploadURL({
-        meta: {
-          type: 'music_source_albumThumbnail',
-          uploader: _jwt.id,
-          ip: _ip,
-          timestamp: new Date().toISOString(),
-        },
-      }),
+      this.cloudflareImagesService.getDirectUploadURLWithMetadata(
+        'music_source_artistThumbnail',
+        _jwt.id,
+        _ip,
+      ),
+      this.cloudflareImagesService.getDirectUploadURLWithMetadata(
+        'music_source_albumThumbnail',
+        _jwt.id,
+        _ip,
+      ),
     ]);
 
     return {
@@ -205,18 +199,28 @@ export class MusicService {
     };
   }
 
-  async createOriginalSource(_source: CreateOriginalSourceDTO) {
-    const imgIds: string[] = [];
-    if (_source.albumThumbnail) imgIds.push(_source.albumThumbnail);
-    if (_source.artistThumbnail) imgIds.push(_source.artistThumbnail);
+  async createOriginalSource(
+    _jwt: MusicbookJwtPayload,
+    _source: CreateOriginalSourceDTO,
+  ) {
+    const imgs: { id: string; type: string }[] = [];
+    if (_source.albumThumbnail)
+      imgs.push({
+        id: _source.albumThumbnail,
+        type: 'music_source_albumThumbnail',
+      });
+    if (_source.artistThumbnail)
+      imgs.push({
+        id: _source.artistThumbnail,
+        type: 'music_source_artistThumbnail',
+      });
 
-    for (const id of imgIds) {
-      try {
-        const { result } = await this.cloudflareImagesService.getImageInfo(id);
-        if (result.draft) throw new BadRequestException('invaild image');
-      } catch (err) {
-        throw new BadRequestException('invaild image');
-      }
+    for (const img of imgs) {
+      await this.cloudflareImagesService.validateImage(
+        img.id,
+        _jwt.id,
+        img.type,
+      );
     }
 
     const albumThumbnailURL = _source.albumThumbnail

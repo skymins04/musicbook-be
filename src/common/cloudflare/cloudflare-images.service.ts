@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import axios from 'axios';
 
 @Injectable()
@@ -34,6 +34,21 @@ export class CloudflareImagesService {
       });
   }
 
+  getDirectUploadURLWithMetadata(
+    _type: string,
+    _uploader: string,
+    _ip: string,
+  ) {
+    return this.getDirectUploadURL({
+      meta: {
+        type: _type,
+        uploader: _uploader,
+        ip: _ip,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
+
   getImageInfo(_imgId: string) {
     return axios({
       method: 'GET',
@@ -43,5 +58,16 @@ export class CloudflareImagesService {
         'Content-Type': 'application/json',
       },
     }).then((res) => res.data);
+  }
+
+  async validateImage(_imgId: string, _uploader: string, _type: string) {
+    const { result } = await this.getImageInfo(_imgId);
+    if (result.draft) throw new BadRequestException('not uploaded yet');
+    if (
+      !result.meta.type ||
+      result.meta.type !== _type ||
+      result.meta.uploader !== _uploader
+    )
+      throw new BadRequestException('invaild image');
   }
 }
