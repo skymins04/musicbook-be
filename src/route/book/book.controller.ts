@@ -50,7 +50,7 @@ export class BookController {
     description: '노래책 목록 조회 성공',
     type: GetBooksResponseDTO,
   })
-  async getBooks(@Query() _query: GetBooksDTO): Promise<GetBooksResponseDTO> {
+  async getBooks(@Query() _query: GetBooksDTO) {
     const { page = 1, sort = 'NEWEST' } = _query;
     const books = await this.bookSerivce.getBooks(50, page, sort);
     return new ApiResponsePagenationDataDTO<{
@@ -81,7 +81,7 @@ export class BookController {
   async getURLsForBookImgDirectUploading(
     @Jwt() _jwt: MusicbookJwtPayload,
     @Req() _req: Request,
-  ): Promise<GetURLsForBookImgDirectUploadingResponseDTO> {
+  ) {
     return new ApiResponseDataDTO(
       await this.bookSerivce.getURLsForBookImgDirectUploading(_jwt, _req.ip),
     );
@@ -102,7 +102,7 @@ export class BookController {
   async createBook(
     @Jwt() _jwt: MusicbookJwtPayload,
     @Body() _body: CreateBookDTO,
-  ): Promise<BookResponseDTO> {
+  ) {
     return new ApiResponseDataDTO(
       await this.bookSerivce.createBook(_jwt, _body),
     );
@@ -120,7 +120,7 @@ export class BookController {
     description: '노래책 조회 성공',
     type: BookResponseDTO,
   })
-  async getMyBook(@Jwt() _jwt: MusicbookJwtPayload): Promise<BookResponseDTO> {
+  async getMyBook(@Jwt() _jwt: MusicbookJwtPayload) {
     return new ApiResponseDataDTO(await this.bookSerivce.getMyBook(_jwt));
   }
 
@@ -166,9 +166,7 @@ export class BookController {
     description: '노래책 좋아요 개수 조회 성공',
     type: BookLikeCountResponseDTO,
   })
-  async getMyBookLikeCount(
-    @Jwt() _jwt: MusicbookJwtPayload,
-  ): Promise<BookLikeCountResponseDTO> {
+  async getMyBookLikeCount(@Jwt() _jwt: MusicbookJwtPayload) {
     return new ApiResponseDataDTO(
       await this.bookSerivce.getMyBookLikeCount(_jwt),
     );
@@ -258,7 +256,7 @@ export class BookController {
   async getMyLikeOfBook(
     @Jwt() _jwt: MusicbookJwtPayload,
     @Param() _param: BookIdDTO,
-  ): Promise<BookLikeStatusResponseDTO> {
+  ) {
     const { id } = _param;
     return new ApiResponseDataDTO(
       await this.bookSerivce.getMyLikeOfBook(_jwt, id),

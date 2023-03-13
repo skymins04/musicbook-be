@@ -1,5 +1,5 @@
-export class ApiResponseDataDTO {
-  constructor(public data) {}
+export class ApiResponseDataDTO<T = any> {
+  constructor(public data: T) {}
 }
 
 export class ApiResponsePagenationDataDTO<T, D = any> {

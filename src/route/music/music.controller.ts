@@ -55,9 +55,7 @@ export class MusicController {
     description: '수록곡 목록 조회 성공',
     type: GetMusicsResponseDTO,
   })
-  async getMusics(
-    @Query() _query: GetMusicsDTO,
-  ): Promise<GetMusicsResponseDTO> {
+  async getMusics(@Query() _query: GetMusicsDTO) {
     const { perPage = 30, page = 1, sort = 'NEWEST' } = _query;
     const musics = await this.musciService.getMusics(perPage, page, sort);
     return new ApiResponsePagenationDataDTO<{
@@ -118,7 +116,7 @@ export class MusicController {
   async getURLsForMusicImgDirectUploading(
     @Jwt() _jwt: MusicbookJwtPayload,
     @Req() _req: Request,
-  ): Promise<GetURLsForMusicSourceImgDirectUploadingResponseDTO> {
+  ) {
     return new ApiResponseDataDTO(
       await this.musciService.getURLsForMusicImgDirectUploading(_jwt, _req.ip),
     );
@@ -148,9 +146,7 @@ export class MusicController {
     description: '수록곡 조회 성공',
     type: MusicsResponseDTO,
   })
-  async getMyMusics(
-    @Jwt() _jwt: MusicbookJwtPayload,
-  ): Promise<MusicsResponseDTO> {
+  async getMyMusics(@Jwt() _jwt: MusicbookJwtPayload) {
     return new ApiResponseDataDTO(await this.musciService.getMyMusics(_jwt));
   }
 
@@ -164,7 +160,7 @@ export class MusicController {
     description: '수록곡 조회 성공',
     type: MusicResponseDTO,
   })
-  async getMusic(@Param() _param: MusicIdDTO): Promise<MusicResponseDTO> {
+  async getMusic(@Param() _param: MusicIdDTO) {
     const { id } = _param;
     return new ApiResponseDataDTO(await this.musciService.getMusic(id));
   }
@@ -212,9 +208,7 @@ export class MusicController {
     description: '수록곡 생성 성공',
     type: MusicLikeCountResponseDTO,
   })
-  async getLikeCountOfMusic(
-    @Param() _param: MusicIdDTO,
-  ): Promise<MusicLikeCountResponseDTO> {
+  async getLikeCountOfMusic(@Param() _param: MusicIdDTO) {
     const { id } = _param;
     return new ApiResponseDataDTO(
       await this.musciService.getLikeCountOfMusic(id),
@@ -274,7 +268,7 @@ export class MusicController {
   async getMyLikeOfMusic(
     @Jwt() _jwt: MusicbookJwtPayload,
     @Param() _param: MusicIdDTO,
-  ): Promise<MusicLikeStatusResponseDTO> {
+  ) {
     const { id } = _param;
     return new ApiResponseDataDTO(
       await this.musciService.getMyLikeOfMusic(_jwt, id),
