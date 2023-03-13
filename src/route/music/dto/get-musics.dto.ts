@@ -2,16 +2,18 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
 } from 'class-validator';
 import { ApiResponsePagenationDataDTO } from 'src/common/api-response/api-response-data.dto';
 import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 import { MusicEntity } from 'src/common/repository/musicbook/music.entity';
 
-export class GetMusicsDTO {
+export class GetMusicsPagenationDTO {
   @Type(() => Number)
   @IsNumber()
   @IsPositive()
@@ -22,6 +24,7 @@ export class GetMusicsDTO {
     example: 30,
     default: 30,
     nullable: true,
+    required: false,
   })
   perPage?: number;
 
@@ -35,6 +38,7 @@ export class GetMusicsDTO {
     example: 1,
     default: 1,
     nullable: true,
+    required: false,
   })
   page?: number;
 
@@ -48,8 +52,36 @@ export class GetMusicsDTO {
     example: 'NEWEST',
     default: 'NEWEST',
     nullable: true,
+    required: false,
   })
   sort?: keyof typeof EMusicbookSortMethod;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/[a-zA-Z0-9ㄱ-ㅎㅏ-ㅣ가-힣-_ ]+/)
+  @IsOptional()
+  @ApiProperty({
+    description: '수록곡 카테고리',
+    type: String,
+    example: 'J-POP',
+    nullable: true,
+    required: false,
+  })
+  category?: string;
+}
+
+export class GetMusicsDTO extends GetMusicsPagenationDTO {
+  @IsString()
+  @Matches(/^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$/i)
+  @IsOptional()
+  @ApiProperty({
+    description: '노래책 ID (uuidv4)',
+    type: String,
+    example: '12341234-1234-1234-1234-123412341234',
+    nullable: true,
+    required: false,
+  })
+  bookId?: string;
 }
 
 class GetMusicsResponseMetaDTO {

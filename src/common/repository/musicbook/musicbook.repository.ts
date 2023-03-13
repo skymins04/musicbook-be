@@ -4,7 +4,6 @@ import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
 import { MusicEntity } from './music.entity';
 import { BookEntity } from './book.entity';
 import { MusicBookSourceRepository } from './musicbook-source.repository';
-import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class MusicBookRepository {
@@ -14,7 +13,6 @@ export class MusicBookRepository {
     @InjectRepository(BookEntity)
     private readonly bookRepository: Repository<BookEntity>,
     private readonly musicbookSourceRepository: MusicBookSourceRepository,
-    private readonly userRepository: UserRepository,
   ) {}
 
   async createMusicByMelonSource(
@@ -215,9 +213,18 @@ export class MusicBookRepository {
     });
   }
 
-  findManyNewestMusic(_perPage = 30, _page = 1) {
+  findManyNewestMusic(
+    _perPage = 30,
+    _page = 1,
+    _options?: { category?: string; bookId?: string; userId?: string },
+  ) {
     return this.musicRepository.find({
-      where: { isHide: false },
+      where: {
+        isHide: false,
+        category: _options?.category,
+        book: { id: _options?.bookId },
+        broadcaster: { id: _options?.userId },
+      },
       skip: _perPage * (_page - 1),
       take: _perPage,
       order: {
@@ -232,40 +239,72 @@ export class MusicBookRepository {
     });
   }
 
-  findManySuggestMusic(_perPage = 30, _page = 1, _category?: string) {
-    let musicQueryBuilder = this.musicRepository.createQueryBuilder('music');
-    if (_category) {
-      if (_category.match(/[^ㄱ-ㅎ|ㅏ-ㅣ|가-힣|a-z|A-Z|0-9|-|_| ]/))
-        throw new BadRequestException();
-      musicQueryBuilder = musicQueryBuilder.where(
+  findManySuggestMusic(
+    _perPage = 30,
+    _page = 1,
+    _options?: { category?: string; bookId?: string; userId?: string },
+  ) {
+    let musicQueryBuilder = this.musicRepository
+      .createQueryBuilder('music')
+      .where('music.is_hide = 0');
+
+    if (_options?.category)
+      musicQueryBuilder = musicQueryBuilder.andWhere(
         'music.category = :category',
         {
-          category: _category,
+          category: _options.category,
         },
       );
-    }
+    if (_options?.bookId)
+      musicQueryBuilder = musicQueryBuilder.andWhere('book.id = :id', {
+        id: _options.bookId,
+      });
+    if (_options?.userId)
+      musicQueryBuilder = musicQueryBuilder.andWhere('broadcaster.id = :id', {
+        id: _options.userId,
+      });
+
     return musicQueryBuilder
-      .where('music.is_hide = 0')
+      .leftJoinAndSelect('music.broadcaster', 'broadcaster')
+      .leftJoinAndSelect('music.book', 'book')
+      .leftJoinAndSelect('music.musicSourceOriginal', 'musicSourceOriginal')
+      .leftJoinAndSelect('music.musicSourceMelon', 'musicSourceMelon')
       .orderBy('RAND()')
       .skip(_perPage * (_page - 1))
       .take(_perPage)
       .getMany();
   }
 
-  findManyPopularMusic(_perPage = 30, _page = 1, _category?: string) {
-    let musicQueryBuilder = this.musicRepository.createQueryBuilder('music');
-    if (_category) {
-      if (_category.match(/[^ㄱ-ㅎ|ㅏ-ㅣ|가-힣|a-z|A-Z|0-9|-|_| ]/))
-        throw new BadRequestException();
-      musicQueryBuilder = musicQueryBuilder.where(
+  findManyPopularMusic(
+    _perPage = 30,
+    _page = 1,
+    _options?: { category?: string; bookId?: string; userId?: string },
+  ) {
+    let musicQueryBuilder = this.musicRepository
+      .createQueryBuilder('music')
+      .where('music.is_hide = 0');
+
+    if (_options?.category)
+      musicQueryBuilder = musicQueryBuilder.andWhere(
         'music.category = :category',
         {
-          category: _category,
+          category: _options.category,
         },
       );
-    }
+    if (_options?.bookId)
+      musicQueryBuilder = musicQueryBuilder.andWhere('book.id = :id', {
+        id: _options.bookId,
+      });
+    if (_options?.userId)
+      musicQueryBuilder = musicQueryBuilder.andWhere('broadcaster.id = :id', {
+        id: _options.userId,
+      });
+
     return musicQueryBuilder
-      .where('music.is_hide = 0')
+      .leftJoinAndSelect('music.broadcaster', 'broadcaster')
+      .leftJoinAndSelect('music.book', 'book')
+      .leftJoinAndSelect('music.musicSourceOriginal', 'musicSourceOriginal')
+      .leftJoinAndSelect('music.musicSourceMelon', 'musicSourceMelon')
       .leftJoinAndSelect('music.musicLikes', 'likes')
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')

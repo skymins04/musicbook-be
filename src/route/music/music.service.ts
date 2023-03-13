@@ -33,16 +33,36 @@ export class MusicService {
 
   private getMusicsSortHandler: Record<
     keyof typeof EMusicbookSortMethod,
-    (_perPage: number, _page: number) => Promise<MusicEntity[]>
+    (
+      _perPage: number,
+      _page: number,
+      _options?: {
+        category?: string;
+        userId?: string;
+        bookId?: string;
+      },
+    ) => Promise<MusicEntity[]>
   > = {
-    NEWEST: (_perPage, _page) => {
-      return this.musicbookRepository.findManyNewestMusic(_perPage, _page);
+    NEWEST: (_perPage, _page, _options) => {
+      return this.musicbookRepository.findManyNewestMusic(_perPage, _page, {
+        category: _options?.category,
+        userId: _options?.userId,
+        bookId: _options?.bookId,
+      });
     },
-    SUGGEST: (_perPage, _page) => {
-      return this.musicbookRepository.findManySuggestMusic(_perPage, _page);
+    SUGGEST: (_perPage, _page, _options) => {
+      return this.musicbookRepository.findManySuggestMusic(_perPage, _page, {
+        category: _options?.category,
+        userId: _options?.userId,
+        bookId: _options?.bookId,
+      });
     },
-    POPULAR: (_perPage, _page) => {
-      return this.musicbookRepository.findManyPopularMusic(_perPage, _page);
+    POPULAR: (_perPage, _page, _options) => {
+      return this.musicbookRepository.findManyPopularMusic(_perPage, _page, {
+        category: _options?.category,
+        userId: _options?.userId,
+        bookId: _options?.bookId,
+      });
     },
   };
 
@@ -50,8 +70,17 @@ export class MusicService {
     _perPage: number,
     _page: number,
     _sort: keyof typeof EMusicbookSortMethod,
+    _options?: {
+      category?: string;
+      userId?: string;
+      bookId?: string;
+    },
   ) {
-    return this.getMusicsSortHandler[_sort](_perPage, _page);
+    return this.getMusicsSortHandler[_sort](_perPage, _page, {
+      category: _options?.category,
+      userId: _options?.userId,
+      bookId: _options?.bookId,
+    });
   }
 
   private createMusicTypeHandler: Record<
@@ -202,10 +231,6 @@ export class MusicService {
 
   async createMelonSource(_melonSongId: number) {
     await this.melonService.getMelonSongInfo(_melonSongId);
-  }
-
-  getMyMusics(_jwt: MusicbookJwtPayload) {
-    return this.musicbookRepository.findManyMusicByUserId(_jwt.id);
   }
 
   async getMusic(_musicId: string) {

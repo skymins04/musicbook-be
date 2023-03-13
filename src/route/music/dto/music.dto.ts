@@ -22,14 +22,6 @@ export class MusicResponseDTO implements ApiResponseDataDTO {
   data: MusicEntity;
 }
 
-export class MusicsResponseDTO implements ApiResponseDataDTO {
-  @ApiProperty({
-    description: '수록곡 생성 결과 배열',
-    type: [MusicEntity],
-  })
-  data: MusicEntity[];
-}
-
 export class MusicLikeCountResponseDTO implements ApiResponseDataDTO {
   @ApiProperty({
     description: '수록곡 좋아요 개수 결과',

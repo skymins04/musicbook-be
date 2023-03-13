@@ -17,7 +17,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
-import { GetMusicsDTO, GetMusicsResponseDTO } from './dto/get-musics.dto';
+import {
+  GetMusicsDTO,
+  GetMusicsPagenationDTO,
+  GetMusicsResponseDTO,
+} from './dto/get-musics.dto';
 import { MusicService } from './music.service';
 import {
   ApiResponseDataDTO,
@@ -29,7 +33,6 @@ import {
   MusicLikeCountResponseDTO,
   MusicLikeStatusResponseDTO,
   MusicResponseDTO,
-  MusicsResponseDTO,
 } from './dto/music.dto';
 import { GetURLsForMusicSourceImgDirectUploadingResponseDTO } from './dto/get-direct-upload-url';
 import { Request } from 'express';
@@ -56,8 +59,17 @@ export class MusicController {
     type: GetMusicsResponseDTO,
   })
   async getMusics(@Query() _query: GetMusicsDTO) {
-    const { perPage = 30, page = 1, sort = 'NEWEST' } = _query;
-    const musics = await this.musciService.getMusics(perPage, page, sort);
+    const {
+      perPage = 30,
+      page = 1,
+      sort = 'NEWEST',
+      category,
+      bookId,
+    } = _query;
+    const musics = await this.musciService.getMusics(perPage, page, sort, {
+      category,
+      bookId,
+    });
     return new ApiResponsePagenationDataDTO<{
       sort: keyof typeof EMusicbookSortMethod;
     }>(
@@ -144,10 +156,24 @@ export class MusicController {
   })
   @ApiOkResponse({
     description: '수록곡 조회 성공',
-    type: MusicsResponseDTO,
+    type: GetMusicsResponseDTO,
   })
-  async getMyMusics(@Jwt() _jwt: MusicbookJwtPayload) {
-    return new ApiResponseDataDTO(await this.musciService.getMyMusics(_jwt));
+  async getMyMusics(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Query() _query: GetMusicsPagenationDTO,
+  ) {
+    const { perPage = 30, page = 1, sort = 'NEWEST', category } = _query;
+    const musics = await this.musciService.getMusics(perPage, page, sort, {
+      category,
+      userId: _jwt.id,
+    });
+
+    return new ApiResponsePagenationDataDTO<{
+      sort: keyof typeof EMusicbookSortMethod;
+    }>(
+      { perPage, currentPage: page, sort, pageItemCount: musics.length },
+      musics,
+    );
   }
 
   @Get(':id')
