@@ -20,6 +20,7 @@ import {
 import { CreateMusicDTO } from './dto/create-music.dto';
 import { BookEntity } from 'src/common/repository/musicbook/book.entity';
 import { UpdateMyMusicDTO } from './dto/update-my-music.dto';
+import { RedisService } from 'src/common/redis/redis.service';
 
 @Injectable()
 export class MusicService {
@@ -29,6 +30,7 @@ export class MusicService {
     private readonly musicbookSourceRepository: MusicBookSourceRepository,
     private readonly melonService: MelonService,
     private readonly cloudflareImagesService: CloudflareImagesService,
+    private readonly redisService: RedisService,
   ) {}
 
   private getMusicsSortHandler: Record<
@@ -168,10 +170,16 @@ export class MusicService {
     return this.createMusicTypeHandler[_music.type](_jwt.id, book, _music);
   }
 
-  async getURLsForMusicImgDirectUploading(
+  async getURLsForMusicSourceImgDirectUploading(
     _jwt: MusicbookJwtPayload,
     _ip: string,
   ): Promise<GetURLsForMusicSourceImgDirectUploadingResponseDataDTO> {
+    await this.redisService.checkRequestCooltime(
+      `cooltime:music_source_img_upload_url:${_jwt.id}`,
+      3,
+      60,
+    );
+
     const [artistThumbnail, albumThumbnail] = await Promise.all([
       this.cloudflareImagesService.getDirectUploadURL({
         meta: {

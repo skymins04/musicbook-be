@@ -11,6 +11,7 @@ import { CloudflareImagesService } from 'src/common/cloudflare/cloudflare-images
 import { GetURLsForBookImgDirectUploadingResponseDataDTO } from './dto/get-direct-upload-url';
 import { UpdateMyBookDTO } from './dto/update-my-book.dto';
 import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
+import { RedisService } from 'src/common/redis/redis.service';
 
 @Injectable()
 export class BookService {
@@ -18,6 +19,7 @@ export class BookService {
     private readonly musicbookRepository: MusicBookRepository,
     private readonly musicbookLikeRepository: MusicBookLikeRepository,
     private readonly cloudflareImagesService: CloudflareImagesService,
+    private readonly redisService: RedisService,
   ) {}
 
   private getBooksSortHandler: Record<
@@ -47,6 +49,12 @@ export class BookService {
     _jwt: MusicbookJwtPayload,
     _ip: string,
   ): Promise<GetURLsForBookImgDirectUploadingResponseDataDTO> {
+    await this.redisService.checkRequestCooltime(
+      `cooltime:book_img_upload_url:${_jwt.id}`,
+      3,
+      60 * 10,
+    );
+
     const [thumbnail, background] = await Promise.all([
       this.cloudflareImagesService.getDirectUploadURL({
         meta: {

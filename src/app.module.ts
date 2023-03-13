@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { RedisModule } from '@nestjs-modules/ioredis';
 import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ApiResponseInterceptor } from './common/api-response/api-response.interceptor';
 import { JwtAuthModule } from './common/jwt-auth/jwt-auth.module';
@@ -18,6 +17,7 @@ import { join } from 'path';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronjobService } from './common/cronjob/cronjob.service';
 import { CloudflareModule } from './common/cloudflare/cloudflare.module';
+import { RedisModule } from './common/redis/redis.module';
 
 @Module({
   imports: [
@@ -43,13 +43,6 @@ import { CloudflareModule } from './common/cloudflare/cloudflare.module';
         CLOUDFLARE_IMAGES_TOKEN: Joi.string().required(),
       }),
     }),
-    RedisModule.forRoot({
-      config: {
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT,
-      },
-    }),
-    RepositoryModule,
     MulterModule.register({
       limits: {
         fileSize: 50 * 1024 * 1024,
@@ -59,13 +52,15 @@ import { CloudflareModule } from './common/cloudflare/cloudflare.module';
       rootPath: join(__dirname, '..', '.uploads'),
       serveRoot: `/${process.env.STATIC_SERVE_ROOT}`,
     }),
-    ScheduleModule.forRoot(),
+    RedisModule,
+    RepositoryModule,
+    CloudflareModule,
     JwtAuthModule,
+    ScheduleModule.forRoot(),
     MelonModule,
     UserModule,
     MusicModule,
     BookModule,
-    CloudflareModule,
   ],
   controllers: [AppController],
   providers: [
