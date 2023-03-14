@@ -155,6 +155,36 @@ export class BookController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('me/hide')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '(wip) 본인 노래책의 숨김여부 조회',
+    description:
+      '사용자 본인의 노래책 숨김여부 조회. 생성된 노래책이 없을 경우 400에러 발생.',
+  })
+  async getIsHideMyBook(@Jwt() _jwt: MusicbookJwtPayload) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Post('me/hide')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '(wip) 본인 노래책 숨김 적용',
+    description:
+      '사용자 본인의 노래책을 숨김. 생성된 노래책이 없을 경우 400에러 발생.',
+  })
+  async hideMyBook(@Jwt() _jwt: MusicbookJwtPayload) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('me/hide')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '(wip) 본인 노래책 숨김 해제',
+    description:
+      '사용자 본인 노래책의 숨김을 해제. 생성된 노래책이 없을 경우 400에러 발생.',
+  })
+  async unhideMyBook(@Jwt() _jwt: MusicbookJwtPayload) {}
+
+  @UseGuards(JwtAuthGuard)
   @Get('me/like')
   @ApiBearerAuth()
   @ApiOperation({

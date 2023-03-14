@@ -182,6 +182,36 @@ export class MusicController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('me/hide')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '(wip) 본인 수록곡의 숨김여부 조회',
+    description:
+      '사용자 본인의 수록곡 숨김여부 조회. 존재하지 않는 수록곡일 경우 400에러 발생.',
+  })
+  async getIsHideMyMusic(@Jwt() _jwt: MusicbookJwtPayload) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Post('me/hide')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '(wip) 본인 수록곡 숨김 적용',
+    description:
+      '사용자 본인의 수록곡을 숨김. 존재하지 않는 수록곡일 경우 400에러 발생.',
+  })
+  async hideMyMusic(@Jwt() _jwt: MusicbookJwtPayload) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('me/hide')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '(wip) 본인 수록곡 숨김 해제',
+    description:
+      '사용자 본인 수록곡의 숨김을 해제. 존재하지 않는 수록곡일 경우 400에러 발생.',
+  })
+  async unhideMyMusic(@Jwt() _jwt: MusicbookJwtPayload) {}
+
   @Get(':musicId')
   @ApiOperation({
     summary: '수록곡 조회',
