@@ -59,6 +59,9 @@ export class RequestService {
     const queueData = await this.songRequestRepository.findManySongRequestByIds(
       queueReqIds,
     );
+    if (queueReqIds.length !== queueData.length)
+      throw new BadRequestException();
+
     queueData.forEach((itm) => {
       queue[queueReqIds.indexOf(itm.id)] = itm;
     });
@@ -77,6 +80,9 @@ export class RequestService {
     const queueData = await this.songRequestRepository.findManySongRequestByIds(
       queueReqIds,
     );
+    if (queueReqIds.length !== queueData.length)
+      throw new BadRequestException();
+
     queueData.forEach((itm) => {
       queue[queueReqIds.indexOf(itm.id)] = itm;
     });
