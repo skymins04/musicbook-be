@@ -19,8 +19,14 @@ export class SongRequestRepository {
     const music = await this.musicbookRepository.findOneMusicById(_musicId, {
       withJoin: ['broadcaster', 'book'],
     });
-    if (!music || !music.isRequestable || !music.book.isRequestable)
+    if (
+      !music ||
+      !music.isRequestable ||
+      !music.book.isRequestable ||
+      (await this.findOneBlacklistUser(music.book.id, _userId))
+    )
       throw new BadRequestException();
+
     if (
       await this.songRequestRepository.exist({
         where: {
@@ -38,7 +44,11 @@ export class SongRequestRepository {
       broadcaster: music.broadcaster,
       book: music.book,
     });
-    await songRequest.save();
+
+    return {
+      music,
+      songRequest: await this.songRequestRepository.save(songRequest),
+    };
   }
 
   async deleteSongRequestByViewerId(_requestId: number, _viewerId: string) {
@@ -60,6 +70,32 @@ export class SongRequestRepository {
     if (!result.affected) throw new BadRequestException();
   }
 
+  findOneSongRequestById(
+    _requestId: number,
+    _options?: {
+      withJoin?: boolean | ('viewer' | 'broadcaster' | 'music' | 'book')[];
+    },
+  ) {
+    return this.songRequestRepository.findOne({
+      where: {
+        id: _requestId,
+      },
+      relations:
+        _options?.withJoin === undefined
+          ? []
+          : typeof _options.withJoin === 'boolean'
+          ? ['viewer', 'broadcaster', 'music', 'book']
+          : _options.withJoin,
+    });
+  }
+
+  findManySongRequestByIds(_requestIds: number[]) {
+    return this.songRequestRepository.find({
+      where: _requestIds.map((x) => ({ id: x })),
+      relations: ['viewer', 'broadcaster', 'music', 'book'],
+    });
+  }
+
   findManySongRequestByBookId(_bookId: string) {
     return this.songRequestRepository.find({
       where: {
@@ -68,6 +104,7 @@ export class SongRequestRepository {
         },
         isCompleted: false,
       },
+      relations: ['viewer', 'broadcaster', 'music', 'book'],
     });
   }
 
@@ -79,6 +116,7 @@ export class SongRequestRepository {
         },
         isCompleted: false,
       },
+      relations: ['viewer', 'broadcaster', 'music', 'book'],
     });
   }
 
@@ -90,6 +128,7 @@ export class SongRequestRepository {
         },
         isCompleted: false,
       },
+      relations: ['viewer', 'broadcaster', 'music', 'book'],
     });
   }
 
@@ -109,6 +148,19 @@ export class SongRequestRepository {
     if (!result.affected) throw new BadRequestException();
   }
 
+  findOneBlacklistUser(_bookId: string, _userId: string) {
+    return this.songRequestBlacklistRepository.findOne({
+      where: {
+        book: {
+          id: _bookId,
+        },
+        user: {
+          id: _userId,
+        },
+      },
+    });
+  }
+
   findManyBlacklistUserByBookId(_bookId: string) {
     return this.songRequestBlacklistRepository.find({
       where: {
@@ -116,6 +168,7 @@ export class SongRequestRepository {
           id: _bookId,
         },
       },
+      relations: ['user'],
     });
   }
 }

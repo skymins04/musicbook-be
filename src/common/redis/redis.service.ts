@@ -44,6 +44,10 @@ export class RedisService {
     return queue.map((itm) => JSON.parse(itm));
   }
 
+  async clearMusicRequestQueue(_bookId: string) {
+    await this.redisClient.del(`music:request:${_bookId}`);
+  }
+
   async removeItemInMusicRequestQueue(_bookId: string, _idx: number) {
     const key = `music:request:${_bookId}`;
     const itm = await this.redisClient.lindex(key, _idx);
