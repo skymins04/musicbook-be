@@ -21,6 +21,7 @@ export class SongRequestRepository {
     });
     if (
       !music ||
+      music.isHide ||
       !music.isRequestable ||
       !music.book.isRequestable ||
       (await this.findOneBlacklistUser(music.book.id, _userId))
