@@ -20,6 +20,8 @@ import { MusicLikeEntity } from '../musicbook/music-like.entity';
 import { BookLikeEntity } from '../musicbook/book-like.entity';
 import { MusicLikeCountEntity } from '../musicbook/music-like-count.entity';
 import { BookLikeCountEntity } from '../musicbook/book-like-count.entity';
+import { SongRequestEntity } from '../song-request/song-request.entity';
+import { SongRequestBlacklistEntity } from '../song-request/song-request-blacklist.entity';
 
 export const UserEntityFixture: DeepPartial<UserEntity>[] = [
   {
@@ -150,4 +152,8 @@ export class UserEntity extends BaseEntity {
     { cascade: true },
   )
   bookLikeCounts: BookLikeCountEntity[];
+  @OneToMany(() => SongRequestEntity, (request) => request.viewer)
+  songRequests: SongRequestEntity[];
+  @OneToMany(() => SongRequestBlacklistEntity, (blacklist) => blacklist.user)
+  songRequestBlacklist: SongRequestBlacklistEntity[];
 }

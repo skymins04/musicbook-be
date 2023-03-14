@@ -17,6 +17,9 @@ import { MusicSourceMelonEntity } from './musicbook/music-source-melon.entity';
 import { MusicSourceOriginalEntity } from './musicbook/music-source-original.entity';
 import { MusicBookSourceRepository } from './musicbook/musicbook-source.repository';
 import { MusicBookLikeRepository } from './musicbook/musicbook-like.repository';
+import { SongRequestEntity } from './song-request/song-request.entity';
+import { SongRequestBlacklistEntity } from './song-request/song-request-blacklist.entity';
+import { SongRequestRepository } from './song-request/song-request.repository';
 
 @Global()
 @Module({
@@ -44,6 +47,8 @@ import { MusicBookLikeRepository } from './musicbook/musicbook-like.repository';
             BookLikeEntity,
             MusicLikeCountEntity,
             BookLikeCountEntity,
+            SongRequestEntity,
+            SongRequestBlacklistEntity,
           ],
           synchronize: false,
           logging: true,
@@ -64,6 +69,8 @@ import { MusicBookLikeRepository } from './musicbook/musicbook-like.repository';
       BookLikeEntity,
       MusicLikeCountEntity,
       BookLikeCountEntity,
+      SongRequestEntity,
+      SongRequestBlacklistEntity,
     ]),
   ],
   providers: [
@@ -71,6 +78,7 @@ import { MusicBookLikeRepository } from './musicbook/musicbook-like.repository';
     MusicBookRepository,
     MusicBookSourceRepository,
     MusicBookLikeRepository,
+    SongRequestRepository,
   ],
   exports: [
     TypeOrmModule,
@@ -78,6 +86,7 @@ import { MusicBookLikeRepository } from './musicbook/musicbook-like.repository';
     MusicBookRepository,
     MusicBookSourceRepository,
     MusicBookLikeRepository,
+    SongRequestRepository,
   ],
 })
 export class RepositoryModule {}

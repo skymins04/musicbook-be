@@ -172,7 +172,7 @@ export class BookController {
     );
   }
 
-  @Get(':id')
+  @Get(':bookId')
   @ApiOperation({
     summary: '특정 사용자 노래책 조회',
     description:
@@ -183,11 +183,11 @@ export class BookController {
     type: BookResponseDTO,
   })
   async getBook(@Param() _param: BookIdDTO) {
-    const { id } = _param;
-    return new ApiResponseDataDTO(await this.bookSerivce.getBook(id));
+    const { bookId } = _param;
+    return new ApiResponseDataDTO(await this.bookSerivce.getBook(bookId));
   }
 
-  @Get(':id/like')
+  @Get(':bookId/like')
   @ApiOperation({
     summary: '노래책 좋아요 개수 조회',
     description:
@@ -200,14 +200,14 @@ export class BookController {
   async getLikeCountOfBook(
     @Param() _param: BookIdDTO,
   ): Promise<BookLikeCountResponseDTO> {
-    const { id } = _param;
+    const { bookId } = _param;
     return new ApiResponseDataDTO(
-      await this.bookSerivce.getLikeCountOfBook(id),
+      await this.bookSerivce.getLikeCountOfBook(bookId),
     );
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post(':id/like')
+  @Post(':bookId/like')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '노래책 좋아요 생성',
@@ -221,12 +221,12 @@ export class BookController {
     @Jwt() _jwt: MusicbookJwtPayload,
     @Param() _param: BookIdDTO,
   ) {
-    const { id } = _param;
-    await this.bookSerivce.createLikeOfBook(_jwt, id);
+    const { bookId } = _param;
+    await this.bookSerivce.createLikeOfBook(_jwt, bookId);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id/like')
+  @Delete(':bookId/like')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '노래책 좋아요 삭제',
@@ -237,12 +237,12 @@ export class BookController {
     @Jwt() _jwt: MusicbookJwtPayload,
     @Param() _param: BookIdDTO,
   ) {
-    const { id } = _param;
-    await this.bookSerivce.deleteLikeOfBook(_jwt, id);
+    const { bookId } = _param;
+    await this.bookSerivce.deleteLikeOfBook(_jwt, bookId);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id/like/me')
+  @Get(':bookId/like/me')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '노래책 좋아요 여부 조회',
@@ -257,9 +257,9 @@ export class BookController {
     @Jwt() _jwt: MusicbookJwtPayload,
     @Param() _param: BookIdDTO,
   ) {
-    const { id } = _param;
+    const { bookId } = _param;
     return new ApiResponseDataDTO(
-      await this.bookSerivce.getMyLikeOfBook(_jwt, id),
+      await this.bookSerivce.getMyLikeOfBook(_jwt, bookId),
     );
   }
 }

@@ -18,6 +18,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CronjobService } from './common/cronjob/cronjob.service';
 import { CloudflareModule } from './common/cloudflare/cloudflare.module';
 import { RedisModule } from './common/redis/redis.module';
+import { RequestModule } from './route/request/request.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { RedisModule } from './common/redis/redis.module';
     UserModule,
     MusicModule,
     BookModule,
+    RequestModule,
   ],
   controllers: [AppController],
   providers: [

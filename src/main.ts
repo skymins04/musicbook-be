@@ -11,6 +11,7 @@ import { MusicModule } from './route/music/music.module';
 import { MelonModule } from './route/melon/melon.module';
 import { BookModule } from './route/book/book.module';
 import * as dotenv from 'dotenv';
+import { RequestModule } from './route/request/request.module';
 
 dotenv.config();
 
@@ -47,7 +48,13 @@ async function bootstrap() {
       .addBearerAuth()
       .build(),
     {
-      include: [UserModule, MelonModule, MusicModule, BookModule],
+      include: [
+        UserModule,
+        MelonModule,
+        MusicModule,
+        BookModule,
+        RequestModule,
+      ],
     },
   );
   SwaggerModule.setup('docs', app, swaggerDocument);

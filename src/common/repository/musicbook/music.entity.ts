@@ -19,6 +19,7 @@ import { MusicLikeCountEntity } from './music-like-count.entity';
 import { MusicSourceOriginalEntity } from './music-source-original.entity';
 import { MusicSourceMelonEntity } from './music-source-melon.entity';
 import { EMusicMRType, EMusicPreviewType } from './musicbook.enum';
+import { SongRequestEntity } from '../song-request/song-request.entity';
 
 @Entity('music')
 export class MusicEntity extends BaseEntity {
@@ -214,4 +215,6 @@ export class MusicEntity extends BaseEntity {
     type: () => [MusicLikeCountEntity],
   })
   musicLikeCounts: MusicLikeCountEntity[];
+  @OneToMany(() => SongRequestEntity, (request) => request.music)
+  songRequests: SongRequestEntity[];
 }

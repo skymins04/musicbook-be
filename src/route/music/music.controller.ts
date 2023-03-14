@@ -182,7 +182,7 @@ export class MusicController {
     );
   }
 
-  @Get(':id')
+  @Get(':musicId')
   @ApiOperation({
     summary: '수록곡 조회',
     description:
@@ -193,12 +193,12 @@ export class MusicController {
     type: MusicResponseDTO,
   })
   async getMusic(@Param() _param: MusicIdDTO) {
-    const { id } = _param;
-    return new ApiResponseDataDTO(await this.musciService.getMusic(id));
+    const { musicId } = _param;
+    return new ApiResponseDataDTO(await this.musciService.getMusic(musicId));
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Patch(':musicId')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '본인 수록곡 수정',
@@ -210,12 +210,12 @@ export class MusicController {
     @Param() _param: MusicIdDTO,
     @Body() _body: UpdateMyMusicDTO,
   ) {
-    const { id } = _param;
-    await this.musciService.updateMyMusic(_jwt, id, _body);
+    const { musicId } = _param;
+    await this.musciService.updateMyMusic(_jwt, musicId, _body);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
+  @Delete(':musicId')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '본인 수록곡 삭제',
@@ -226,11 +226,11 @@ export class MusicController {
     description: '수록곡 삭제 성공',
   })
   async deleteMusic(@Jwt() _jwt, @Param() _param: MusicIdDTO) {
-    const { id } = _param;
-    await this.musciService.deleteMusic(_jwt, id);
+    const { musicId } = _param;
+    await this.musciService.deleteMusic(_jwt, musicId);
   }
 
-  @Get(':id/like')
+  @Get(':musicId/like')
   @ApiOperation({
     summary: '수록곡 좋아요 개수 조회',
     description:
@@ -241,14 +241,14 @@ export class MusicController {
     type: MusicLikeCountResponseDTO,
   })
   async getLikeCountOfMusic(@Param() _param: MusicIdDTO) {
-    const { id } = _param;
+    const { musicId } = _param;
     return new ApiResponseDataDTO(
-      await this.musciService.getLikeCountOfMusic(id),
+      await this.musciService.getLikeCountOfMusic(musicId),
     );
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post(':id/like')
+  @Post(':musicId/like')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '수록곡 좋아요 생성',
@@ -262,12 +262,12 @@ export class MusicController {
     @Jwt() _jwt: MusicbookJwtPayload,
     @Param() _param: MusicIdDTO,
   ) {
-    const { id } = _param;
-    await this.musciService.createLikeOfMusic(_jwt, id);
+    const { musicId } = _param;
+    await this.musciService.createLikeOfMusic(_jwt, musicId);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id/like')
+  @Delete(':musicId/like')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '수록곡 좋아요 삭제',
@@ -281,12 +281,12 @@ export class MusicController {
     @Jwt() _jwt: MusicbookJwtPayload,
     @Param() _param: MusicIdDTO,
   ) {
-    const { id } = _param;
-    await this.musciService.deleteLikeOfMusic(_jwt, id);
+    const { musicId } = _param;
+    await this.musciService.deleteLikeOfMusic(_jwt, musicId);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id/like/me')
+  @Get(':musicId/like/me')
   @ApiBearerAuth()
   @ApiOperation({
     summary: '수록곡 좋아요 여부 조회',
@@ -301,9 +301,9 @@ export class MusicController {
     @Jwt() _jwt: MusicbookJwtPayload,
     @Param() _param: MusicIdDTO,
   ) {
-    const { id } = _param;
+    const { musicId } = _param;
     return new ApiResponseDataDTO(
-      await this.musciService.getMyLikeOfMusic(_jwt, id),
+      await this.musciService.getMyLikeOfMusic(_jwt, musicId),
     );
   }
 }

@@ -11,7 +11,7 @@ export class MusicIdDTO {
     type: String,
     example: '12341234-1234-1234-1234-123412341234',
   })
-  id: string;
+  musicId: string;
 }
 
 export class MusicResponseDTO implements ApiResponseDataDTO {

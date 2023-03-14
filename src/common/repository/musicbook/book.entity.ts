@@ -18,6 +18,8 @@ import { BookLikeEntity } from './book-like.entity';
 import { MusicLikeCountEntity } from './music-like-count.entity';
 import { BookLikeCountEntity } from './book-like-count.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { SongRequestEntity } from '../song-request/song-request.entity';
+import { SongRequestBlacklistEntity } from '../song-request/song-request-blacklist.entity';
 
 export const BookEntityFixture: DeepPartial<BookEntity>[] = [
   {
@@ -130,6 +132,13 @@ export class BookEntity extends BaseEntity {
     example: false,
   })
   isPaid: boolean;
+  @Column('boolean', { default: false })
+  @ApiProperty({
+    description: '대기열 내 동일 수록곡 중복신청 허용 여부',
+    type: Boolean,
+    example: false,
+  })
+  isAllowDuplicateRequest: boolean;
   @CreateDateColumn()
   @ApiProperty({
     description: '노래책 생성타임스템프(ISO8601, YYYY-MM-DDTHH:mm:ss.sssZ)',
@@ -184,4 +193,10 @@ export class BookEntity extends BaseEntity {
     cascade: true,
   })
   bookLikeCounts: BookLikeCountEntity[];
+  @OneToMany(() => SongRequestEntity, (request) => request.book, {
+    cascade: true,
+  })
+  songRequests: SongRequestEntity[];
+  @OneToMany(() => SongRequestBlacklistEntity, (blacklist) => blacklist.user)
+  songRequestBlacklist: SongRequestBlacklistEntity[];
 }
