@@ -95,6 +95,8 @@ export class UserService {
   async loginByTwitchCallback(_code: string) {
     const { accessToken, refreshToken } = await this.getTwitchUserToken(_code);
     const twitchAPIUserInfo = await this.getTwitchUserInfo(accessToken);
+    if (!twitchAPIUserInfo.email) throw new BadRequestException();
+
     const userTwitch = await this.userRepositoryService.createOrUpdateTwitch({
       twitchId: twitchAPIUserInfo.id,
       twitchLogin: twitchAPIUserInfo.login,
