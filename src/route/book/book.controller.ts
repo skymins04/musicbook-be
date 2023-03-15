@@ -35,6 +35,7 @@ import {
 import { UpdateMyBookDTO } from './dto/update-my-book.dto';
 import { Jwt } from 'src/common/jwt-auth/jwt.decorator';
 import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
+import { BookConfigDTO, BookConfigReponseDTO } from './dto/book-config.dto';
 
 @Controller('book')
 @ApiTags('Book')
@@ -130,7 +131,7 @@ export class BookController {
   @ApiOperation({
     summary: '본인 노래책 수정',
     description:
-      '사용자 본인의 노래책 수정. 생성된 노래책이 없을 경우 400에러 발생.',
+      '사용자 본인의 노래책 수정 엔드포인트. 생성된 노래책이 없을 경우 400에러 발생.',
   })
   @ApiOkResponse({
     description: '노래책 수정 성공',
@@ -148,41 +149,48 @@ export class BookController {
   @ApiOperation({
     summary: '본인 노래책 삭제',
     description:
-      '사용자 본인의 노래책 삭제. 생성된 노래책이 없을 경우 400에러 발생.',
+      '사용자 본인의 노래책 삭제 엔드포인트. 생성된 노래책이 없을 경우 400에러 발생.',
   })
   async deleteMyBook(@Jwt() _jwt: MusicbookJwtPayload) {
     await this.bookSerivce.deleteMyBook(_jwt);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('me/hide')
+  @Get('me/config')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 본인 노래책의 숨김여부 조회',
+    summary: '본인 노래책의 설정 조회',
     description:
-      '사용자 본인의 노래책 숨김여부 조회. 생성된 노래책이 없을 경우 400에러 발생.',
+      '사용자 본인의 노래책 설정 조회 엔드포인트. 생성된 노래책이 없을 경우 400에러 발생.',
   })
-  async getIsHideMyBook(@Jwt() _jwt: MusicbookJwtPayload) {}
+  @ApiOkResponse({
+    description: '노래책 설정 조회 성공',
+    type: BookConfigReponseDTO,
+  })
+  async getConfigMyBook(@Jwt() _jwt: MusicbookJwtPayload) {
+    return new ApiResponseDataDTO(await this.bookSerivce.getConfigMyBook(_jwt));
+  }
 
   @UseGuards(JwtAuthGuard)
-  @Post('me/hide')
+  @Patch('me/config')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 본인 노래책 숨김 적용',
+    summary: '본인 노래책 설정 적용',
     description:
-      '사용자 본인의 노래책을 숨김. 생성된 노래책이 없을 경우 400에러 발생.',
+      '사용자 본인의 노래책 설정 적용 엔드포인트. 생성된 노래책이 없을 경우 400에러 발생.',
   })
-  async hideMyBook(@Jwt() _jwt: MusicbookJwtPayload) {}
-
-  @UseGuards(JwtAuthGuard)
-  @Delete('me/hide')
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: '(wip) 본인 노래책 숨김 해제',
-    description:
-      '사용자 본인 노래책의 숨김을 해제. 생성된 노래책이 없을 경우 400에러 발생.',
+  @ApiOkResponse({
+    description: '노래책 설정 적용 성공',
+    type: BookConfigReponseDTO,
   })
-  async unhideMyBook(@Jwt() _jwt: MusicbookJwtPayload) {}
+  async setConfigMyBook(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Body() _body: BookConfigDTO,
+  ) {
+    return new ApiResponseDataDTO(
+      await this.bookSerivce.setConfigMyBook(_jwt, _body),
+    );
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('me/like')
@@ -206,7 +214,7 @@ export class BookController {
   @ApiOperation({
     summary: '특정 사용자 노래책 조회',
     description:
-      '특정 사용자의 노래책 조회. 생성된 노래책이 없을 경우 404에러 발생.',
+      '특정 사용자의 노래책 조회 엔드포인트. 생성된 노래책이 없을 경우 404에러 발생.',
   })
   @ApiOkResponse({
     description: '노래책 조회 성공',

@@ -121,7 +121,7 @@ export class MusicEntity extends BaseEntity {
     example: true,
     default: true,
   })
-  isRequestable: boolean;
+  isAllowRequest: boolean;
   @Column('boolean', { default: false })
   @ApiProperty({
     description: '수록곡 숨김 여부',

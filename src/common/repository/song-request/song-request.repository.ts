@@ -22,8 +22,9 @@ export class SongRequestRepository {
     if (
       !music ||
       music.isHide ||
-      !music.isRequestable ||
-      !music.book.isRequestable ||
+      music.book.isHide ||
+      !music.isAllowRequest ||
+      !music.book.isAllowRequest ||
       (await this.findOneBlacklistUser(music.book.id, _userId))
     )
       throw new BadRequestException();

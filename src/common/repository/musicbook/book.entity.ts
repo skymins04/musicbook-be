@@ -31,7 +31,7 @@ export const BookEntityFixture: DeepPartial<BookEntity>[] = [
     thumbnailURL: 'https://example.com/example.png',
     backgroundImgURL: 'https://example.com/example.png',
     likeCount: 0,
-    isRequestable: true,
+    isAllowRequest: true,
     isHide: false,
     isPaid: false,
     broadcaster: {
@@ -104,13 +104,6 @@ export class BookEntity extends BaseEntity {
     example: 'https://example.com/example.png',
   })
   backgroundImgURL: string;
-  @Column('boolean', { default: true })
-  @ApiProperty({
-    description: '노래책 신청곡 허용 여부',
-    type: Boolean,
-    example: true,
-  })
-  isRequestable: boolean;
   @Column('integer', { default: 0 })
   @ApiProperty({
     description: '노래책 좋아요 개수',
@@ -118,6 +111,14 @@ export class BookEntity extends BaseEntity {
     example: 100,
   })
   likeCount: number;
+  @Column('integer', { default: 0 })
+  @ApiProperty({
+    description:
+      '노래책 신청곡 대기열 최대 개수 (isAllowRequest가 true일때만 적용)',
+    type: Number,
+    example: 10,
+  })
+  requestLimitCount: number;
   @Column('boolean', { default: false })
   @ApiProperty({
     description: '노래책 숨김 여부',
@@ -132,6 +133,20 @@ export class BookEntity extends BaseEntity {
     example: false,
   })
   isPaid: boolean;
+  @Column('boolean', { default: true })
+  @ApiProperty({
+    description: '노래책 신청곡 허용 여부',
+    type: Boolean,
+    example: true,
+  })
+  isAllowRequest: boolean;
+  @Column('boolean', { default: false })
+  @ApiProperty({
+    description: '노래책 신청곡 대기열 최대 개수 적용 여부',
+    type: Boolean,
+    example: true,
+  })
+  isAllowRequestLimit: boolean;
   @Column('boolean', { default: false })
   @ApiProperty({
     description: '대기열 내 동일 수록곡 중복신청 허용 여부',

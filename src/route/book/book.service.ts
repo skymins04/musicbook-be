@@ -12,6 +12,7 @@ import { GetURLsForBookImgDirectUploadingResponseDataDTO } from './dto/get-direc
 import { UpdateMyBookDTO } from './dto/update-my-book.dto';
 import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 import { RedisService } from 'src/common/redis/redis.service';
+import { BookConfigDTO, BookConfigReponseDataDTO } from './dto/book-config.dto';
 
 @Injectable()
 export class BookService {
@@ -198,5 +199,42 @@ export class BookService {
     if (!(await this.musicbookRepository.existBookById(_bookId)))
       throw new BadRequestException();
     return this.musicbookLikeRepository.existBookLike(_jwt.id, _bookId);
+  }
+
+  async getConfigMyBook(
+    _jwt: MusicbookJwtPayload,
+  ): Promise<BookConfigReponseDataDTO> {
+    const book = await this.musicbookRepository.findOneBookByUserId(_jwt.id);
+    if (!book) throw new BadRequestException();
+
+    return {
+      isHide: book.isHide,
+      isPaid: book.isPaid,
+      isAllowDuplicateRequest: book.isAllowDuplicateRequest,
+      isAllowRequest: book.isAllowRequest,
+      isAllowRequestLimit: book.isAllowRequestLimit,
+      requestLimitCount: book.requestLimitCount,
+    };
+  }
+
+  async setConfigMyBook(
+    _jwt: MusicbookJwtPayload,
+    _config: BookConfigDTO,
+  ): Promise<BookConfigReponseDataDTO> {
+    const book = await this.musicbookRepository.findOneBookByUserId(_jwt.id);
+    if (!book) throw new BadRequestException();
+    for (const key of Object.keys(_config)) {
+      book[key] = _config[key];
+    }
+    await book.save();
+
+    return {
+      isHide: book.isHide,
+      isPaid: book.isPaid,
+      isAllowDuplicateRequest: book.isAllowDuplicateRequest,
+      isAllowRequest: book.isAllowRequest,
+      isAllowRequestLimit: book.isAllowRequestLimit,
+      requestLimitCount: book.requestLimitCount,
+    };
   }
 }
