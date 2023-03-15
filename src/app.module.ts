@@ -35,6 +35,7 @@ import { RequestModule } from './route/request/request.module';
         MYSQL_DATABASE: Joi.string().required(),
         REDIS_HOST: Joi.string().required(),
         REDIS_PORT: Joi.number().required(),
+        REDIS_PASSWORD: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         TWITCH_CLIENT_ID: Joi.string().required(),
         TWITCH_CLIENT_SECRET: Joi.string().required(),

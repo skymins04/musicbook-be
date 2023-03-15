@@ -20,10 +20,8 @@ export class RedisService {
     req_id: number,
     music_id: string,
   ) {
-    await this.redisClient.rpush(
-      `music:request:${_bookId}`,
-      JSON.stringify({ req_id, music_id }),
-    );
+    const key = `music:request:${_bookId}`;
+    await this.redisClient.rpush(key, JSON.stringify({ req_id, music_id }));
   }
 
   async lpopItemOfMusicRequestQueue(
