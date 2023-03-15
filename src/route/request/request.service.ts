@@ -117,6 +117,7 @@ export class RequestService {
     _jwt: MusicbookJwtPayload,
     _userId: string,
   ) {
+    if (_jwt.id === _userId) throw new BadRequestException();
     const book = await this.musicbookRepository.findOneBookByUserId(_jwt.id);
     if (!book) throw new BadRequestException();
 
