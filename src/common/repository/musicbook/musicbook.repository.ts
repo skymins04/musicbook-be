@@ -338,13 +338,13 @@ export class MusicBookRepository {
   }
 
   async deleteBookById(_bookId: string) {
-    await this.bookRepository.delete(_bookId);
-    await this.musicRepository.delete({ book: { id: _bookId } });
+    await this.bookRepository.softDelete(_bookId);
+    await this.musicRepository.softDelete({ book: { id: _bookId } });
   }
 
   async deleteBookByUserId(_userId: string) {
-    await this.bookRepository.delete({ broadcaster: { id: _userId } });
-    await this.musicRepository.delete({ broadcaster: { id: _userId } });
+    await this.bookRepository.softDelete({ broadcaster: { id: _userId } });
+    await this.musicRepository.softDelete({ broadcaster: { id: _userId } });
   }
 
   findOneBookById(

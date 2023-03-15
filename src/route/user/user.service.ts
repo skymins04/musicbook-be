@@ -5,11 +5,13 @@ import { Redis } from 'ioredis';
 import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
 import { UserRepository } from 'src/common/repository/user/user.repository';
 import { UserMeUpdateDTO } from './dto/user-me.dto';
+import { MusicBookRepository } from 'src/common/repository/musicbook/musicbook.repository';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly userRepositoryService: UserRepository,
+    private readonly userRepository: UserRepository,
+    private readonly musicbookRepository: MusicBookRepository,
     private readonly jwtAuthService: JwtAuthService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
@@ -97,7 +99,7 @@ export class UserService {
     const twitchAPIUserInfo = await this.getTwitchUserInfo(accessToken);
     if (!twitchAPIUserInfo.email) throw new BadRequestException();
 
-    const userTwitch = await this.userRepositoryService.createOrUpdateTwitch({
+    const userTwitch = await this.userRepository.createOrUpdateTwitch({
       twitchId: twitchAPIUserInfo.id,
       twitchLogin: twitchAPIUserInfo.login,
       twitchDisplayName: twitchAPIUserInfo.display_name,
@@ -112,15 +114,13 @@ export class UserService {
       twitchRefreshToken: refreshToken,
     });
     const existingUserByTwitchId =
-      await this.userRepositoryService.findOneUserByTwitchId(
-        userTwitch.twitchId,
-        { withDeleted: true },
-      );
-    const existingUserByEmail =
-      await this.userRepositoryService.findOneUserByEmail(
-        userTwitch.twitchEmail,
-        { withDeleted: true },
-      );
+      await this.userRepository.findOneUserByTwitchId(userTwitch.twitchId, {
+        withDeleted: true,
+      });
+    const existingUserByEmail = await this.userRepository.findOneUserByEmail(
+      userTwitch.twitchEmail,
+      { withDeleted: true },
+    );
     const existingUser = existingUserByTwitchId || existingUserByEmail;
 
     if (existingUser) {
@@ -135,9 +135,7 @@ export class UserService {
         providerId: twitchAPIUserInfo.id,
       });
     } else {
-      const user = await this.userRepositoryService.createUserByTwitch(
-        userTwitch,
-      );
+      const user = await this.userRepository.createUserByTwitch(userTwitch);
       return this.jwtAuthService.jwtSign({
         id: user.id,
         displayName: user.displayName,
@@ -151,22 +149,20 @@ export class UserService {
   async loginByGoogleCallback(_code: string) {
     const token = await this.getGoogleUserToken(_code);
     const googleAPIUserInfo = await this.getGoogleUserInfo(token);
-    const userGoogle = await this.userRepositoryService.createOrUpdateGoogle({
+    const userGoogle = await this.userRepository.createOrUpdateGoogle({
       googleId: googleAPIUserInfo.sub,
       googleDisplayName: googleAPIUserInfo.name,
       googleProfileImgURL: googleAPIUserInfo.picture,
       googleEmail: googleAPIUserInfo.email,
     });
     const existingUserByGoogleId =
-      await this.userRepositoryService.findOneUserByGoogleId(
-        userGoogle.googleId,
-        { withDeleted: true },
-      );
-    const existingUserByEmail =
-      await this.userRepositoryService.findOneUserByEmail(
-        userGoogle.googleEmail,
-        { withDeleted: true },
-      );
+      await this.userRepository.findOneUserByGoogleId(userGoogle.googleId, {
+        withDeleted: true,
+      });
+    const existingUserByEmail = await this.userRepository.findOneUserByEmail(
+      userGoogle.googleEmail,
+      { withDeleted: true },
+    );
     const existingUser = existingUserByGoogleId || existingUserByEmail;
 
     if (existingUser) {
@@ -181,9 +177,7 @@ export class UserService {
         providerId: googleAPIUserInfo.sub,
       });
     } else {
-      const user = await this.userRepositoryService.createUserByGoogle(
-        userGoogle,
-      );
+      const user = await this.userRepository.createUserByGoogle(userGoogle);
       return this.jwtAuthService.jwtSign({
         id: user.id,
         displayName: user.displayName,
@@ -196,7 +190,7 @@ export class UserService {
 
   async getMeInfo(_jwt: MusicbookJwtPayload) {
     try {
-      const user = await this.userRepositoryService.findOneUserById(_jwt.id);
+      const user = await this.userRepository.findOneUserById(_jwt.id);
       if (user) return user;
       throw new BadRequestException('not found user');
     } catch (e) {
@@ -205,17 +199,16 @@ export class UserService {
   }
 
   async updateMeInfo(_jwt: MusicbookJwtPayload, _meInfo: UserMeUpdateDTO) {
-    await this.userRepositoryService.updateUser(_jwt.id, { ..._meInfo });
+    await this.userRepository.updateUser(_jwt.id, { ..._meInfo });
   }
 
   async getLinkableTwitchToUser(
     _twitchId: string,
   ): Promise<'notFound' | 'notLinkable' | 'linkable' | 'assigned'> {
-    const userTwitch = await this.userRepositoryService.findOneTwitchById(
-      _twitchId,
-      { withDeleted: true },
-    );
-    const existingUser = await this.userRepositoryService.findOneUserByTwitchId(
+    const userTwitch = await this.userRepository.findOneTwitchById(_twitchId, {
+      withDeleted: true,
+    });
+    const existingUser = await this.userRepository.findOneUserByTwitchId(
       _twitchId,
       { withDeleted: true },
     );
@@ -228,11 +221,10 @@ export class UserService {
   async getLinkableGoogleToUser(
     _googleId: string,
   ): Promise<'notFound' | 'notLinkable' | 'linkable' | 'assigned'> {
-    const userGoogle = await this.userRepositoryService.findOneGoogleById(
-      _googleId,
-      { withDeleted: true },
-    );
-    const existingUser = await this.userRepositoryService.findOneUserByGoogleId(
+    const userGoogle = await this.userRepository.findOneGoogleById(_googleId, {
+      withDeleted: true,
+    });
+    const existingUser = await this.userRepository.findOneUserByGoogleId(
       _googleId,
       { withDeleted: true },
     );
@@ -243,23 +235,22 @@ export class UserService {
   }
 
   async linkTwitchToUser(_twitchId: string, _userId: string) {
-    const userTwitch = await this.userRepositoryService.findOneTwitchById(
+    const userTwitch = await this.userRepository.findOneTwitchById(_twitchId, {
+      withDeleted: true,
+    });
+    const existingUser = await this.userRepository.findOneUserByTwitchId(
       _twitchId,
       { withDeleted: true },
     );
-    const existingUser = await this.userRepositoryService.findOneUserByTwitchId(
-      _twitchId,
-      { withDeleted: true },
-    );
-    const targetUser = await this.userRepositoryService.findOneUserById(
-      _userId,
-    );
+    const targetUser = await this.userRepository.findOneUserById(_userId);
     if (!userTwitch || !targetUser) throw new BadRequestException();
 
     if (existingUser) {
       existingUser.twitch = null;
-      if (existingUser.google === null) await existingUser.remove();
-      else await existingUser.save();
+      if (existingUser.google === null) {
+        await this.musicbookRepository.deleteBookByUserId(existingUser.id);
+        await existingUser.remove();
+      } else await existingUser.save();
     }
 
     targetUser.twitch = userTwitch;
@@ -290,7 +281,7 @@ export class UserService {
     else await this.redis.del(_code);
 
     const twitchAPIUserInfo = JSON.parse(stringifiedTwitchAPIUserInfo);
-    const userTwitch = await this.userRepositoryService.createOrUpdateTwitch({
+    const userTwitch = await this.userRepository.createOrUpdateTwitch({
       twitchId: twitchAPIUserInfo.id,
       twitchLogin: twitchAPIUserInfo.login,
       twitchDisplayName: twitchAPIUserInfo.display_name,
@@ -309,22 +300,21 @@ export class UserService {
   }
 
   async linkGoogleToUser(_googleId: string, _userId: string) {
-    const userGoogle = await this.userRepositoryService.findOneGoogleById(
+    const userGoogle = await this.userRepository.findOneGoogleById(_googleId, {
+      withDeleted: true,
+    });
+    const existingUser = await this.userRepository.findOneUserByGoogleId(
       _googleId,
       { withDeleted: true },
     );
-    const existingUser = await this.userRepositoryService.findOneUserByGoogleId(
-      _googleId,
-      { withDeleted: true },
-    );
-    const targetUser = await this.userRepositoryService.findOneUserById(
-      _userId,
-    );
+    const targetUser = await this.userRepository.findOneUserById(_userId);
     if (!userGoogle || !targetUser) throw new BadRequestException();
 
     existingUser.google = null;
-    if (existingUser.twitch === null) await existingUser.remove();
-    else await existingUser.save();
+    if (existingUser.twitch === null) {
+      await this.musicbookRepository.deleteBookByUserId(existingUser.id);
+      await existingUser.remove();
+    } else await existingUser.save();
 
     targetUser.google = userGoogle;
     await targetUser.save();
@@ -351,7 +341,7 @@ export class UserService {
     else await this.redis.del(_code);
 
     const googleAPIUserInfo = JSON.parse(stringifiedTwitchAPIUserInfo);
-    const userGoogle = await this.userRepositoryService.createOrUpdateGoogle({
+    const userGoogle = await this.userRepository.createOrUpdateGoogle({
       googleId: googleAPIUserInfo.sub,
       googleDisplayName: googleAPIUserInfo.name,
       googleProfileImgURL: googleAPIUserInfo.picture,
@@ -362,7 +352,7 @@ export class UserService {
   }
 
   async unlinkTwitchToUser(_jwt: MusicbookJwtPayload) {
-    const user = await this.userRepositoryService.findOneUserById(_jwt.id);
+    const user = await this.userRepository.findOneUserById(_jwt.id);
     if (user.google !== null) {
       user.twitch = null;
       await user.save();
@@ -370,7 +360,7 @@ export class UserService {
   }
 
   async unlinkGoogleToUser(_jwt: MusicbookJwtPayload) {
-    const user = await this.userRepositoryService.findOneUserById(_jwt.id);
+    const user = await this.userRepository.findOneUserById(_jwt.id);
     if (user.twitch !== null) {
       user.google = null;
       await user.save();
