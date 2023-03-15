@@ -131,13 +131,14 @@ export class MusicBookRepository {
 
   findOneMusicByUserId(
     _userId: string,
+    _musicId: string,
     _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'book')[];
     },
   ) {
     return this.musicRepository.findOne({
-      where: { broadcaster: { id: _userId } },
+      where: { id: _musicId, broadcaster: { id: _userId } },
       relations:
         _options?.withJoin === undefined || _options?.withJoin
           ? typeof _options?.withJoin === 'boolean' ||

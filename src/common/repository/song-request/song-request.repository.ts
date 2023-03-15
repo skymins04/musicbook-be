@@ -19,24 +19,22 @@ export class SongRequestRepository {
     const music = await this.musicbookRepository.findOneMusicById(_musicId, {
       withJoin: ['broadcaster', 'book'],
     });
+    const songRequests = await this.findManySongRequestByBookId(music.book.id);
+
     if (
       !music ||
       music.isHide ||
       music.book.isHide ||
       !music.isAllowRequest ||
       !music.book.isAllowRequest ||
+      (music.book.isAllowRequest &&
+        music.book.requestLimitCount >= 0 &&
+        songRequests.length >= music.book.requestLimitCount) ||
+      (!music.book.isAllowDuplicateRequest &&
+        songRequests.filter(
+          (x) => x.viewer.id === _userId && x.music.id === _musicId,
+        ).length !== 0) ||
       (await this.findOneBlacklistUser(music.book.id, _userId))
-    )
-      throw new BadRequestException();
-
-    if (
-      await this.songRequestRepository.exist({
-        where: {
-          viewer: { id: _userId },
-          music: { id: _musicId },
-          isCompleted: false,
-        },
-      })
     )
       throw new BadRequestException();
 

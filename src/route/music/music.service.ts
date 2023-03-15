@@ -21,6 +21,10 @@ import { CreateMusicDTO } from './dto/create-music.dto';
 import { BookEntity } from 'src/common/repository/musicbook/book.entity';
 import { UpdateMyMusicDTO } from './dto/update-my-music.dto';
 import { RedisService } from 'src/common/redis/redis.service';
+import {
+  MusicConfigDTO,
+  MusicConfigReponseDataDTO,
+} from './dto/music-config.dto';
 
 @Injectable()
 export class MusicService {
@@ -301,5 +305,44 @@ export class MusicService {
     if (!(await this.musicbookRepository.existMusicById(_musicId)))
       throw new BadRequestException();
     return this.musicbookLikeRepository.existMusicLike(_jwt.id, _musicId);
+  }
+
+  async getConfigMyMusic(
+    _jwt: MusicbookJwtPayload,
+    _musicId: string,
+  ): Promise<MusicConfigReponseDataDTO> {
+    const music = await this.musicbookRepository.findOneMusicByUserId(
+      _jwt.id,
+      _musicId,
+    );
+    if (!music) throw new BadRequestException();
+
+    return {
+      isHide: music.isHide,
+      isPaid: music.isPaid,
+      isAllowRequest: music.isAllowRequest,
+    };
+  }
+
+  async setConfigMyMusic(
+    _jwt: MusicbookJwtPayload,
+    _musicId: string,
+    _config: MusicConfigDTO,
+  ): Promise<MusicConfigReponseDataDTO> {
+    const music = await this.musicbookRepository.findOneMusicByUserId(
+      _jwt.id,
+      _musicId,
+    );
+    if (!music) throw new BadRequestException();
+    for (const key of Object.keys(_config)) {
+      music[key] = _config[key];
+    }
+    await music.save();
+
+    return {
+      isHide: music.isHide,
+      isPaid: music.isPaid,
+      isAllowRequest: music.isAllowRequest,
+    };
   }
 }

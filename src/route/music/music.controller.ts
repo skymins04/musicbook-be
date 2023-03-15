@@ -43,6 +43,7 @@ import {
 import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 import { CreateMusicDTO } from './dto/create-music.dto';
 import { UpdateMyMusicDTO } from './dto/update-my-music.dto';
+import { MusicConfigDTO } from './dto/music-config.dto';
 
 @Controller('music')
 @ApiTags('Music')
@@ -182,26 +183,6 @@ export class MusicController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('me/config')
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: '(wip) 본인 수록곡의 설정 조회',
-    description:
-      '사용자 본인의 수록곡 설정 조회 엔드포인트. 존재하지 않는 수록곡일 경우 400에러 발생.',
-  })
-  async getConfigMyMusic(@Jwt() _jwt: MusicbookJwtPayload) {}
-
-  @UseGuards(JwtAuthGuard)
-  @Post('me/config')
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: '(wip) 본인 수록곡 설정 적용',
-    description:
-      '사용자 본인의 수록곡 설정 적용 엔드포인트. 존재하지 않는 수록곡일 경우 400에러 발생.',
-  })
-  async setConfigMyMusic(@Jwt() _jwt: MusicbookJwtPayload) {}
-
   @Get(':musicId')
   @ApiOperation({
     summary: '수록곡 조회',
@@ -324,6 +305,43 @@ export class MusicController {
     const { musicId } = _param;
     return new ApiResponseDataDTO(
       await this.musciService.getMyLikeOfMusic(_jwt, musicId),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':musicId/config')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '본인 수록곡의 설정 조회',
+    description:
+      '사용자 본인의 수록곡 설정 조회 엔드포인트. 존재하지 않는 수록곡일 경우 400에러 발생.',
+  })
+  async getConfigMyMusic(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Param() _param: MusicIdDTO,
+  ) {
+    const { musicId } = _param;
+    return new ApiResponseDataDTO(
+      await this.musciService.getConfigMyMusic(_jwt, musicId),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':musicId/config')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '본인 수록곡 설정 적용',
+    description:
+      '사용자 본인의 수록곡 설정 적용 엔드포인트. 존재하지 않는 수록곡일 경우 400에러 발생.',
+  })
+  async setConfigMyMusic(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Param() _param: MusicIdDTO,
+    @Body() _body: MusicConfigDTO,
+  ) {
+    const { musicId } = _param;
+    return new ApiResponseDataDTO(
+      await this.musciService.setConfigMyMusic(_jwt, musicId, _body),
     );
   }
 }
