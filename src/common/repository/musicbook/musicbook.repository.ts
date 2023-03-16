@@ -411,15 +411,15 @@ export class MusicBookRepository {
     });
   }
 
-  findManyBookByCustomBookId(
+  findOneBookByCustomBookId(
     _customBookId: string,
     _options?: {
       withDeleted?: boolean;
       withJoin?: boolean | ('broadcaster' | 'musics')[];
     },
   ) {
-    return this.musicRepository.find({
-      where: { book: { customId: _customBookId } },
+    return this.bookRepository.findOne({
+      where: { customId: _customBookId },
       relations:
         _options?.withJoin === undefined || _options?.withJoin
           ? typeof _options?.withJoin === 'boolean' ||

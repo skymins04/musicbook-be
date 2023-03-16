@@ -27,6 +27,7 @@ import { CreateBookDTO } from './dto/create-book.dto';
 import { Request } from 'express';
 import { GetURLsForBookImgDirectUploadingResponseDTO } from './dto/get-direct-upload-url';
 import {
+  BookIDAndCustomIdDTO,
   BookIdDTO,
   BookLikeCountResponseDTO,
   BookLikeStatusResponseDTO,
@@ -220,7 +221,7 @@ export class BookController {
     description: '노래책 조회 성공',
     type: BookResponseDTO,
   })
-  async getBook(@Param() _param: BookIdDTO) {
+  async getBook(@Param() _param: BookIDAndCustomIdDTO) {
     const { bookId } = _param;
     return new ApiResponseDataDTO(await this.bookSerivce.getBook(bookId));
   }

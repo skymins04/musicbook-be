@@ -174,9 +174,16 @@ export class BookService {
   }
 
   async getBook(_bookId: string) {
-    const book = await this.musicbookRepository.findOneBookById(_bookId, {
-      withJoin: ['broadcaster', 'musics'],
-    });
+    let book: BookEntity;
+    if (_bookId.match(/^@[a-zA-Z0-9ㄱ-ㅎㅏ-ㅣ가-힣-_]{1,20}$/)) {
+      book = await this.musicbookRepository.findOneBookByCustomBookId(_bookId, {
+        withJoin: ['broadcaster', 'musics'],
+      });
+    } else {
+      book = await this.musicbookRepository.findOneBookById(_bookId, {
+        withJoin: ['broadcaster', 'musics'],
+      });
+    }
     if (!book) throw new NotFoundException();
     return book;
   }

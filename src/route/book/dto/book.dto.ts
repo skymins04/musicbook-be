@@ -13,6 +13,18 @@ export class BookIdDTO {
   })
   bookId: string;
 }
+export class BookIDAndCustomIdDTO {
+  @IsString()
+  @Matches(
+    /^([a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}|@[a-zA-Z0-9ㄱ-ㅎㅏ-ㅣ가-힣-_]{1,20})$/i,
+  )
+  @ApiProperty({
+    description: '노래책 ID (uuidv4 or customID)',
+    type: String,
+    example: '@customID, 12341234-1234-1234-1234-123412341234',
+  })
+  bookId: string;
+}
 
 export class BookResponseDTO implements ApiResponseDataDTO {
   @ApiProperty({
