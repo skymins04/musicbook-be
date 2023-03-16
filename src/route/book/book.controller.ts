@@ -18,7 +18,11 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
 import { BookService } from './book.service';
-import { GetBooksDTO, GetBooksResponseDTO } from './dto/get-books.dto';
+import {
+  GetBooksDTO,
+  GetBooksResponseDTO,
+  SearchBooksDTO,
+} from './dto/get-books.dto';
 import {
   ApiResponseDataDTO,
   ApiResponsePagenationDataDTO,
@@ -69,6 +73,27 @@ export class BookController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post()
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '노래책 생성',
+    description:
+      '노래책 생성 엔드포인트. 한 사용자 당 하나의 노래책만 생성 가능. 복수개의 노래책 생성 시도시 400에러 발생.',
+  })
+  @ApiOkResponse({
+    description: '노래책 생성 성공',
+    type: BookResponseDTO,
+  })
+  async createBook(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Body() _body: CreateBookDTO,
+  ) {
+    return new ApiResponseDataDTO(
+      await this.bookSerivce.createBook(_jwt, _body),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('/img_upload_url')
   @ApiBearerAuth()
   @ApiOperation({
@@ -89,24 +114,28 @@ export class BookController {
     );
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post()
-  @ApiBearerAuth()
+  @Get('/search')
   @ApiOperation({
-    summary: '노래책 생성',
-    description:
-      '노래책 생성 엔드포인트. 한 사용자 당 하나의 노래책만 생성 가능. 복수개의 노래책 생성 시도시 400에러 발생.',
+    summary: '노래책 검색',
+    description: '노래책 검색 엔드포인트.',
   })
   @ApiOkResponse({
-    description: '노래책 생성 성공',
-    type: BookResponseDTO,
+    description: '노래책 검색 성공',
+    type: GetBooksResponseDTO,
   })
-  async createBook(
-    @Jwt() _jwt: MusicbookJwtPayload,
-    @Body() _body: CreateBookDTO,
-  ) {
-    return new ApiResponseDataDTO(
-      await this.bookSerivce.createBook(_jwt, _body),
+  async searchBooks(@Query() _query: SearchBooksDTO) {
+    const { q, page = 1, sort = 'NEWEST', perPage = 30 } = _query;
+    const books = await this.bookSerivce.searchBooks(perPage, page, sort, q);
+    return new ApiResponsePagenationDataDTO<{
+      sort: keyof typeof EMusicbookSortMethod;
+    }>(
+      {
+        perPage,
+        currentPage: page,
+        sort,
+        pageItemCount: books.length,
+      },
+      books,
     );
   }
 

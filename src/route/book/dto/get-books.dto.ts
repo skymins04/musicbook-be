@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -50,6 +51,17 @@ export class GetBooksDTO {
     nullable: true,
   })
   sort?: keyof typeof EMusicbookSortMethod;
+}
+
+export class SearchBooksDTO extends GetBooksDTO {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: '노래책 검색 쿼리',
+    type: String,
+    example: '베타맨',
+  })
+  q: string;
 }
 
 class GetBooksResponseMetaDTO {

@@ -25,16 +25,16 @@ export class BookService {
 
   private getBooksSortHandler: Record<
     keyof typeof EMusicbookSortMethod,
-    (_perPage: number, _page: number) => Promise<BookEntity[]>
+    (_perPage: number, _page: number, _q?: string) => Promise<BookEntity[]>
   > = {
-    NEWEST: (_perPage, _page) => {
-      return this.musicbookRepository.findManyNewestBook(_perPage, _page);
+    NEWEST: (_perPage, _page, _q) => {
+      return this.musicbookRepository.findManyNewestBook(_perPage, _page, _q);
     },
-    SUGGEST: (_perPage, _page) => {
-      return this.musicbookRepository.findManySuggestBook(_perPage, _page);
+    SUGGEST: (_perPage, _page, _q) => {
+      return this.musicbookRepository.findManySuggestBook(_perPage, _page, _q);
     },
-    POPULAR: (_perPage, _page) => {
-      return this.musicbookRepository.findManyPopularBook(_perPage, _page);
+    POPULAR: (_perPage, _page, _q) => {
+      return this.musicbookRepository.findManyPopularBook(_perPage, _page, _q);
     },
   };
 
@@ -243,5 +243,14 @@ export class BookService {
       isAllowRequestLimit: book.isAllowRequestLimit,
       requestLimitCount: book.requestLimitCount,
     };
+  }
+
+  async searchBooks(
+    _perPage: number,
+    _page: number,
+    _sort: keyof typeof EMusicbookSortMethod,
+    _q: string,
+  ) {
+    return this.getBooksSortHandler[_sort](_perPage, _page, _q);
   }
 }

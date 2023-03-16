@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
+import { DeepPartial, FindOptionsWhere, Like, Repository } from 'typeorm';
 import { MusicEntity } from './music.entity';
 import { BookEntity } from './book.entity';
 import { MusicBookSourceRepository } from './musicbook-source.repository';
@@ -443,31 +443,66 @@ export class MusicBookRepository {
     });
   }
 
-  findManyNewestBook(_perPage = 30, _page = 1) {
-    return this.bookRepository.find({
-      where: { isHide: false },
-      skip: _perPage * (_page - 1),
-      take: _perPage,
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+  findManyNewestBook(_perPage = 30, _page = 1, q?: string) {
+    let queryBuilder = this.bookRepository
+      .createQueryBuilder('book')
+      .leftJoinAndSelect('book.broadcaster', 'broadcaster')
+      .where('book.is_hide = 0');
+    if (q)
+      queryBuilder = queryBuilder
+        .andWhere(`REPLACE(book.title,' ','') LIKE '%${q.replace(/ /g, '')}%'`)
+        .orWhere(`book.customId LIKE '%${q.replace(/ /g, '')}%'`)
+        .orWhere(
+          `REPLACE(broadcaster.displayName,' ','') LIKE '%${q.replace(
+            / /g,
+            '',
+          )}%'`,
+        );
+    return queryBuilder
+      .orderBy('book.createdAt', 'DESC')
+      .skip(_perPage * (_page - 1))
+      .take(_perPage)
+      .getMany();
   }
 
-  findManySuggestBook(_perPage = 30, _page = 1) {
-    return this.bookRepository
+  findManySuggestBook(_perPage = 30, _page = 1, q?: string) {
+    let queryBuilder = this.bookRepository
       .createQueryBuilder('book')
-      .where('book.is_hide = 0')
+      .leftJoinAndSelect('book.broadcaster', 'broadcaster')
+      .where('book.is_hide = 0');
+    if (q)
+      queryBuilder = queryBuilder
+        .andWhere(`REPLACE(book.title,' ','') LIKE '%${q.replace(/ /g, '')}%'`)
+        .orWhere(`book.customId LIKE '%${q.replace(/ /g, '')}%'`)
+        .orWhere(
+          `REPLACE(broadcaster.displayName,' ','') LIKE '%${q.replace(
+            / /g,
+            '',
+          )}%'`,
+        );
+    return queryBuilder
       .orderBy('RAND()')
       .skip(_perPage * (_page - 1))
       .take(_perPage)
       .getMany();
   }
 
-  findManyPopularBook(_perPage = 30, _page = 1) {
-    return this.bookRepository
+  findManyPopularBook(_perPage = 30, _page = 1, q?: string) {
+    let queryBuilder = this.bookRepository
       .createQueryBuilder('book')
-      .where('book.is_hide = 0')
+      .leftJoinAndSelect('book.broadcaster', 'broadcaster')
+      .where('book.is_hide = 0');
+    if (q)
+      queryBuilder = queryBuilder
+        .andWhere(`REPLACE(book.title,' ','') LIKE '%${q.replace(/ /g, '')}%'`)
+        .orWhere(`book.customId LIKE '%${q.replace(/ /g, '')}%'`)
+        .orWhere(
+          `REPLACE(broadcaster.displayName,' ','') LIKE '%${q.replace(
+            / /g,
+            '',
+          )}%'`,
+        );
+    return queryBuilder
       .leftJoinAndSelect('book.bookLikes', 'likes')
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')
