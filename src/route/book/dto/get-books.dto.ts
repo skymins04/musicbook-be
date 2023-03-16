@@ -12,18 +12,18 @@ import { BookEntity } from 'src/common/repository/musicbook/book.entity';
 import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 
 export class GetBooksDTO {
-  // @Type(() => Number)
-  // @IsNumber()
-  // @IsPositive()
-  // @IsOptional()
-  // @ApiProperty({
-  //   description: '페이지 당 노래책 아이템 개수',
-  //   type: Number,
-  //   example: 30,
-  //   default: 30,
-  //   nullable: true,
-  // })
-  // perPage?: number;
+  @Type(() => Number)
+  @IsNumber()
+  @IsPositive()
+  @IsOptional()
+  @ApiProperty({
+    description: '페이지 당 노래책 아이템 개수',
+    type: Number,
+    example: 30,
+    default: 30,
+    nullable: true,
+  })
+  perPage?: number;
 
   @Type(() => Number)
   @IsNumber()

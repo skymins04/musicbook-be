@@ -53,13 +53,13 @@ export class BookController {
     type: GetBooksResponseDTO,
   })
   async getBooks(@Query() _query: GetBooksDTO) {
-    const { page = 1, sort = 'NEWEST' } = _query;
-    const books = await this.bookSerivce.getBooks(50, page, sort);
+    const { page = 1, sort = 'NEWEST', perPage = 30 } = _query;
+    const books = await this.bookSerivce.getBooks(perPage, page, sort);
     return new ApiResponsePagenationDataDTO<{
       sort: keyof typeof EMusicbookSortMethod;
     }>(
       {
-        perPage: 50,
+        perPage,
         currentPage: page,
         sort,
         pageItemCount: books.length,
