@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { CronjobService } from './cronjob.service';
+import { MusicbookLikeCountCronjob } from './musicbook-like-count.cron';
 
 @Module({
   imports: [ScheduleModule.forRoot()],
-  providers: [CronjobService],
+  providers: [MusicbookLikeCountCronjob],
   exports: [ScheduleModule],
 })
 export class CronjobModule {}
