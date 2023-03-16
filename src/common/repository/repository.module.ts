@@ -51,8 +51,8 @@ import { SongRequestRepository } from './song-request/song-request.repository';
             SongRequestBlacklistEntity,
           ],
           synchronize: false,
-          logging: true,
-          keepConnectionAlive: true,
+          logging: config.get('NODE_ENV') === 'development',
+          keepConnectionAlive: config.get('NODE_ENV') === 'development',
           namingStrategy: new SnakeNamingStrategy(),
         };
       },
