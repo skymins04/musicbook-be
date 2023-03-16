@@ -43,6 +43,7 @@ export class MusicService {
       _perPage: number,
       _page: number,
       _options?: {
+        q?: string;
         category?: string;
         userId?: string;
         bookId?: string;
@@ -51,6 +52,7 @@ export class MusicService {
   > = {
     NEWEST: (_perPage, _page, _options) => {
       return this.musicbookRepository.findManyNewestMusic(_perPage, _page, {
+        q: _options?.q,
         category: _options?.category,
         userId: _options?.userId,
         bookId: _options?.bookId,
@@ -58,6 +60,7 @@ export class MusicService {
     },
     SUGGEST: (_perPage, _page, _options) => {
       return this.musicbookRepository.findManySuggestMusic(_perPage, _page, {
+        q: _options?.q,
         category: _options?.category,
         userId: _options?.userId,
         bookId: _options?.bookId,
@@ -65,6 +68,7 @@ export class MusicService {
     },
     POPULAR: (_perPage, _page, _options) => {
       return this.musicbookRepository.findManyPopularMusic(_perPage, _page, {
+        q: _options?.q,
         category: _options?.category,
         userId: _options?.userId,
         bookId: _options?.bookId,
@@ -77,12 +81,14 @@ export class MusicService {
     _page: number,
     _sort: keyof typeof EMusicbookSortMethod,
     _options?: {
+      q?: string;
       category?: string;
       userId?: string;
       bookId?: string;
     },
   ) {
     return this.getMusicsSortHandler[_sort](_perPage, _page, {
+      q: _options?.q,
       category: _options?.category,
       userId: _options?.userId,
       bookId: _options?.bookId,

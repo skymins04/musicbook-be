@@ -66,10 +66,12 @@ export class MusicController {
       sort = 'NEWEST',
       category,
       bookId,
+      q,
     } = _query;
     const musics = await this.musciService.getMusics(perPage, page, sort, {
       category,
       bookId,
+      q,
     });
     return new ApiResponsePagenationDataDTO<{
       sort: keyof typeof EMusicbookSortMethod;
@@ -169,8 +171,9 @@ export class MusicController {
     @Jwt() _jwt: MusicbookJwtPayload,
     @Query() _query: GetMusicsPagenationDTO,
   ) {
-    const { perPage = 30, page = 1, sort = 'NEWEST', category } = _query;
+    const { q, perPage = 30, page = 1, sort = 'NEWEST', category } = _query;
     const musics = await this.musciService.getMusics(perPage, page, sort, {
+      q,
       category,
       userId: _jwt.id,
     });

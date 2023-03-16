@@ -42,8 +42,9 @@ export class BookService {
     _perPage: number,
     _page: number,
     _sort: keyof typeof EMusicbookSortMethod,
+    _q?: string,
   ) {
-    return this.getBooksSortHandler[_sort](_perPage, _page);
+    return this.getBooksSortHandler[_sort](_perPage, _page, _q);
   }
 
   async getURLsForBookImgDirectUploading(

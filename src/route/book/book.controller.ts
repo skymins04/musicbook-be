@@ -18,11 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
 import { BookService } from './book.service';
-import {
-  GetBooksDTO,
-  GetBooksResponseDTO,
-  SearchBooksDTO,
-} from './dto/get-books.dto';
+import { GetBooksDTO, GetBooksResponseDTO } from './dto/get-books.dto';
 import {
   ApiResponseDataDTO,
   ApiResponsePagenationDataDTO,
@@ -57,8 +53,8 @@ export class BookController {
     type: GetBooksResponseDTO,
   })
   async getBooks(@Query() _query: GetBooksDTO) {
-    const { page = 1, sort = 'NEWEST', perPage = 30 } = _query;
-    const books = await this.bookSerivce.getBooks(perPage, page, sort);
+    const { q, page = 1, sort = 'NEWEST', perPage = 30 } = _query;
+    const books = await this.bookSerivce.getBooks(perPage, page, sort, q);
     return new ApiResponsePagenationDataDTO<{
       sort: keyof typeof EMusicbookSortMethod;
     }>(
@@ -111,31 +107,6 @@ export class BookController {
   ) {
     return new ApiResponseDataDTO(
       await this.bookSerivce.getURLsForBookImgDirectUploading(_jwt, _req.ip),
-    );
-  }
-
-  @Get('/search')
-  @ApiOperation({
-    summary: '노래책 검색',
-    description: '노래책 검색 엔드포인트.',
-  })
-  @ApiOkResponse({
-    description: '노래책 검색 성공',
-    type: GetBooksResponseDTO,
-  })
-  async searchBooks(@Query() _query: SearchBooksDTO) {
-    const { q, page = 1, sort = 'NEWEST', perPage = 30 } = _query;
-    const books = await this.bookSerivce.searchBooks(perPage, page, sort, q);
-    return new ApiResponsePagenationDataDTO<{
-      sort: keyof typeof EMusicbookSortMethod;
-    }>(
-      {
-        perPage,
-        currentPage: page,
-        sort,
-        pageItemCount: books.length,
-      },
-      books,
     );
   }
 

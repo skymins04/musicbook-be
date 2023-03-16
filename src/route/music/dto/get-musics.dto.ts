@@ -68,6 +68,18 @@ export class GetMusicsPagenationDTO {
     required: false,
   })
   category?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  @ApiProperty({
+    description: '수록곡 검색 쿼리',
+    type: String,
+    example: '베타맨',
+    nullable: true,
+    required: false,
+  })
+  q?: string;
 }
 
 export class GetMusicsDTO extends GetMusicsPagenationDTO {

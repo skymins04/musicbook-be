@@ -217,36 +217,19 @@ export class MusicBookRepository {
   findManyNewestMusic(
     _perPage = 30,
     _page = 1,
-    _options?: { category?: string; bookId?: string; userId?: string },
-  ) {
-    return this.musicRepository.find({
-      where: {
-        isHide: false,
-        category: _options?.category,
-        book: { id: _options?.bookId },
-        broadcaster: { id: _options?.userId },
-      },
-      skip: _perPage * (_page - 1),
-      take: _perPage,
-      order: {
-        createdAt: 'DESC',
-      },
-      relations: [
-        'broadcaster',
-        'book',
-        'musicSourceOriginal',
-        'musicSourceMelon',
-      ],
-    });
-  }
-
-  findManySuggestMusic(
-    _perPage = 30,
-    _page = 1,
-    _options?: { category?: string; bookId?: string; userId?: string },
+    _options?: {
+      q?: string;
+      category?: string;
+      bookId?: string;
+      userId?: string;
+    },
   ) {
     let musicQueryBuilder = this.musicRepository
       .createQueryBuilder('music')
+      .leftJoinAndSelect('music.broadcaster', 'broadcaster')
+      .leftJoinAndSelect('music.book', 'book')
+      .leftJoinAndSelect('music.musicSourceOriginal', 'musicSourceOriginal')
+      .leftJoinAndSelect('music.musicSourceMelon', 'musicSourceMelon')
       .where('music.is_hide = 0');
 
     if (_options?.category)
@@ -264,12 +247,65 @@ export class MusicBookRepository {
       musicQueryBuilder = musicQueryBuilder.andWhere('broadcaster.id = :id', {
         id: _options.userId,
       });
+    if (_options?.q) {
+      const keyword = _options.q.replace(/ /g, '');
+      musicQueryBuilder = musicQueryBuilder
+        .andWhere(`REPLACE(music.title,' ','') LIKE '%${keyword}%'`)
+        .orWhere(`REPLACE(book.title,' ','') LIKE '%${keyword}%'`)
+        .orWhere(`book.customId LIKE '%${keyword}%'`)
+        .orWhere(`REPLACE(broadcaster.displayName,' ','') LIKE '%${keyword}%'`);
+    }
 
     return musicQueryBuilder
+      .orderBy('music.createdAt', 'DESC')
+      .skip(_perPage * (_page - 1))
+      .take(_perPage)
+      .getMany();
+  }
+
+  findManySuggestMusic(
+    _perPage = 30,
+    _page = 1,
+    _options?: {
+      q?: string;
+      category?: string;
+      bookId?: string;
+      userId?: string;
+    },
+  ) {
+    let musicQueryBuilder = this.musicRepository
+      .createQueryBuilder('music')
       .leftJoinAndSelect('music.broadcaster', 'broadcaster')
       .leftJoinAndSelect('music.book', 'book')
       .leftJoinAndSelect('music.musicSourceOriginal', 'musicSourceOriginal')
       .leftJoinAndSelect('music.musicSourceMelon', 'musicSourceMelon')
+      .where('music.is_hide = 0');
+
+    if (_options?.category)
+      musicQueryBuilder = musicQueryBuilder.andWhere(
+        'music.category = :category',
+        {
+          category: _options.category,
+        },
+      );
+    if (_options?.bookId)
+      musicQueryBuilder = musicQueryBuilder.andWhere('book.id = :id', {
+        id: _options.bookId,
+      });
+    if (_options?.userId)
+      musicQueryBuilder = musicQueryBuilder.andWhere('broadcaster.id = :id', {
+        id: _options.userId,
+      });
+    if (_options?.q) {
+      const keyword = _options.q.replace(/ /g, '');
+      musicQueryBuilder = musicQueryBuilder
+        .andWhere(`REPLACE(music.title,' ','') LIKE '%${keyword}%'`)
+        .orWhere(`REPLACE(book.title,' ','') LIKE '%${keyword}%'`)
+        .orWhere(`book.customId LIKE '%${keyword}%'`)
+        .orWhere(`REPLACE(broadcaster.displayName,' ','') LIKE '%${keyword}%'`);
+    }
+
+    return musicQueryBuilder
       .orderBy('RAND()')
       .skip(_perPage * (_page - 1))
       .take(_perPage)
@@ -279,10 +315,20 @@ export class MusicBookRepository {
   findManyPopularMusic(
     _perPage = 30,
     _page = 1,
-    _options?: { category?: string; bookId?: string; userId?: string },
+    _options?: {
+      q?: string;
+      category?: string;
+      bookId?: string;
+      userId?: string;
+    },
   ) {
     let musicQueryBuilder = this.musicRepository
       .createQueryBuilder('music')
+      .leftJoinAndSelect('music.broadcaster', 'broadcaster')
+      .leftJoinAndSelect('music.book', 'book')
+      .leftJoinAndSelect('music.musicSourceOriginal', 'musicSourceOriginal')
+      .leftJoinAndSelect('music.musicSourceMelon', 'musicSourceMelon')
+      .leftJoinAndSelect('music.musicLikes', 'likes')
       .where('music.is_hide = 0');
 
     if (_options?.category)
@@ -300,13 +346,16 @@ export class MusicBookRepository {
       musicQueryBuilder = musicQueryBuilder.andWhere('broadcaster.id = :id', {
         id: _options.userId,
       });
+    if (_options?.q) {
+      const keyword = _options.q.replace(/ /g, '');
+      musicQueryBuilder = musicQueryBuilder
+        .andWhere(`REPLACE(music.title,' ','') LIKE '%${keyword}%'`)
+        .orWhere(`REPLACE(book.title,' ','') LIKE '%${keyword}%'`)
+        .orWhere(`book.customId LIKE '%${keyword}%'`)
+        .orWhere(`REPLACE(broadcaster.displayName,' ','') LIKE '%${keyword}%'`);
+    }
 
     return musicQueryBuilder
-      .leftJoinAndSelect('music.broadcaster', 'broadcaster')
-      .leftJoinAndSelect('music.book', 'book')
-      .leftJoinAndSelect('music.musicSourceOriginal', 'musicSourceOriginal')
-      .leftJoinAndSelect('music.musicSourceMelon', 'musicSourceMelon')
-      .leftJoinAndSelect('music.musicLikes', 'likes')
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')
       .groupBy('music.id')
@@ -448,16 +497,13 @@ export class MusicBookRepository {
       .createQueryBuilder('book')
       .leftJoinAndSelect('book.broadcaster', 'broadcaster')
       .where('book.is_hide = 0');
-    if (q)
+    if (q) {
+      const keyword = q.replace(/ /g, '');
       queryBuilder = queryBuilder
-        .andWhere(`REPLACE(book.title,' ','') LIKE '%${q.replace(/ /g, '')}%'`)
-        .orWhere(`book.customId LIKE '%${q.replace(/ /g, '')}%'`)
-        .orWhere(
-          `REPLACE(broadcaster.displayName,' ','') LIKE '%${q.replace(
-            / /g,
-            '',
-          )}%'`,
-        );
+        .andWhere(`REPLACE(book.title,' ','') LIKE '%${keyword}%'`)
+        .orWhere(`book.customId LIKE '%${keyword}%'`)
+        .orWhere(`REPLACE(broadcaster.displayName,' ','') LIKE '%${keyword}%'`);
+    }
     return queryBuilder
       .orderBy('book.createdAt', 'DESC')
       .skip(_perPage * (_page - 1))
@@ -470,16 +516,13 @@ export class MusicBookRepository {
       .createQueryBuilder('book')
       .leftJoinAndSelect('book.broadcaster', 'broadcaster')
       .where('book.is_hide = 0');
-    if (q)
+    if (q) {
+      const keyword = q.replace(/ /g, '');
       queryBuilder = queryBuilder
-        .andWhere(`REPLACE(book.title,' ','') LIKE '%${q.replace(/ /g, '')}%'`)
-        .orWhere(`book.customId LIKE '%${q.replace(/ /g, '')}%'`)
-        .orWhere(
-          `REPLACE(broadcaster.displayName,' ','') LIKE '%${q.replace(
-            / /g,
-            '',
-          )}%'`,
-        );
+        .andWhere(`REPLACE(book.title,' ','') LIKE '%${keyword}%'`)
+        .orWhere(`book.customId LIKE '%${keyword}%'`)
+        .orWhere(`REPLACE(broadcaster.displayName,' ','') LIKE '%${keyword}%'`);
+    }
     return queryBuilder
       .orderBy('RAND()')
       .skip(_perPage * (_page - 1))
@@ -492,16 +535,13 @@ export class MusicBookRepository {
       .createQueryBuilder('book')
       .leftJoinAndSelect('book.broadcaster', 'broadcaster')
       .where('book.is_hide = 0');
-    if (q)
+    if (q) {
+      const keyword = q.replace(/ /g, '');
       queryBuilder = queryBuilder
-        .andWhere(`REPLACE(book.title,' ','') LIKE '%${q.replace(/ /g, '')}%'`)
-        .orWhere(`book.customId LIKE '%${q.replace(/ /g, '')}%'`)
-        .orWhere(
-          `REPLACE(broadcaster.displayName,' ','') LIKE '%${q.replace(
-            / /g,
-            '',
-          )}%'`,
-        );
+        .andWhere(`REPLACE(book.title,' ','') LIKE '%${keyword}%'`)
+        .orWhere(`book.customId LIKE '%${keyword}%'`)
+        .orWhere(`REPLACE(broadcaster.displayName,' ','') LIKE '%${keyword}%'`);
+    }
     return queryBuilder
       .leftJoinAndSelect('book.bookLikes', 'likes')
       .addSelect('COUNT(likes.id)', 'likeCount')

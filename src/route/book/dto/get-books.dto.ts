@@ -23,6 +23,7 @@ export class GetBooksDTO {
     example: 30,
     default: 30,
     nullable: true,
+    required: false,
   })
   perPage?: number;
 
@@ -36,6 +37,7 @@ export class GetBooksDTO {
     example: 1,
     default: 1,
     nullable: true,
+    required: false,
   })
   page?: number;
 
@@ -49,19 +51,21 @@ export class GetBooksDTO {
     example: 'NEWEST',
     default: 'NEWEST',
     nullable: true,
+    required: false,
   })
   sort?: keyof typeof EMusicbookSortMethod;
-}
 
-export class SearchBooksDTO extends GetBooksDTO {
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({
     description: '노래책 검색 쿼리',
     type: String,
     example: '베타맨',
+    nullable: true,
+    required: false,
   })
-  q: string;
+  q?: string;
 }
 
 class GetBooksResponseMetaDTO {
