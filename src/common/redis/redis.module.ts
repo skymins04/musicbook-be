@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { RedisService } from './redis.service';
 import { RedisModule as IORedisModule } from '@nestjs-modules/ioredis';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RedisMusicRequestService } from './redis-music-request.service';
 
 @Global()
 @Module({
@@ -18,7 +19,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
     }),
   ],
-  providers: [RedisService],
-  exports: [IORedisModule, RedisService],
+  providers: [RedisService, RedisMusicRequestService],
+  exports: [IORedisModule, RedisService, RedisMusicRequestService],
 })
 export class RedisModule {}

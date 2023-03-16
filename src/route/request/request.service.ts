@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { RedisService } from 'src/common/redis/redis.service';
+import { RedisMusicRequestService } from 'src/common/redis/redis-music-request.service';
 import { MusicBookRepository } from 'src/common/repository/musicbook/musicbook.repository';
 import { SongRequestEntity } from 'src/common/repository/song-request/song-request.entity';
 import { SongRequestRepository } from 'src/common/repository/song-request/song-request.repository';
@@ -7,7 +7,7 @@ import { SongRequestRepository } from 'src/common/repository/song-request/song-r
 @Injectable()
 export class RequestService {
   constructor(
-    private readonly redisService: RedisService,
+    private readonly redisMusicRequestService: RedisMusicRequestService,
     private readonly songRequestRepository: SongRequestRepository,
     private readonly musicbookRepository: MusicBookRepository,
   ) {}
@@ -15,7 +15,7 @@ export class RequestService {
   async createSongRequest(_jwt: MusicbookJwtPayload, _musicId: string) {
     const { music, songRequest } =
       await this.songRequestRepository.createSongRequest(_jwt.id, _musicId);
-    await this.redisService.rpushItemOfMusicRequestQueue(
+    await this.redisMusicRequestService.rpushItemOfMusicRequestQueue(
       music.book.id,
       songRequest.id,
       music.id,
@@ -34,11 +34,11 @@ export class RequestService {
     )
       throw new BadRequestException();
 
-    const queue = await this.redisService.getMusicRequestQueue(
+    const queue = await this.redisMusicRequestService.getMusicRequestQueue(
       songRequest.book.id,
     );
     await songRequest.remove();
-    await this.redisService.removeItemInMusicRequestQueue(
+    await this.redisMusicRequestService.removeItemInMusicRequestQueue(
       songRequest.book.id,
       queue.map((x) => x.req_id).indexOf(_requestId),
     );
@@ -53,7 +53,7 @@ export class RequestService {
       throw new BadRequestException();
 
     const queueReqIds = (
-      await this.redisService.getMusicRequestQueue(_bookId)
+      await this.redisMusicRequestService.getMusicRequestQueue(_bookId)
     ).map((x) => x.req_id);
     const queue: SongRequestEntity[] = new Array(queueReqIds.length);
     const queueData = await this.songRequestRepository.findManySongRequestByIds(
@@ -74,7 +74,7 @@ export class RequestService {
     if (!book) throw new BadRequestException();
 
     const queueReqIds = (
-      await this.redisService.getMusicRequestQueue(book.id)
+      await this.redisMusicRequestService.getMusicRequestQueue(book.id)
     ).map((x) => x.req_id);
     const queue: SongRequestEntity[] = new Array(queueReqIds.length);
     const queueData = await this.songRequestRepository.findManySongRequestByIds(
@@ -94,11 +94,11 @@ export class RequestService {
     const book = await this.musicbookRepository.findOneBookByUserId(_jwt.id);
     if (!book) throw new BadRequestException();
 
-    await this.redisService.clearMusicRequestQueue(book.id);
+    await this.redisMusicRequestService.clearMusicRequestQueue(book.id);
     const songRequests =
       await this.songRequestRepository.findManySongRequestByBookId(book.id);
     for (const songRequest of songRequests) {
-      await this.redisService.rpushItemOfMusicRequestQueue(
+      await this.redisMusicRequestService.rpushItemOfMusicRequestQueue(
         book.id,
         songRequest.id,
         songRequest.music.id,
@@ -136,9 +136,9 @@ export class RequestService {
     if (!book) throw new BadRequestException();
 
     const queueIds = (
-      await this.redisService.getMusicRequestQueue(book.id)
+      await this.redisMusicRequestService.getMusicRequestQueue(book.id)
     ).map((x) => x.req_id);
-    await this.redisService.shiftUpItemInMusicRequestQueue(
+    await this.redisMusicRequestService.shiftUpItemInMusicRequestQueue(
       book.id,
       queueIds.indexOf(_requestId),
     );
@@ -149,9 +149,9 @@ export class RequestService {
     if (!book) throw new BadRequestException();
 
     const queueIds = (
-      await this.redisService.getMusicRequestQueue(book.id)
+      await this.redisMusicRequestService.getMusicRequestQueue(book.id)
     ).map((x) => x.req_id);
-    await this.redisService.shiftDownItemInMusicRequestQueue(
+    await this.redisMusicRequestService.shiftDownItemInMusicRequestQueue(
       book.id,
       queueIds.indexOf(_requestId),
     );

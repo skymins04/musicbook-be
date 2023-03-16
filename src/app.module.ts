@@ -14,11 +14,10 @@ import { BookModule } from './route/book/book.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { ScheduleModule } from '@nestjs/schedule';
-import { CronjobService } from './common/cronjob/cronjob.service';
 import { CloudflareModule } from './common/cloudflare/cloudflare.module';
 import { RedisModule } from './common/redis/redis.module';
 import { RequestModule } from './route/request/request.module';
+import { CronjobModule } from './cronjob/cronjob.module';
 
 @Module({
   imports: [
@@ -58,7 +57,7 @@ import { RequestModule } from './route/request/request.module';
     RepositoryModule,
     CloudflareModule,
     JwtAuthModule,
-    ScheduleModule.forRoot(),
+    CronjobModule,
     MelonModule,
     UserModule,
     MusicModule,
@@ -68,7 +67,6 @@ import { RequestModule } from './route/request/request.module';
   controllers: [AppController],
   providers: [
     AppService,
-    CronjobService,
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,

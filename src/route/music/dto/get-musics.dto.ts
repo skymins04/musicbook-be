@@ -118,7 +118,7 @@ export class GetMusicsResponseDTO
 {
   @ApiProperty({
     description: '수록곡 목록 조회 응답의 페이지네이션 관련 정보',
-    type: [GetMusicsResponseMetaDTO],
+    type: GetMusicsResponseMetaDTO,
   })
   meta: GetMusicsResponseMetaDTO;
   @ApiProperty({
