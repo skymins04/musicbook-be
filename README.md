@@ -40,6 +40,16 @@ or
 yarn install
 ```
 
+### DB Migration
+
+```sh
+npm migration:generate
+npm migration:run
+or
+yarn migration:generate
+yarn migration:run
+```
+
 ### 개발서버 실행
 
 ```sh
