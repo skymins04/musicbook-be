@@ -12,12 +12,12 @@ export interface CloudflareImagesUploadQueueData {
 }
 
 @Processor('cloudflare-images-upload')
-export class CloudflareImagesUploadProccesor {
+export class CloudflareImagesUploadProcessor {
   constructor() {
     this.logger.log('bull queue processor initialized.');
   }
 
-  private readonly logger = new Logger(CloudflareImagesUploadProccesor.name);
+  private readonly logger = new Logger(CloudflareImagesUploadProcessor.name);
 
   @Process()
   async uploadFile(job: Job<CloudflareImagesUploadQueueData>) {
@@ -44,8 +44,9 @@ export class CloudflareImagesUploadProccesor {
           `${job.data.uploadId} fail cloudflare images upload.`,
         );
       })
-      .finally(() => {
+      .finally(async () => {
         fs.unlinkSync(job.data.path);
+        await job.remove();
       });
   }
 }

@@ -16,7 +16,6 @@ import { RedisModule } from './common/redis/redis.module';
 import { RequestModule } from './route/request/request.module';
 import { CronjobModule } from './cronjob/cronjob.module';
 import { CloudflareMulterModule } from './common/cloudflare-multer/cloudflare-multer.module';
-import { CloudflareImagesUploadProccesor } from './common/cloudflare/cloudflare-images-upload.processor';
 
 @Module({
   imports: [
@@ -66,7 +65,6 @@ import { CloudflareImagesUploadProccesor } from './common/cloudflare/cloudflare-
   controllers: [AppController],
   providers: [
     AppService,
-    CloudflareImagesUploadProccesor,
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,

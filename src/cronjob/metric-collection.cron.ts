@@ -9,7 +9,7 @@ export class MetricCollectionCron {
     private readonly musicbookRepository: MusicBookRepository,
     private readonly musicbookLikeCountRepository: MusicBookLikeCountRepository,
   ) {
-    this.logger.log(MetricCollectionCron.name, 'initialized.');
+    this.logger.log(`${MetricCollectionCron.name} initialized.`);
   }
 
   private readonly logger = new Logger(MetricCollectionCron.name);

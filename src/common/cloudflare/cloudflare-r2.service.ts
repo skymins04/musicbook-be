@@ -4,13 +4,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class CloudflareR2Service {
-  private R2 = new AWS.S3({
+  private readonly R2 = new AWS.S3({
     endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     signatureVersion: 'v4',
     accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY,
     secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
   });
-  private DEFAULT_BUCKET_NAME = 'musicbook';
+  private readonly DEFAULT_BUCKET_NAME = 'musicbook';
 
   createBucket(_bucketName: string) {
     return this.R2.createBucket({ Bucket: _bucketName }).promise();
@@ -21,15 +21,16 @@ export class CloudflareR2Service {
   }
 
   putObject(
-    _file: Express.Multer.File,
+    _buffer: Buffer,
+    _contentType: string,
     _key?: string,
     _bucketName: string = this.DEFAULT_BUCKET_NAME,
   ) {
     return this.R2.putObject({
       Key: _key || uuidv4(),
-      Body: _file.buffer,
+      Body: _buffer,
       Bucket: _bucketName,
-      ContentType: _file.mimetype,
+      ContentType: _contentType,
     }).promise();
   }
 
