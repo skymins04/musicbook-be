@@ -130,6 +130,7 @@ export class MusicController {
     summary: '고유 수록곡 source의 이미지 Direct upload URL 획득',
     description:
       '고유 수록곡 source의 이미지를 Cloudflare images에 Direct upload하기 위한 URL 획득 엔드포인트. 1분 동안 최대 3번 요청 가능.',
+    deprecated: true,
   })
   @ApiOkResponse({
     description: 'Direct upload URL 획득',

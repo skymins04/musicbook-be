@@ -96,6 +96,7 @@ export class BookController {
     summary: '노래책 썸네일 및 배경 이미지 Direct upload URL 획득',
     description:
       '노래책 썸네일 및 배경 이미지를 Cloudflare images에 Direct upload하기 위한 URL 획득 엔드포인트. 10분 동안 최대 3번 요청 가능.',
+    deprecated: true,
   })
   @ApiOkResponse({
     description: 'Direct upload URL 획득',
