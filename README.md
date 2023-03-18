@@ -27,7 +27,8 @@
 - redis, mariadb 컨테이너 실행 (redis requirepass 설정 필)
 - GCP console에서 oauth client ID 및 secret 발급
 - twitch developer dashboard에서 client ID 및 secret 발급
-- cloudflare account ID 및 images token 발급
+- cloudflare account ID 및 images token, r2 service key+secret service kry 발급
+- cloudflare images와 r2는 workers를 통한 도메인 연결 필요
 - JWT_SECRET과 STATIC_SERVE_ROOT에 random string 기입
 
 ## 실행법
