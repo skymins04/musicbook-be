@@ -20,6 +20,7 @@ import { MusicBookLikeRepository } from './musicbook/musicbook-like.repository';
 import { SongRequestEntity } from './song-request/song-request.entity';
 import { SongRequestBlacklistEntity } from './song-request/song-request-blacklist.entity';
 import { SongRequestRepository } from './song-request/song-request.repository';
+import { MusicBookLikeCountRepository } from './musicbook/musicbook-like-count.repository';
 
 @Global()
 @Module({
@@ -78,6 +79,7 @@ import { SongRequestRepository } from './song-request/song-request.repository';
     MusicBookRepository,
     MusicBookSourceRepository,
     MusicBookLikeRepository,
+    MusicBookLikeCountRepository,
     SongRequestRepository,
   ],
   exports: [
@@ -86,6 +88,7 @@ import { SongRequestRepository } from './song-request/song-request.repository';
     MusicBookRepository,
     MusicBookSourceRepository,
     MusicBookLikeRepository,
+    MusicBookLikeCountRepository,
     SongRequestRepository,
   ],
 })

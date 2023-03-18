@@ -234,10 +234,10 @@ export class MusicService {
     }
 
     const albumThumbnailURL = _source.albumThumbnail
-      ? `https://cdnimg.musicbook.kr/${_source.albumThumbnail}/public`
+      ? `${process.env.CLOUDFLARE_IMAGES_CDN_ADDRESS}/${_source.albumThumbnail}/public`
       : undefined;
     const artistThumbnailURL = _source.artistThumbnail
-      ? `https://cdnimg.musicbook.kr/${_source.artistThumbnail}/public`
+      ? `${process.env.CLOUDFLARE_IMAGES_CDN_ADDRESS}/${_source.artistThumbnail}/public`
       : undefined;
 
     await this.musicbookSourceRepository.createMusicSourceOriginal({

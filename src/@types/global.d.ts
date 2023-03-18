@@ -19,6 +19,10 @@ declare namespace NodeJS {
     GOOGLE_CLIENT_SECRET: string;
     CLOUDFLARE_ACCOUNT_ID: string;
     CLOUDFLARE_IMAGES_TOKEN: string;
+    CLOUDFLARE_IMAGES_CDN_ADDRESS: string;
+    CLOUDFLARE_R2_ACCESS_KEY: string;
+    CLOUDFLARE_R2_SECRET_ACCESS_KEY: string;
+    CLOUDFLARE_R2_CDN_ADDRESS: string;
   }
 }
 

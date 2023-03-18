@@ -94,9 +94,11 @@ export class BookService {
 
     return {
       thumbnailImgURL:
-        _thumbnail && `https://cdnimg.musicbook.kr/${_thumbnail}/public`,
+        _thumbnail &&
+        `${process.env.CLOUDFLARE_IMAGES_CDN_ADDRESS}/${_thumbnail}/public`,
       backroundImgURL:
-        _background && `https://cdnimg.musicbook.kr/${_background}/public`,
+        _background &&
+        `${process.env.CLOUDFLARE_IMAGES_CDN_ADDRESS}/${_background}/public`,
     };
   }
 

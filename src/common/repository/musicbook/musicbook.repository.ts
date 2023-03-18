@@ -214,6 +214,22 @@ export class MusicBookRepository {
     });
   }
 
+  findAllMusic(_options?: {
+    withDeleted?: boolean;
+    withJoin?: boolean | ('broadcaster' | 'book')[];
+  }) {
+    return this.musicRepository.find({
+      relations:
+        _options?.withJoin === undefined || _options?.withJoin
+          ? typeof _options?.withJoin === 'boolean' ||
+            _options?.withJoin === undefined
+            ? ['broadcaster', 'book']
+            : _options?.withJoin
+          : [],
+      withDeleted: _options?.withDeleted,
+    });
+  }
+
   getMusicSearchQueryBuilder(_options?: {
     q?: string;
     category?: string;
@@ -436,6 +452,22 @@ export class MusicBookRepository {
   ) {
     return this.bookRepository.exist({
       where: { customId: _customId },
+      withDeleted: _options?.withDeleted,
+    });
+  }
+
+  findAllBook(_options?: {
+    withDeleted?: boolean;
+    withJoin?: boolean | ('broadcaster' | 'musics')[];
+  }) {
+    return this.bookRepository.find({
+      relations:
+        _options?.withJoin === undefined || _options?.withJoin
+          ? typeof _options?.withJoin === 'boolean' ||
+            _options?.withJoin === undefined
+            ? ['broadcaster']
+            : _options?.withJoin
+          : [],
       withDeleted: _options?.withDeleted,
     });
   }

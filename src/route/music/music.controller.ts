@@ -8,10 +8,14 @@ import {
   Post,
   Query,
   Req,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -44,11 +48,31 @@ import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.
 import { CreateMusicDTO } from './dto/create-music.dto';
 import { UpdateMyMusicDTO } from './dto/update-my-music.dto';
 import { MusicConfigDTO } from './dto/music-config.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('music')
 @ApiTags('Music')
 export class MusicController {
   constructor(private readonly musciService: MusicService) {}
+
+  @Post('test')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'file', maxCount: 1 }]))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  test(@UploadedFiles() files: Express.Multer.File) {
+    console.log(files);
+    return;
+  }
 
   @Get()
   @ApiOperation({
