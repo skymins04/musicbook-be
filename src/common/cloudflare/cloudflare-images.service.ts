@@ -1,8 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { CloudflareImagesUploadQueueData } from './cloudflare-images-upload.processor';
 
 @Injectable()
 export class CloudflareImagesService {
+  constructor(
+    @InjectQueue('cloudflare-images-upload')
+    private readonly cloudflareImagesUploadQueue: Queue<CloudflareImagesUploadQueueData>,
+  ) {}
+
+  addUploadQueue(_data: CloudflareImagesUploadQueueData) {
+    return this.cloudflareImagesUploadQueue.add(_data);
+  }
+
   getDirectUploadURL(_options?: {
     meta?: Record<string, string | number>;
     signedURL?: boolean;
