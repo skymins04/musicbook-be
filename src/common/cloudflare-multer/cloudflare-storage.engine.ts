@@ -45,6 +45,7 @@ export class CloudflareStorage implements StorageEngine {
         this.cloudflareR2Service
           .putObject(fs.readFileSync(_file.path), _file.mimetype, key)
           .then((result) => {
+            fs.unlinkSync(_file.path);
             _cb(null, { filename: key });
           });
       }
