@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,10 +9,13 @@ import {
   Post,
   Query,
   Req,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiConsumes,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -37,6 +41,7 @@ import { UpdateMyBookDTO } from './dto/update-my-book.dto';
 import { Jwt } from 'src/common/jwt-auth/jwt.decorator';
 import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 import { BookConfigDTO, BookConfigReponseDTO } from './dto/book-config.dto';
+import { ImgFilesInterceptor } from 'src/common/cloudflare-multer/image-files.interceptor';
 
 @Controller('book')
 @ApiTags('Book')
@@ -69,8 +74,10 @@ export class BookController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ImgFilesInterceptor(['thumbnail', 'background']))
   @Post()
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '노래책 생성',
     description:
@@ -82,10 +89,16 @@ export class BookController {
   })
   async createBook(
     @Jwt() _jwt: MusicbookJwtPayload,
+    @UploadedFiles() _files: MulterFiles<'thumbnail' | 'background'>,
     @Body() _body: CreateBookDTO,
   ) {
+    if (!_files.thumbnail) throw new BadRequestException();
     return new ApiResponseDataDTO(
-      await this.bookSerivce.createBook(_jwt, _body),
+      await this.bookSerivce.createBook(_jwt, {
+        ..._body,
+        thumbnail: _files.thumbnail[0].filename,
+        background: _files.background && _files.background[0].filename,
+      }),
     );
   }
 
@@ -128,8 +141,10 @@ export class BookController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ImgFilesInterceptor(['thumbnail', 'background']))
   @Patch('me')
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '본인 노래책 수정',
     description:
@@ -140,9 +155,14 @@ export class BookController {
   })
   async updateMyBook(
     @Jwt() _jwt: MusicbookJwtPayload,
+    @UploadedFiles() _files: MulterFiles<'thumbnail' | 'background'>,
     @Body() _body: UpdateMyBookDTO,
   ) {
-    await this.bookSerivce.updateMyBook(_jwt, _body);
+    await this.bookSerivce.updateMyBook(_jwt, {
+      ..._body,
+      thumbnail: _files.thumbnail && _files.thumbnail[0].filename,
+      background: _files.background && _files.background[0].filename,
+    });
   }
 
   @UseGuards(JwtAuthGuard)

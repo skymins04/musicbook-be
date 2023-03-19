@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UserLoginCallbackQueryDTO {
   @IsString()
@@ -17,4 +17,10 @@ export class UserLoginCallbackQueryDTO {
     example: 'profile+email',
   })
   scope: string;
+
+  @IsOptional()
+  authuser?: number;
+
+  @IsOptional()
+  prompt?: string;
 }

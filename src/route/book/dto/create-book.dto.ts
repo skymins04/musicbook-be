@@ -3,16 +3,17 @@ import { IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
 
 export class CreateBookDTO {
   @IsString()
-  @Matches(/^@[a-zA-Z0-9ㄱ-ㅎㅏ-ㅣ가-힣-_]{1,20}$/)
+  @Matches(/^[a-zA-Z0-9ㄱ-ㅎㅏ-ㅣ가-힣-_]{1,20}$/)
   @IsOptional()
   @ApiProperty({
     description:
       '노래책 custom ID. 한글, 영어, 숫자, -, _ 조합으로 최소 1자리 ~ 최대 20자리 가능.',
     type: String,
-    example: '@베타맨-BetaMan_04',
+    example: '베타맨-BetaMan_04',
     nullable: true,
+    required: false,
   })
-  customId: string;
+  customId?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -32,8 +33,9 @@ export class CreateBookDTO {
     type: String,
     example: '이것은 노래책 설명 텍스트.',
     nullable: true,
+    required: false,
   })
-  description: string;
+  description?: string;
 
   @IsString()
   @Matches(/^\![a-zA-Z0-9ㄱ-ㅎㅏ-ㅣ가-힣-_]{1,10}$/)
@@ -45,27 +47,25 @@ export class CreateBookDTO {
     example: '!노래책',
     default: '!노래책',
     nullable: true,
+    required: false,
   })
-  requestCommandPrefix: string;
+  requestCommandPrefix?: string;
 
-  @IsString()
-  @Matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
   @ApiProperty({
     description: '노래책 로고 썸네일 이미지 cloudflare images uuid',
     type: String,
+    format: 'binary',
     example: '2cdc28f0-017a-49c4-9ed7-87056c83901',
   })
   thumbnail: string;
 
-  @IsString()
-  @Matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
-  @IsOptional()
   @ApiProperty({
     description: '노래책 배경 커버 이미지 cloudflare images uuid',
     type: String,
+    format: 'binary',
     example: '2cdc28f0-017a-49c4-9ed7-87056c83901',
     nullable: true,
     required: false,
   })
-  background: string;
+  background?: string;
 }

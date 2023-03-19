@@ -13,6 +13,7 @@ import { UpdateMyBookDTO } from './dto/update-my-book.dto';
 import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 import { RedisService } from 'src/common/redis/redis.service';
 import { BookConfigDTO, BookConfigReponseDataDTO } from './dto/book-config.dto';
+import { getCloudflareImagesFileURL } from 'src/common/cloudflare-multer/getCloudflareFileURL';
 
 @Injectable()
 export class BookService {
@@ -108,24 +109,24 @@ export class BookService {
   ): Promise<BookEntity> {
     if (await this.musicbookRepository.existBookByUserId(_jwt.id))
       throw new BadRequestException('already created');
-
-    const { thumbnailImgURL, backroundImgURL } =
-      await this.checkBookImagesValidation(
-        _jwt,
-        _book.thumbnail,
-        _book.background,
-      );
+    if (
+      _book.customId &&
+      (await this.musicbookRepository.existBookByCustomId(_book.customId))
+    )
+      throw new BadRequestException('already used custom ID');
 
     return this.musicbookRepository.createBook({
       broadcaster: {
         id: _jwt.id,
       },
-      customId: _book.customId || undefined,
+      customId: _book.customId,
       title: _book.title,
       description: _book.description || '',
       requestCommandPrefix: _book.requestCommandPrefix || '!노래책',
-      thumbnailURL: thumbnailImgURL,
-      backgroundImgURL: backroundImgURL || 'https://exmple.com/example.png',
+      thumbnailURL: getCloudflareImagesFileURL(_book.thumbnail),
+      backgroundImgURL: _book.background
+        ? getCloudflareImagesFileURL(_book.background)
+        : 'https://exmple.com/example.png',
     });
   }
 
@@ -142,28 +143,22 @@ export class BookService {
       withJoin: false,
     });
     if (!book) throw new BadRequestException();
+    if (
+      _book.customId &&
+      (await this.musicbookRepository.existBookByCustomId(_book.customId))
+    )
+      throw new BadRequestException('already used custom ID');
 
-    const { thumbnailImgURL, backroundImgURL } =
-      await this.checkBookImagesValidation(
-        _jwt,
-        _book.thumbnail,
-        _book.background,
-      );
-
-    if (_book.thumbnail) {
-      book.thumbnailURL = thumbnailImgURL;
-      delete _book.thumbnail;
-    }
-    if (_book.background) {
-      book.backgroundImgURL = backroundImgURL;
-      delete _book.thumbnail;
-    }
-
-    for (const key of Object.keys(_book)) {
-      book[key] = _book[key];
-    }
-
-    await book.save();
+    await this.musicbookRepository.updateBook(book.id, {
+      customId: _book.customId,
+      title: _book.title,
+      description: _book.description,
+      requestCommandPrefix: _book.requestCommandPrefix,
+      thumbnailURL:
+        _book.thumbnail && getCloudflareImagesFileURL(_book.thumbnail),
+      backgroundImgURL:
+        _book.background && getCloudflareImagesFileURL(_book.background),
+    });
   }
 
   async deleteMyBook(_jwt: MusicbookJwtPayload) {
