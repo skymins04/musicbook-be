@@ -12,6 +12,7 @@ import { MelonModule } from './route/melon/melon.module';
 import { BookModule } from './route/book/book.module';
 import * as dotenv from 'dotenv';
 import { RequestModule } from './route/request/request.module';
+import { PlaylistModule } from './route/widget/playlist/playlist.module';
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ async function bootstrap() {
         MusicModule,
         BookModule,
         RequestModule,
+        PlaylistModule,
       ],
     },
   );

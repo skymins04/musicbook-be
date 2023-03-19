@@ -16,6 +16,7 @@ import { RedisModule } from './common/redis/redis.module';
 import { RequestModule } from './route/request/request.module';
 import { CronjobModule } from './cronjob/cronjob.module';
 import { CloudflareMulterModule } from './common/cloudflare-multer/cloudflare-multer.module';
+import { WidgetModule } from './route/widget/widget.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { CloudflareMulterModule } from './common/cloudflare-multer/cloudflare-mu
     MusicModule,
     BookModule,
     RequestModule,
+    WidgetModule,
   ],
   controllers: [AppController],
   providers: [
