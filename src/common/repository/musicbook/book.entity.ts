@@ -20,6 +20,7 @@ import { BookLikeCountEntity } from './book-like-count.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { SongRequestEntity } from '../song-request/song-request.entity';
 import { SongRequestBlacklistEntity } from '../song-request/song-request-blacklist.entity';
+import { WidgetPlaylistEntity } from '../widget-playlist/widget-playlist.entity';
 
 export const BookEntityFixture: DeepPartial<BookEntity>[] = [
   {
@@ -214,4 +215,6 @@ export class BookEntity extends BaseEntity {
   songRequests: SongRequestEntity[];
   @OneToMany(() => SongRequestBlacklistEntity, (blacklist) => blacklist.user)
   songRequestBlacklist: SongRequestBlacklistEntity[];
+  @OneToMany(() => WidgetPlaylistEntity, (widget) => widget.book)
+  widgetPlaylists: WidgetPlaylistEntity[];
 }

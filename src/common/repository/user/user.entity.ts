@@ -22,6 +22,7 @@ import { MusicLikeCountEntity } from '../musicbook/music-like-count.entity';
 import { BookLikeCountEntity } from '../musicbook/book-like-count.entity';
 import { SongRequestEntity } from '../song-request/song-request.entity';
 import { SongRequestBlacklistEntity } from '../song-request/song-request-blacklist.entity';
+import { WidgetPlaylistEntity } from '../widget-playlist/widget-playlist.entity';
 
 export const UserEntityFixture: DeepPartial<UserEntity>[] = [
   {
@@ -156,4 +157,6 @@ export class UserEntity extends BaseEntity {
   songRequests: SongRequestEntity[];
   @OneToMany(() => SongRequestBlacklistEntity, (blacklist) => blacklist.user)
   songRequestBlacklist: SongRequestBlacklistEntity[];
+  @OneToMany(() => WidgetPlaylistEntity, (widget) => widget.user)
+  widgetPlaylists: WidgetPlaylistEntity[];
 }

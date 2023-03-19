@@ -21,6 +21,7 @@ import { SongRequestEntity } from './song-request/song-request.entity';
 import { SongRequestBlacklistEntity } from './song-request/song-request-blacklist.entity';
 import { SongRequestRepository } from './song-request/song-request.repository';
 import { MusicBookLikeCountRepository } from './musicbook/musicbook-like-count.repository';
+import { WidgetPlaylistEntity } from './widget-playlist/widget-playlist.entity';
 
 @Global()
 @Module({
@@ -50,6 +51,7 @@ import { MusicBookLikeCountRepository } from './musicbook/musicbook-like-count.r
             BookLikeCountEntity,
             SongRequestEntity,
             SongRequestBlacklistEntity,
+            WidgetPlaylistEntity,
           ],
           synchronize: false,
           logging: config.get('NODE_ENV') === 'development',
@@ -72,6 +74,7 @@ import { MusicBookLikeCountRepository } from './musicbook/musicbook-like-count.r
       BookLikeCountEntity,
       SongRequestEntity,
       SongRequestBlacklistEntity,
+      WidgetPlaylistEntity,
     ]),
   ],
   providers: [
