@@ -21,7 +21,7 @@ export class WidgetPlaylistEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ default: '새 플레이리스트 위젯' })
   title: string;
 
   @Column({
