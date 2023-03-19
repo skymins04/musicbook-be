@@ -320,6 +320,7 @@ export class MusicBookRepository {
     const musicQueryBuilder = this.getMusicSearchQueryBuilder(_options);
 
     return musicQueryBuilder
+      .leftJoinAndSelect('music.musicLikes', 'likes')
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')
       .groupBy('music.id')

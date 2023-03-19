@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiConsumes,
   ApiOkResponse,
   ApiOperation,
@@ -48,6 +47,8 @@ import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.
 import { CreateMusicDTO } from './dto/create-music.dto';
 import { UpdateMyMusicDTO } from './dto/update-my-music.dto';
 import { MusicConfigDTO } from './dto/music-config.dto';
+import { ImgFilesInterceptor } from 'src/common/cloudflare-multer/image-files.interceptor';
+import { AudioFilesInterceptor } from 'src/common/cloudflare-multer/audio-files.interceptor';
 
 @Controller('music')
 @ApiTags('Music')
@@ -86,8 +87,10 @@ export class MusicController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(AudioFilesInterceptor(['previewFile', 'mrFile']))
   @Post()
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '수록곡 생성',
     description:
@@ -99,16 +102,23 @@ export class MusicController {
   })
   async createMusic(
     @Jwt() _jwt: MusicbookJwtPayload,
+    @UploadedFiles() _files: MulterFiles<'previewFile' | 'mrFile'>,
     @Body() _body: CreateMusicDTO,
   ): Promise<MusicResponseDTO> {
     return new ApiResponseDataDTO(
-      await this.musciService.createMusic(_jwt, _body),
+      await this.musciService.createMusic(_jwt, {
+        ..._body,
+        previewFile: _files.previewFile && _files.previewFile[0],
+        mrFile: _files.mrFile && _files.mrFile[0],
+      }),
     );
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ImgFilesInterceptor(['artistThumbnail', 'albumThumbnail']))
   @Post('source/original')
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '고유 수록곡 source 생성',
     description: 'original source 생성 엔드포인트.',
@@ -118,9 +128,16 @@ export class MusicController {
   })
   async createOriginalSource(
     @Jwt() _jwt: MusicbookJwtPayload,
+    @UploadedFiles() _files: MulterFiles<'artistThumbnail' | 'albumThumbnail'>,
     @Body() _body: CreateOriginalSourceDTO,
   ) {
-    await this.musciService.createOriginalSource(_jwt, _body);
+    await this.musciService.createOriginalSource(_jwt, {
+      ..._body,
+      artistThumbnail:
+        _files.artistThumbnail && _files.artistThumbnail[0].filename,
+      albumThumbnail:
+        _files.albumThumbnail && _files.albumThumbnail[0].filename,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -207,8 +224,10 @@ export class MusicController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(AudioFilesInterceptor(['previewFile', 'mrFile']))
   @Patch(':musicId')
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '본인 수록곡 수정',
     description:
@@ -217,10 +236,15 @@ export class MusicController {
   async updateMyMusic(
     @Jwt() _jwt,
     @Param() _param: MusicIdDTO,
+    @UploadedFiles() _files: MulterFiles<'previewFile' | 'mrFile'>,
     @Body() _body: UpdateMyMusicDTO,
   ) {
     const { musicId } = _param;
-    await this.musciService.updateMyMusic(_jwt, musicId, _body);
+    await this.musciService.updateMyMusic(_jwt, musicId, {
+      ..._body,
+      previewFile: _files.previewFile && _files.previewFile[0],
+      mrFile: _files.mrFile && _files.mrFile[0],
+    });
   }
 
   @UseGuards(JwtAuthGuard)

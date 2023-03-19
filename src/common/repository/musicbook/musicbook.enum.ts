@@ -13,16 +13,16 @@ export enum EMusicPreviewType {
   YOUTUBE = 'YOUTUBE',
   // SOUNDCLOUD = 'SOUNDCLOUD',
   // SPOTIFY = 'SPOTIFY',
-  // FLAC = 'FLAC',
-  // WAV = 'WAV',
-  // MP3 = 'MP3',
+  FLAC = 'FLAC',
+  WAV = 'WAV',
+  MP3 = 'MP3',
 }
 
 export enum EMusicMRType {
   YOUTUBE = 'YOUTUBE',
   // SOUNDCLOUD = 'SOUNDCLOUD',
   // SPOTIFY = 'SPOTIFY',
-  // FLAC = 'FLAC',
-  // WAV = 'WAV',
-  // MP3 = 'MP3',
+  FLAC = 'FLAC',
+  WAV = 'WAV',
+  MP3 = 'MP3',
 }

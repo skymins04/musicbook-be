@@ -25,12 +25,10 @@ export class CreateOriginalSourceDTO {
   })
   artistName: string;
 
-  @IsString()
-  @IsOptional()
-  @Matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
   @ApiProperty({
     description: '원곡자 프로필 이미지 cloudflare images uuid',
     type: String,
+    format: 'binary',
     example: '2cdc28f0-017a-49c4-9ed7-87056c83901',
     nullable: true,
     required: false,
@@ -58,12 +56,10 @@ export class CreateOriginalSourceDTO {
   })
   albumTitle?: string;
 
-  @IsString()
-  @IsOptional()
-  @Matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
   @ApiProperty({
     description: '앨범 썸네일 이미지 cloudflare images uuid',
     type: String,
+    format: 'binary',
     example: '2cdc28f0-017a-49c4-9ed7-87056c83901',
     nullable: true,
     required: false,

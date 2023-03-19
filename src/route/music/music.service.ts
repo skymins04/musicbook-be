@@ -25,6 +25,10 @@ import {
   MusicConfigDTO,
   MusicConfigReponseDataDTO,
 } from './dto/music-config.dto';
+import {
+  getCloudflareImagesFileURL,
+  getCloudflareR2FileURL,
+} from 'src/common/cloudflare-multer/getCloudflareFileURL';
 
 @Injectable()
 export class MusicService {
@@ -141,18 +145,35 @@ export class MusicService {
 
   private validateURLTypeHandler: Record<
     keyof typeof EMusicPreviewType | keyof typeof EMusicMRType,
-    (_url: string) => [boolean, string | null]
+    (_url?: string, _file?: Express.Multer.File) => [boolean, string | null]
   > = {
     YOUTUBE: (_url) => {
-      const match = !!_url.match(
+      const match = !!_url?.match(
         /(http:|https:)?(\/\/)?(www\.)?(youtube.com|youtu.be)\/(watch|embed)?(\?v=|\/)?(\S+)?/g,
       );
       const id = match
-        ? _url.match(
-            /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/,
-          )[7]
+        ? `https://youtube.com/watch?v=${
+            _url.match(
+              /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/,
+            )[7]
+          }`
         : null;
       return [match, id];
+    },
+    FLAC: (_url, _file) => {
+      if (_file?.mimetype.match(/^audio\/(x-)?flac$/))
+        return [true, getCloudflareR2FileURL(_file.filename)];
+      return [false, null];
+    },
+    WAV: (_url, _file) => {
+      if (_file?.mimetype.match(/^audio\/(x-)?wav$/))
+        return [true, getCloudflareR2FileURL(_file.filename)];
+      return [false, null];
+    },
+    MP3: (_url, _file) => {
+      if (_file?.mimetype.match(/^audio\/mpeg$/))
+        return [true, getCloudflareR2FileURL(_file.filename)];
+      return [false, null];
     },
   };
 
@@ -160,22 +181,25 @@ export class MusicService {
     const book = await this.musicbookRepository.findOneBookByUserId(_jwt.id);
     if (!book) throw new BadRequestException();
 
-    if (_music.mrURL && _music.mrType) {
+    if (_music.mrType) {
       const [result, id] = this.validateURLTypeHandler[_music.mrType](
         _music.mrURL,
+        _music.mrFile,
       );
       if (result) _music.mrURL = id;
-      else throw new BadRequestException();
-    } else if (_music.mrURL && !_music.mrType) throw new BadRequestException();
+      else throw new BadRequestException('invaild mr source');
+    } else if ((_music.mrURL || _music.mrFile) && !_music.mrType)
+      throw new BadRequestException('not found mr source');
 
-    if (_music.previewURL && _music.previewType) {
+    if (_music.previewType) {
       const [result, id] = this.validateURLTypeHandler[_music.previewType](
         _music.previewURL,
+        _music.previewFile,
       );
       if (result) _music.previewURL = id;
-      else throw new BadRequestException();
-    } else if (_music.previewURL && !_music.previewType)
-      throw new BadRequestException();
+      else throw new BadRequestException('invaild preview source');
+    } else if ((_music.previewURL || _music.previewFile) && !_music.previewType)
+      throw new BadRequestException('not found preview source');
 
     return this.createMusicTypeHandler[_music.type](_jwt.id, book, _music);
   }
@@ -213,40 +237,17 @@ export class MusicService {
     _jwt: MusicbookJwtPayload,
     _source: CreateOriginalSourceDTO,
   ) {
-    const imgs: { id: string; type: string }[] = [];
-    if (_source.albumThumbnail)
-      imgs.push({
-        id: _source.albumThumbnail,
-        type: 'music_source_albumThumbnail',
-      });
-    if (_source.artistThumbnail)
-      imgs.push({
-        id: _source.artistThumbnail,
-        type: 'music_source_artistThumbnail',
-      });
-
-    for (const img of imgs) {
-      await this.cloudflareImagesService.validateImage(
-        img.id,
-        _jwt.id,
-        img.type,
-      );
-    }
-
-    const albumThumbnailURL = _source.albumThumbnail
-      ? `${process.env.CLOUDFLARE_IMAGES_CDN_ADDRESS}/${_source.albumThumbnail}/public`
-      : undefined;
-    const artistThumbnailURL = _source.artistThumbnail
-      ? `${process.env.CLOUDFLARE_IMAGES_CDN_ADDRESS}/${_source.artistThumbnail}/public`
-      : undefined;
-
     await this.musicbookSourceRepository.createMusicSourceOriginal({
       songTitle: _source.title,
       artistName: _source.artistName,
-      artistThumbnail: artistThumbnailURL,
+      artistThumbnail:
+        _source.artistThumbnail &&
+        getCloudflareImagesFileURL(_source.artistThumbnail),
       category: _source.category,
       albumTitle: _source.albumTitle,
-      albumThumbnail: albumThumbnailURL,
+      albumThumbnail:
+        _source.albumThumbnail &&
+        getCloudflareImagesFileURL(_source.albumThumbnail),
       lyrics: _source.lyrics,
     });
   }
@@ -266,22 +267,28 @@ export class MusicService {
     _musicId: string,
     _music: UpdateMyMusicDTO,
   ) {
-    if (_music.mrURL && _music.mrType) {
+    if (_music.mrType) {
       const [result, id] = this.validateURLTypeHandler[_music.mrType](
         _music.mrURL,
+        _music.mrFile,
       );
       if (result) _music.mrURL = id;
-      else throw new BadRequestException();
-    } else if (_music.mrURL && !_music.mrType) throw new BadRequestException();
+      else throw new BadRequestException('invaild mr source');
+    } else if ((_music.mrURL || _music.mrFile) && !_music.mrType)
+      throw new BadRequestException('not found mr source');
 
-    if (_music.previewURL && _music.previewType) {
+    if (_music.previewType) {
       const [result, id] = this.validateURLTypeHandler[_music.previewType](
         _music.previewURL,
+        _music.previewFile,
       );
       if (result) _music.previewURL = id;
-      else throw new BadRequestException();
-    } else if (_music.previewURL && !_music.previewType)
-      throw new BadRequestException();
+      else throw new BadRequestException('invaild preview source');
+    } else if ((_music.previewURL || _music.previewFile) && !_music.previewType)
+      throw new BadRequestException('not found preview source');
+
+    delete _music.mrFile;
+    delete _music.previewFile;
 
     await this.musicbookRepository.updateMusic(
       { id: _musicId, broadcaster: { id: _jwt.id } },
