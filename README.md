@@ -19,6 +19,7 @@
 - TypeORM (MariaDB)
 - Redis
 - Cloudflare Images
+- Cloudflare R2
 
 ## 서버구성
 
