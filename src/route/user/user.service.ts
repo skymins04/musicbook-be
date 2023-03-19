@@ -199,7 +199,11 @@ export class UserService {
   }
 
   async updateMeInfo(_jwt: MusicbookJwtPayload, _meInfo: UserMeUpdateDTO) {
-    await this.userRepository.updateUser(_jwt.id, { ..._meInfo });
+    await this.userRepository.updateUser(_jwt.id, {
+      displayName: _meInfo.displayName,
+      description: _meInfo.description,
+      profileImgURL: _meInfo.profileImg,
+    });
   }
 
   async getLinkableTwitchToUser(

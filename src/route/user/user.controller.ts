@@ -8,16 +8,18 @@ import {
   Query,
   Redirect,
   Res,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import * as dotenv from 'dotenv';
 import { UserLoginCallbackQueryDTO } from './dto/user-login.dto';
 import { Response } from 'express';
 import { ApiResponseDataDTO } from 'src/common/api-response/api-response-data.dto';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
 import {
   ApiBearerAuth,
+  ApiConsumes,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -25,8 +27,8 @@ import {
 import { UserMeResponseDTO, UserMeUpdateDTO } from './dto/user-me.dto';
 import { UserLinkaCallbackResponseDTO } from './dto/user-link.dto';
 import { Jwt } from 'src/common/jwt-auth/jwt.decorator';
-
-dotenv.config();
+import { ImgFilesInterceptor } from 'src/common/cloudflare-multer/image-files.interceptor';
+import { getCloudflareImagesFileURL } from 'src/common/cloudflare-multer/getCloudflareFileURL';
 
 const TWITCH_CLIENT_SCOPES = [
   'user:read:follows',
@@ -58,11 +60,10 @@ export class UserController {
     summary: '트위치를 통한 사용자 로그인',
     description: `트위치를 통한 사용자 로그인 jwt를 생성하고 쿠키 "jwt"로 전달하는 엔드포인트. 등록된 적 없는 사용자일 경우 새로 생성 후 jwt를 발급한다.`,
   })
-  @Redirect(
-    `https://id.twitch.tv/oauth2/authorize?client_id=${process.env.TWITCH_CLIENT_ID}&redirect_uri=${process.env.API_ADDRESS}/user/login/twitch/cb&response_type=code&scope=${TWITCH_CLIENT_SCOPES}`,
-  )
-  loginByTwitch() {
-    return;
+  loginByTwitch(@Res({ passthrough: true }) _res: Response) {
+    _res.redirect(
+      `https://id.twitch.tv/oauth2/authorize?client_id=${process.env.TWITCH_CLIENT_ID}&redirect_uri=${process.env.API_ADDRESS}/user/login/twitch/cb&response_type=code&scope=${TWITCH_CLIENT_SCOPES}`,
+    );
   }
 
   @Get('login/twitch/cb')
@@ -86,11 +87,10 @@ export class UserController {
     summary: '구글을 통한 사용자 로그인',
     description: `구글을 통한 사용자 로그인 jwt를 생성하고 쿠키 "jwt"로 전달하는 엔드포인트. 등록된 적 없는 사용자일 경우 새로 생성 후 jwt를 발급한다.`,
   })
-  @Redirect(
-    `https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=${process.env.API_ADDRESS}/user/login/google/cb&scope=${GOOGLE_CLIENT_SCOPES}&client_id=${process.env.GOOGLE_CLIENT_ID}&service=lso&o2v=2&flowName=GeneralOAuthFlow&prompt=select_account`,
-  )
-  loginByGoogle() {
-    return;
+  loginByGoogle(@Res({ passthrough: true }) _res: Response) {
+    _res.redirect(
+      `https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=${process.env.API_ADDRESS}/user/login/google/cb&scope=${GOOGLE_CLIENT_SCOPES}&client_id=${process.env.GOOGLE_CLIENT_ID}&service=lso&o2v=2&flowName=GeneralOAuthFlow&prompt=select_account`,
+    );
   }
 
   @Get('login/google/cb')
@@ -125,32 +125,39 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ImgFilesInterceptor(['profileImg']))
   @Patch('me')
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({
     summary: '사용자 본인의 정보 업데이트',
     description: `사용자 본인의 정보를 업데이트하는 엔드포인트.`,
   })
   async updateMeInfo(
     @Jwt() _jwt: MusicbookJwtPayload,
+    @UploadedFiles() _files: Record<'profileImg', Express.Multer.File[]>,
     @Body() _body: UserMeUpdateDTO,
   ) {
-    await this.userService.updateMeInfo(_jwt, _body);
+    await this.userService.updateMeInfo(_jwt, {
+      ..._body,
+      profileImg:
+        _files.profileImg &&
+        getCloudflareImagesFileURL(_files.profileImg[0].filename),
+    });
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('/link/twitch')
-  @Redirect(
-    `https://id.twitch.tv/oauth2/authorize?client_id=${process.env.TWITCH_CLIENT_ID}&redirect_uri=${process.env.API_ADDRESS}/user/link/twitch/cb&response_type=code&scope=${TWITCH_CLIENT_SCOPES}&force_verify=true`,
-  )
   @ApiBearerAuth()
   @ApiOperation({
     summary: '트위치 계정 사용자 연동',
     description:
       '트위치 계정을 노래책 사용자에 연동하는 엔드포인트. 트위치 OAuth 페이지로 리다이렉트 후, /user/link/twitch/cb로 콜백됨.',
   })
-  async linkTwitchToUser() {
-    return;
+  async linkTwitchToUser(@Res({ passthrough: true }) _res: Response) {
+    _res.redirect(
+      `https://id.twitch.tv/oauth2/authorize?client_id=${process.env.TWITCH_CLIENT_ID}&redirect_uri=${process.env.API_ADDRESS}/user/link/twitch/cb&response_type=code&scope=${TWITCH_CLIENT_SCOPES}&force_verify=true`,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -201,17 +208,16 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/link/google')
-  @Redirect(
-    `https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=${process.env.API_ADDRESS}/user/link/google/cb&scope=${GOOGLE_CLIENT_SCOPES}&client_id=${process.env.GOOGLE_CLIENT_ID}&service=lso&o2v=2&flowName=GeneralOAuthFlow&prompt=select_account`,
-  )
   @ApiBearerAuth()
   @ApiOperation({
     summary: '구글 계정 사용자 연동',
     description:
       '구글 계정을 노래책 사용자에 연동하는 엔드포인트. 구글 OAuth 페이지로 리다이렉트 후, /user/link/google/cb로 콜백됨.',
   })
-  async linkGoogleToUser() {
-    return;
+  async linkGoogleToUser(@Res({ passthrough: true }) _res: Response) {
+    _res.redirect(
+      `https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=${process.env.API_ADDRESS}/user/link/google/cb&scope=${GOOGLE_CLIENT_SCOPES}&client_id=${process.env.GOOGLE_CLIENT_ID}&service=lso&o2v=2&flowName=GeneralOAuthFlow&prompt=select_account`,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
