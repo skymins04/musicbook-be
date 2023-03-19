@@ -33,3 +33,5 @@ declare interface MusicbookJwtPayload {
   provider: string;
   providerId: string;
 }
+
+declare type MulterFiles<T = string> = Record<T, Express.Multer.File[]>;

@@ -135,7 +135,7 @@ export class UserController {
   })
   async updateMeInfo(
     @Jwt() _jwt: MusicbookJwtPayload,
-    @UploadedFiles() _files: Record<'profileImg', Express.Multer.File[]>,
+    @UploadedFiles() _files: MulterFiles<'profileImg'>,
     @Body() _body: UserMeUpdateDTO,
   ) {
     await this.userService.updateMeInfo(_jwt, {
