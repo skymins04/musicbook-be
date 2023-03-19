@@ -22,6 +22,7 @@ import { SongRequestBlacklistEntity } from './song-request/song-request-blacklis
 import { SongRequestRepository } from './song-request/song-request.repository';
 import { MusicBookLikeCountRepository } from './musicbook/musicbook-like-count.repository';
 import { WidgetPlaylistEntity } from './widget-playlist/widget-playlist.entity';
+import { WidgetPlaylistRepository } from './widget-playlist/widget-playlist.repository';
 
 @Global()
 @Module({
@@ -84,6 +85,7 @@ import { WidgetPlaylistEntity } from './widget-playlist/widget-playlist.entity';
     MusicBookLikeRepository,
     MusicBookLikeCountRepository,
     SongRequestRepository,
+    WidgetPlaylistRepository,
   ],
   exports: [
     TypeOrmModule,
@@ -93,6 +95,7 @@ import { WidgetPlaylistEntity } from './widget-playlist/widget-playlist.entity';
     MusicBookLikeRepository,
     MusicBookLikeCountRepository,
     SongRequestRepository,
+    WidgetPlaylistRepository,
   ],
 })
 export class RepositoryModule {}

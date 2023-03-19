@@ -12,15 +12,15 @@ export class WidgetPlaylistRepository {
     private readonly musicbookRepository: MusicBookRepository,
   ) {}
 
-  async createWidgetPlaylist(_userId: string) {
+  async createWidgetPlaylist(_userId: string): Promise<WidgetPlaylistEntity> {
     const book = await this.musicbookRepository.findOneBookByUserId(_userId, {
       withJoin: ['broadcaster'],
     });
     if (!book) throw new BadRequestException('not found book');
 
-    return this.widgetPlaylistRepository.save([
-      { book, user: book.broadcaster },
-    ]);
+    return this.widgetPlaylistRepository.save(
+      new WidgetPlaylistEntity({ book, user: book.broadcaster }),
+    );
   }
 
   async updateWidgetPlaylist(
@@ -55,6 +55,27 @@ export class WidgetPlaylistRepository {
     });
   }
 
+  findOneWidgetPlaylistByWidgetIdAndUserId(
+    _widgetId: string,
+    _userId: string,
+    _options?: {
+      withDeleted?: boolean;
+      withJoin?: boolean | ('user' | 'book')[];
+    },
+  ) {
+    return this.widgetPlaylistRepository.findOne({
+      where: { id: _widgetId, user: { id: _userId } },
+      relations:
+        _options?.withJoin === undefined || _options?.withJoin
+          ? typeof _options?.withJoin === 'boolean' ||
+            _options?.withJoin === undefined
+            ? ['book']
+            : _options?.withJoin
+          : [],
+      withDeleted: _options?.withDeleted,
+    });
+  }
+
   existWidgetPlaylist(
     _widgetId: string,
     _options?: {
@@ -74,7 +95,7 @@ export class WidgetPlaylistRepository {
       withJoin?: boolean | ('user' | 'book')[];
     },
   ) {
-    return this.widgetPlaylistRepository.findOne({
+    return this.widgetPlaylistRepository.find({
       where: { user: { id: _userId } },
       relations:
         _options?.withJoin === undefined || _options?.withJoin
@@ -94,7 +115,7 @@ export class WidgetPlaylistRepository {
       withJoin?: boolean | ('user' | 'book')[];
     },
   ) {
-    return this.widgetPlaylistRepository.findOne({
+    return this.widgetPlaylistRepository.find({
       where: { book: { id: _bookId } },
       relations:
         _options?.withJoin === undefined || _options?.withJoin
