@@ -2,6 +2,9 @@
 
 지상최고의 음악방송 플랫폼 서비스, 노래책 Backend API
 
+- Service Domain: https://api.musicbook.kr
+- Swagger Docs: https://api.musicbook.kr/docs
+
 ## 기능
 
 - 노래책 회원 관리
