@@ -178,7 +178,7 @@ export class MelonService {
         melonSource.artistThumbnail = artistThumbnail;
         melonSource.albumThumbnail1000 = `${thumbnailBaseURL}_1000.jpg`;
         melonSource.albumThumbnail500 = `${thumbnailBaseURL}_500.jpg`;
-        melonSource.albumThumbnail200 = `${thumbnailBaseURL}_200.jpg`;
+        melonSource.albumThumbnail200 = `${thumbnailBaseURL}.jpg`;
         melonSource.lyrics = lyrics;
         await melonSource.save();
 
