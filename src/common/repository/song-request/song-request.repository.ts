@@ -21,22 +21,27 @@ export class SongRequestRepository {
     });
     const songRequests = await this.findManySongRequestByBookId(music.book.id);
 
+    if (!music) throw new BadRequestException('not found music');
+    if (music.isHide || music.book.isHide)
+      throw new BadRequestException('hidden music');
+    if (!music.isAllowRequest || !music.book.isAllowRequest)
+      throw new BadRequestException('not allowed request');
     if (
-      !music ||
-      music.isHide ||
-      music.book.isHide ||
-      !music.isAllowRequest ||
-      !music.book.isAllowRequest ||
-      (music.book.isAllowRequest &&
-        music.book.requestLimitCount >= 0 &&
-        songRequests.length >= music.book.requestLimitCount) ||
-      (!music.book.isAllowDuplicateRequest &&
-        songRequests.filter(
-          (x) => x.viewer.id === _userId && x.music.id === _musicId,
-        ).length !== 0) ||
-      (await this.findOneBlacklistUser(music.book.id, _userId))
+      music.book.isAllowRequestLimit &&
+      music.book.requestLimitCount >= 0 &&
+      songRequests.length >= music.book.requestLimitCount
+    ) {
+      throw new BadRequestException('overed request limit count');
+    }
+    if (
+      !music.book.isAllowDuplicateRequest &&
+      songRequests.filter(
+        (x) => x.viewer.id === _userId && x.music.id === _musicId,
+      ).length !== 0
     )
-      throw new BadRequestException();
+      throw new BadRequestException('not allowed duplicate request');
+    if (await this.findOneBlacklistUser(music.book.id, _userId))
+      throw new BadRequestException('blacklisted user');
 
     const songRequest = new SongRequestEntity({
       viewer: { id: _userId },

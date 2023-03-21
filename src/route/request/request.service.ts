@@ -3,6 +3,8 @@ import { RedisMusicRequestService } from 'src/common/redis/redis-music-request.s
 import { MusicBookRepository } from 'src/common/repository/musicbook/musicbook.repository';
 import { SongRequestEntity } from 'src/common/repository/song-request/song-request.entity';
 import { SongRequestRepository } from 'src/common/repository/song-request/song-request.repository';
+import { PlaylistGateway } from '../widget/playlist/playlist.gateway';
+import { WidgetPlaylistRepository } from 'src/common/repository/widget-playlist/widget-playlist.repository';
 
 @Injectable()
 export class RequestService {
@@ -10,7 +12,19 @@ export class RequestService {
     private readonly redisMusicRequestService: RedisMusicRequestService,
     private readonly songRequestRepository: SongRequestRepository,
     private readonly musicbookRepository: MusicBookRepository,
+    private readonly widgetPlaylistRepository: WidgetPlaylistRepository,
+    private readonly widgetPlaylistGateway: PlaylistGateway,
   ) {}
+
+  async updateWidgetPlaylist(_bookId: string) {
+    const widgets =
+      await this.widgetPlaylistRepository.findManyWidgetPlaylistByBookId(
+        _bookId,
+      );
+    for (const widget of widgets) {
+      this.widgetPlaylistGateway.sendUpdateEventByWidgetId(widget.id);
+    }
+  }
 
   async createSongRequest(_jwt: MusicbookJwtPayload, _musicId: string) {
     const { music, songRequest } =
@@ -20,6 +34,8 @@ export class RequestService {
       songRequest.id,
       music.id,
     );
+
+    await this.updateWidgetPlaylist(music.book.id);
   }
 
   async deleteSongRequest(_jwt: MusicbookJwtPayload, _requestId: number) {
@@ -42,6 +58,8 @@ export class RequestService {
       songRequest.book.id,
       queue.map((x) => x.req_id).indexOf(_requestId),
     );
+
+    await this.updateWidgetPlaylist(songRequest.book.id);
   }
 
   getMySongRequests(_jwt: MusicbookJwtPayload) {
@@ -104,6 +122,8 @@ export class RequestService {
         songRequest.music.id,
       );
     }
+
+    await this.updateWidgetPlaylist(book.id);
   }
 
   async getSongRequestBlacklist(_jwt: MusicbookJwtPayload) {
@@ -142,6 +162,8 @@ export class RequestService {
       book.id,
       queueIds.indexOf(_requestId),
     );
+
+    await this.updateWidgetPlaylist(book.id);
   }
 
   async moveDownSongRequest(_jwt: MusicbookJwtPayload, _requestId: number) {
@@ -155,5 +177,7 @@ export class RequestService {
       book.id,
       queueIds.indexOf(_requestId),
     );
+
+    await this.updateWidgetPlaylist(book.id);
   }
 }

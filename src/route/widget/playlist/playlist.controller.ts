@@ -105,6 +105,10 @@ export class PlaylistController {
     description:
       '특정 플레이리스트 위젯을 조회하는 엔드포인트. 존재하지 않는 위젯 ID일 경우 404에러 반환.',
   })
+  @ApiOkResponse({
+    description: '위젯 조회 성공',
+    type: PlaylistResponseDTO,
+  })
   async getOneWidgetPlaylist(@Param() _param: PlaylistWidgetIdDTO) {
     const { widgetId } = _param;
     return new ApiResponseDataDTO(
