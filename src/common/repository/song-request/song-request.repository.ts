@@ -78,7 +78,16 @@ export class SongRequestRepository {
   findOneSongRequestById(
     _requestId: number,
     _options?: {
-      withJoin?: boolean | ('viewer' | 'broadcaster' | 'music' | 'book')[];
+      withJoin?:
+        | boolean
+        | (
+            | 'viewer'
+            | 'broadcaster'
+            | 'music'
+            | 'book'
+            | 'music.musicSourceMelon'
+            | 'music.musicSourceOriginal'
+          )[];
     },
   ) {
     return this.songRequestRepository.findOne({
@@ -89,7 +98,14 @@ export class SongRequestRepository {
         _options?.withJoin === undefined
           ? []
           : typeof _options.withJoin === 'boolean'
-          ? ['viewer', 'broadcaster', 'music', 'book']
+          ? [
+              'viewer',
+              'broadcaster',
+              'music',
+              'book',
+              'music.musicSourceMelon',
+              'music.musicSourceOriginal',
+            ]
           : _options.withJoin,
     });
   }
@@ -97,7 +113,14 @@ export class SongRequestRepository {
   findManySongRequestByIds(_requestIds: number[]) {
     return this.songRequestRepository.find({
       where: _requestIds.map((x) => ({ id: x })),
-      relations: ['viewer', 'broadcaster', 'music', 'book'],
+      relations: [
+        'viewer',
+        'broadcaster',
+        'music',
+        'book',
+        'music.musicSourceMelon',
+        'music.musicSourceOriginal',
+      ],
     });
   }
 
@@ -109,7 +132,14 @@ export class SongRequestRepository {
         },
         isCompleted: false,
       },
-      relations: ['viewer', 'broadcaster', 'music', 'book'],
+      relations: [
+        'viewer',
+        'broadcaster',
+        'music',
+        'book',
+        'music.musicSourceMelon',
+        'music.musicSourceOriginal',
+      ],
     });
   }
 
@@ -121,7 +151,14 @@ export class SongRequestRepository {
         },
         isCompleted: false,
       },
-      relations: ['viewer', 'broadcaster', 'music', 'book'],
+      relations: [
+        'viewer',
+        'broadcaster',
+        'music',
+        'book',
+        'music.musicSourceMelon',
+        'music.musicSourceOriginal',
+      ],
     });
   }
 
@@ -133,7 +170,14 @@ export class SongRequestRepository {
         },
         isCompleted: false,
       },
-      relations: ['viewer', 'broadcaster', 'music', 'book'],
+      relations: [
+        'viewer',
+        'broadcaster',
+        'music',
+        'book',
+        'music.musicSourceMelon',
+        'music.musicSourceOriginal',
+      ],
     });
   }
 
