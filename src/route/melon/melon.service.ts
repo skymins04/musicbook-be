@@ -142,12 +142,13 @@ export class MelonService {
           .text()
           .trim();
 
-        const lyrics = $song('#d_video_summary')
-          .html()
-          .replace(/\<\!\-\-.*\-\-\>/g, '')
-          .replace(/\<br ?\/?\>/g, '\n')
-          .replace(/\\t/g, '')
-          .trim();
+        const lyrics =
+          $song('#d_video_summary')
+            .html()
+            ?.replace(/\<\!\-\-.*\-\-\>/g, '')
+            .replace(/\<br ?\/?\>/g, '\n')
+            .replace(/\\t/g, '')
+            .trim() || '';
 
         const thumbnailRawURL = $song(
           '#downloadfrm > div > div > div.thumb > a > img',
