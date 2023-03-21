@@ -11,7 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { WidgetPlaylistRepository } from 'src/common/repository/widget-playlist/widget-playlist.repository';
 
 @Injectable()
-@WebSocketGateway({ namespace: /\/ws-widget-playlist-.+/ })
+@WebSocketGateway({ namespace: /\/ws-widget-playlist-.+/, cors: true })
 export class PlaylistGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
