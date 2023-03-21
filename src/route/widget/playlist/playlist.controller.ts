@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -19,6 +20,7 @@ import { Jwt } from 'src/common/jwt-auth/jwt.decorator';
 import { PlaylistService } from './playlist.service';
 import {
   PlaylistResponseDTO,
+  PlaylistUpdateDTO,
   PlaylistWidgetIdDTO,
   PlaylistsResponseDTO,
 } from './dto/playlist.dto';
@@ -68,11 +70,18 @@ export class PlaylistController {
   @Patch(':widgetId')
   @ApiBearerAuth()
   @ApiOperation({
-    summary: '(wip) 플레이리스트 위젯 정보 수정',
+    summary: '플레이리스트 위젯 정보 수정',
     description:
       '플레이리스트 위젯의 정보를 수정하는 엔드포인트. 존재하지 않는 위젯 ID일 경우 400에러 반환.',
   })
-  async updateWidgetPlaylist() {}
+  async updateWidgetPlaylist(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Param() _param: PlaylistWidgetIdDTO,
+    @Body() _body: PlaylistUpdateDTO,
+  ) {
+    const { widgetId } = _param;
+    await this.playlistService.updateWidgetPlaylist(_jwt, widgetId, _body);
+  }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

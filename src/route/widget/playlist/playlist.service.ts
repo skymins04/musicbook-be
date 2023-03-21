@@ -3,6 +3,7 @@ import { CloudflareR2Service } from 'src/common/cloudflare/cloudflare-r2.service
 import { MusicBookRepository } from 'src/common/repository/musicbook/musicbook.repository';
 import { WidgetPlaylistEntity } from 'src/common/repository/widget-playlist/widget-playlist.entity';
 import { WidgetPlaylistRepository } from 'src/common/repository/widget-playlist/widget-playlist.repository';
+import { PlaylistUpdateDTO } from './dto/playlist.dto';
 
 @Injectable()
 export class PlaylistService {
@@ -38,7 +39,35 @@ export class PlaylistService {
     return widget;
   }
 
-  async updateWidgetPlaylist() {}
+  async updateWidgetPlaylist(
+    _jwt: MusicbookJwtPayload,
+    _widgetId: string,
+    _widget: PlaylistUpdateDTO,
+  ) {
+    const widget =
+      await this.widgetPlaylistRepository.findOneWidgetPlaylistByWidgetIdAndUserId(
+        _widgetId,
+        _jwt.id,
+      );
+    if (!widget) throw new BadRequestException();
+
+    if (_widget.theme === 'CUSTOM')
+      await this.cloudflareR2Service.putObject(
+        Buffer.from(_widget.customCSS),
+        'text/css',
+        `widget_theme:playlist:${widget.id}`,
+      );
+
+    await this.widgetPlaylistRepository.updateWidgetPlaylist(
+      _jwt.id,
+      _widgetId,
+      {
+        title: _widget.title,
+        theme: _widget.theme,
+        fontSize: _widget.fontSize,
+      },
+    );
+  }
 
   async deleteWidgetPlaylist(_jwt: MusicbookJwtPayload, _widgetId: string) {
     const widget =
