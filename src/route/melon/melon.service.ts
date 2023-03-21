@@ -162,6 +162,10 @@ export class MelonService {
         } else {
           thumbnailBaseURL = thumbnailRawURL.split('.jpg')[0];
         }
+        thumbnailBaseURL = thumbnailBaseURL.replace(
+          'https://cdnimg.melon.co.kr',
+          'https://cdnimg.musicbook.kr/melon',
+        );
 
         const melonSource = new MusicSourceMelonEntity();
         melonSource.songId = _songId;
