@@ -6,7 +6,6 @@ import {
   Patch,
   Post,
   Query,
-  Redirect,
   Res,
   UploadedFiles,
   UseGuards,
@@ -78,8 +77,12 @@ export class UserController {
     const { code } = _query;
     const token = await this.userService.loginByTwitchCallback(code);
 
-    _res.cookie('jwt', token, { httpOnly: true });
-    return new ApiResponseDataDTO(token);
+    _res.cookie('jwt', token, {
+      httpOnly: true,
+      domain: process.env.ROOT_DOMAIN,
+    });
+    _res.redirect(process.env.LOGIN_REDIRECT_ADDRESS);
+    // return new ApiResponseDataDTO(token);
   }
 
   @Get('login/google')
@@ -105,7 +108,11 @@ export class UserController {
     const { code } = _query;
     const token = await this.userService.loginByGoogleCallback(code);
 
-    _res.cookie('jwt', token, { httpOnly: true });
+    _res.cookie('jwt', token, {
+      httpOnly: true,
+      domain: process.env.ROOT_DOMAIN,
+    });
+    _res.redirect(process.env.LOGIN_REDIRECT_ADDRESS);
     return new ApiResponseDataDTO(token);
   }
 

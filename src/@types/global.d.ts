@@ -3,6 +3,9 @@ declare namespace NodeJS {
     // DATABASE_URL: string;
     NODE_ENV: string;
     API_ADDRESS: string;
+    API_PORT: number;
+    LOGIN_REDIRECT_ADDRESS: string;
+    ROOT_DOMAIN: string;
     STATIC_SERVE_ROOT: string;
     MYSQL_HOST: string;
     MYSQL_PORT: number;

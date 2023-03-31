@@ -63,6 +63,6 @@ async function bootstrap() {
   if (process.env.NODE_ENV !== 'production')
     fs.writeFileSync('./swagger-spec.json', JSON.stringify(swaggerDocument));
 
-  await app.listen(3000);
+  await app.listen(process.env.API_PORT);
 }
 bootstrap();

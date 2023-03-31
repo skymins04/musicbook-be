@@ -25,6 +25,9 @@ import { WidgetModule } from './route/widget/widget.module';
       envFilePath: '.env',
       validationSchema: Joi.object({
         API_ADDRESS: Joi.string().required(),
+        API_PORT: Joi.number().required(),
+        LOGIN_REDIRECT_ADDRESS: Joi.string().required(),
+        ROOT_DOMAIN: Joi.string().required(),
         STATIC_SERVE_ROOT: Joi.string().required(),
         MYSQL_HOST: Joi.string().required(),
         MYSQL_PORT: Joi.number().required(),
