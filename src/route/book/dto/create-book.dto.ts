@@ -57,7 +57,7 @@ export class CreateBookDTO {
     format: 'binary',
     example: '2cdc28f0-017a-49c4-9ed7-87056c83901',
   })
-  thumbnail: string;
+  thumbnail?: string;
 
   @ApiProperty({
     description: '노래책 배경 커버 이미지 cloudflare images uuid',

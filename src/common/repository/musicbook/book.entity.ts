@@ -91,20 +91,18 @@ export class BookEntity extends BaseEntity {
     example: '!노래책',
   })
   requestCommandPrefix: string;
-  @Column()
+  @Column({ nullable: true })
   @ApiProperty({
     description: '노래책 썸네일 이미지 URL',
     type: String,
-    example: 'https://example.com/example.png',
   })
-  thumbnailURL: string;
-  @Column()
+  thumbnailURL?: string;
+  @Column({ nullable: true })
   @ApiProperty({
     description: '노래책 배경 커버이미지 URL',
     type: String,
-    example: 'https://example.com/example.png',
   })
-  backgroundImgURL: string;
+  backgroundImgURL?: string;
   @Column('integer', { default: 0 })
   @ApiProperty({
     description: '노래책 좋아요 개수',

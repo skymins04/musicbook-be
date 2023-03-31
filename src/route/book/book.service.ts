@@ -123,10 +123,12 @@ export class BookService {
       title: _book.title,
       description: _book.description || '',
       requestCommandPrefix: _book.requestCommandPrefix || '!노래책',
-      thumbnailURL: getCloudflareImagesFileURL(_book.thumbnail),
+      thumbnailURL: _book.thumbnail
+        ? getCloudflareImagesFileURL(_book.thumbnail)
+        : null,
       backgroundImgURL: _book.background
         ? getCloudflareImagesFileURL(_book.background)
-        : 'https://exmple.com/example.png',
+        : null,
     });
   }
 

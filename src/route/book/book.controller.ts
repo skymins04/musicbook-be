@@ -82,6 +82,7 @@ export class BookController {
     summary: '노래책 생성',
     description:
       '노래책 생성 엔드포인트. 한 사용자 당 하나의 노래책만 생성 가능. 복수개의 노래책 생성 시도시 400에러 발생.',
+    deprecated: true,
   })
   @ApiOkResponse({
     description: '노래책 생성 성공',

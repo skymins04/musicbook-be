@@ -6,6 +6,9 @@ import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
 import { UserRepository } from 'src/common/repository/user/user.repository';
 import { UserMeUpdateDTO } from './dto/user-me.dto';
 import { MusicBookRepository } from 'src/common/repository/musicbook/musicbook.repository';
+import { BookService } from '../book/book.service';
+import { v4 as uuidv4 } from 'uuid';
+import { PlaylistService } from '../widget/playlist/playlist.service';
 
 @Injectable()
 export class UserService {
@@ -13,6 +16,8 @@ export class UserService {
     private readonly userRepository: UserRepository,
     private readonly musicbookRepository: MusicBookRepository,
     private readonly jwtAuthService: JwtAuthService,
+    private readonly bookService: BookService,
+    private readonly widgetPlaylistService: PlaylistService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
@@ -136,13 +141,20 @@ export class UserService {
       });
     } else {
       const user = await this.userRepository.createUserByTwitch(userTwitch);
-      return this.jwtAuthService.jwtSign({
+      const jwt = this.jwtAuthService.jwtSign({
         id: user.id,
         displayName: user.displayName,
         accessToken,
         provider: 'twitch',
         providerId: twitchAPIUserInfo.id,
       });
+      const parsedJwt = this.jwtAuthService.jwtVerify(jwt);
+      await this.bookService.createBook(parsedJwt, {
+        customId: `user-${uuidv4()}`,
+        title: `${user.displayName}의 노래책`,
+      });
+      await this.widgetPlaylistService.createWidgetPlaylist(parsedJwt);
+      return jwt;
     }
   }
 

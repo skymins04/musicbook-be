@@ -7,5 +7,6 @@ import { JwtAuthService } from 'src/common/jwt-auth/jwt-auth.service';
 @Module({
   controllers: [BookController],
   providers: [BookService, JwtAuthService],
+  exports: [BookService],
 })
 export class BookModule {}
