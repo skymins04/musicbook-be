@@ -41,6 +41,10 @@ export class PlaylistService {
   async updateWidgetPlaylist() {}
 
   async deleteWidgetPlaylist(_jwt: MusicbookJwtPayload, _widgetId: string) {
+    const widgetCount =
+      await this.widgetPlaylistRepository.getCountWidgetPlaylist(_jwt.id);
+    if (widgetCount <= 1)
+      throw new BadRequestException('at least one widget must exist');
     const widget =
       await this.widgetPlaylistRepository.findOneWidgetPlaylistByWidgetIdAndUserId(
         _widgetId,
