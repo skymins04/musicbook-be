@@ -142,12 +142,13 @@ export class MelonService {
           .text()
           .trim();
 
-        const lyrics = $song('#d_video_summary')
-          .html()
-          .replace(/\<\!\-\-.*\-\-\>/g, '')
-          .replace(/\<br ?\/?\>/g, '\n')
-          .replace(/\\t/g, '')
-          .trim();
+        const lyrics =
+          $song('#d_video_summary')
+            .html()
+            ?.replace(/\<\!\-\-.*\-\-\>/g, '')
+            .replace(/\<br ?\/?\>/g, '\n')
+            .replace(/\\t/g, '')
+            .trim() || '';
 
         const thumbnailRawURL = $song(
           '#downloadfrm > div > div > div.thumb > a > img',
@@ -162,6 +163,10 @@ export class MelonService {
         } else {
           thumbnailBaseURL = thumbnailRawURL.split('.jpg')[0];
         }
+        thumbnailBaseURL = thumbnailBaseURL.replace(
+          'https://cdnimg.melon.co.kr',
+          'https://cdnimg.musicbook.kr/melon',
+        );
 
         const melonSource = new MusicSourceMelonEntity();
         melonSource.songId = _songId;
@@ -173,7 +178,7 @@ export class MelonService {
         melonSource.artistThumbnail = artistThumbnail;
         melonSource.albumThumbnail1000 = `${thumbnailBaseURL}_1000.jpg`;
         melonSource.albumThumbnail500 = `${thumbnailBaseURL}_500.jpg`;
-        melonSource.albumThumbnail200 = `${thumbnailBaseURL}_200.jpg`;
+        melonSource.albumThumbnail200 = `${thumbnailBaseURL}.jpg`;
         melonSource.lyrics = lyrics;
         await melonSource.save();
 

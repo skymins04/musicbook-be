@@ -24,11 +24,12 @@ export class WidgetPlaylistRepository {
   }
 
   async updateWidgetPlaylist(
+    _userId: string,
     _widgetId: string,
     _widget: DeepPartial<WidgetPlaylistEntity>,
   ) {
     const result = await this.widgetPlaylistRepository.update(
-      _widgetId,
+      { id: _widgetId, user: { id: _userId } },
       _widget,
     );
     if (!result.affected)

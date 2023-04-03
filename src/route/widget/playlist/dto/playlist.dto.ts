@@ -52,7 +52,7 @@ export class PlaylistUpdateDTO {
     type: String,
     nullable: true,
     required: false,
-    example: 'BASIC',
+    example: '플레이리스트 제목',
   })
   title?: string;
 
