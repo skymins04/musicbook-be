@@ -68,7 +68,7 @@ export class RequestService {
 
   async getSongRequestQueue(_bookId: string) {
     if (!(await this.musicbookRepository.existBookById(_bookId)))
-      throw new BadRequestException();
+      throw new BadRequestException('not found book');
 
     const queueReqIds = (
       await this.redisMusicRequestService.getMusicRequestQueue(_bookId)
@@ -78,7 +78,7 @@ export class RequestService {
       queueReqIds,
     );
     if (queueReqIds.length !== queueData.length)
-      throw new BadRequestException();
+      throw new BadRequestException('invaild queue');
 
     queueData.forEach((itm) => {
       queue[queueReqIds.indexOf(itm.id)] = itm;
