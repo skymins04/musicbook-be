@@ -17,9 +17,10 @@ import { PlaylistModule } from './route/widget/playlist/playlist.module';
 dotenv.config();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {cors: true});
   app.enableCors({
     origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
   app.use(cookieParser());
   app.use(
