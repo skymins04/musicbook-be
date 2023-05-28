@@ -52,9 +52,9 @@ export class UserController {
     description: `쿠키 "jwt"를 제거하여 사용자를 로그아웃시키는 엔드포인트`,
   })
   logout(@Req() _req: Request, @Res({ passthrough: true }) _res: Response) {
-    const redirectURL = _req.headers.referer;
-    _res.clearCookie('jwt', { path: '/' });
-    if (redirectURL) _res.redirect(redirectURL);
+    const redirectURL =
+      _req.headers.referer || 'https://musicbook.kr/community';
+    _res.cookie('jwt', '', { maxAge: 0 });
   }
 
   @Get('login/twitch')
