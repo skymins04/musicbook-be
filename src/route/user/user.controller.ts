@@ -51,7 +51,7 @@ export class UserController {
     summary: '사용자 로그아웃',
     description: `쿠키 "jwt"를 제거하여 사용자를 로그아웃시키는 엔드포인트`,
   })
-  logout(@Req() _req: Request, @Res({ passthrough: true }) _res: Response) {
+  logout(@Req() _req: Request, @Res() _res: Response) {
     const redirectURL =
       `${_req.headers.referer}/community` || 'https://musicbook.kr/community';
     _res.clearCookie('jwt');
@@ -77,7 +77,7 @@ export class UserController {
   async loginByTwitchCallback(
     @Query() _query: UserLoginCallbackQueryDTO,
     @Req() _req: Request,
-    @Res({ passthrough: true }) _res: Response,
+    @Res() _res: Response,
   ) {
     const { code } = _query;
     const token = await this.userService.loginByTwitchCallback(code);
@@ -110,7 +110,7 @@ export class UserController {
   async loginByGoogleCallback(
     @Query() _query: UserLoginCallbackQueryDTO,
     @Req() _req: Request,
-    @Res({ passthrough: true }) _res: Response,
+    @Res() _res: Response,
   ) {
     const { code } = _query;
     const token = await this.userService.loginByGoogleCallback(code);
