@@ -19,7 +19,7 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {cors: true});
   app.enableCors({
-    origin: true,
+    origin: '*.musicbook.kr:*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
   app.use(cookieParser());
