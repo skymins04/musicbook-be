@@ -54,11 +54,13 @@ export class UserController {
   logout(@Req() _req: Request, @Res({ passthrough: true }) _res: Response) {
     const redirectURL =
       _req.headers.referer || 'https://musicbook.kr/community';
-    _res.cookie('jwt', '', {
-      maxAge: 0,
-      httpOnly: true,
-      domain: process.env.ROOT_DOMAIN,
-    });
+    _res
+      .cookie('jwt', '', {
+        maxAge: 0,
+        httpOnly: true,
+        domain: process.env.ROOT_DOMAIN,
+      })
+      .redirect(redirectURL);
   }
 
   @Get('login/twitch')
