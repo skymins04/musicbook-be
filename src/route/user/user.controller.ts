@@ -53,7 +53,7 @@ export class UserController {
   })
   logout(@Req() _req: Request, @Res({ passthrough: true }) _res: Response) {
     const redirectURL =
-      _req.headers.referer || 'https://musicbook.kr/community';
+      `${_req.headers.referer}/community` || 'https://musicbook.kr/community';
     _res.clearCookie('jwt');
     _res.redirect(redirectURL);
   }
@@ -82,7 +82,7 @@ export class UserController {
     const { code } = _query;
     const token = await this.userService.loginByTwitchCallback(code);
     const redirectURL =
-      _req.headers.referer || 'https://musicbook.kr/community';
+      `${_req.headers.referer}/community` || 'https://musicbook.kr/community';
 
     _res.cookie('jwt', token, {
       httpOnly: true,
@@ -115,7 +115,7 @@ export class UserController {
     const { code } = _query;
     const token = await this.userService.loginByGoogleCallback(code);
     const redirectURL =
-      _req.headers.referer || 'https://musicbook.kr/community';
+      `${_req.headers.referer}/community` || 'https://musicbook.kr/community';
 
     _res.cookie('jwt', token, {
       httpOnly: true,
