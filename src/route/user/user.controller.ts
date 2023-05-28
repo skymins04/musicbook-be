@@ -52,15 +52,13 @@ export class UserController {
     description: `쿠키 "jwt"를 제거하여 사용자를 로그아웃시키는 엔드포인트`,
   })
   logout(@Req() _req: Request, @Res({ passthrough: true }) _res: Response) {
-    const redirectURL =
-      _req.headers.referer || 'https://musicbook.kr/community';
     _res
       .cookie('jwt', '', {
         maxAge: 0,
         httpOnly: true,
         domain: process.env.ROOT_DOMAIN,
       })
-      .redirect(redirectURL);
+      .redirect(process.env.LOGIN_REDIRECT_ADDRESS);
   }
 
   @Get('login/twitch')
@@ -86,14 +84,12 @@ export class UserController {
   ) {
     const { code } = _query;
     const token = await this.userService.loginByTwitchCallback(code);
-    const redirectURL =
-      _req.headers.referer || 'https://musicbook.kr/community';
 
     _res.cookie('jwt', token, {
       httpOnly: true,
       domain: process.env.ROOT_DOMAIN,
     });
-    _res.redirect(redirectURL);
+    _res.redirect(process.env.LOGIN_REDIRECT_ADDRESS);
   }
 
   @Get('login/google')
@@ -119,14 +115,12 @@ export class UserController {
   ) {
     const { code } = _query;
     const token = await this.userService.loginByGoogleCallback(code);
-    const redirectURL =
-      _req.headers.referer || 'https://musicbook.kr/community';
 
     _res.cookie('jwt', token, {
       httpOnly: true,
       domain: process.env.ROOT_DOMAIN,
     });
-    _res.redirect(redirectURL);
+    _res.redirect(process.env.LOGIN_REDIRECT_ADDRESS);
   }
 
   @UseGuards(JwtAuthGuard)
