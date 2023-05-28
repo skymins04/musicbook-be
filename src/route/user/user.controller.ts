@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
   UploadedFiles,
   UseGuards,
@@ -13,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserLoginCallbackQueryDTO } from './dto/user-login.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { ApiResponseDataDTO } from 'src/common/api-response/api-response-data.dto';
 import { JwtAuthGuard } from 'src/common/jwt-auth/jwt-auth.guard';
 import {
@@ -50,8 +51,10 @@ export class UserController {
     summary: '사용자 로그아웃',
     description: `쿠키 "jwt"를 제거하여 사용자를 로그아웃시키는 엔드포인트`,
   })
-  logout(@Res({ passthrough: true }) _res: Response) {
-    _res.cookie('jwt', '', { maxAge: 0 });
+  logout(@Req() _req: Request, @Res({ passthrough: true }) _res: Response) {
+    const redirectURL =
+      _req.headers.referer || 'https://musicbook.kr/community';
+    _res.cookie('jwt', '', { maxAge: 0 }).redirect(redirectURL);
   }
 
   @Get('login/twitch')
@@ -72,17 +75,19 @@ export class UserController {
   })
   async loginByTwitchCallback(
     @Query() _query: UserLoginCallbackQueryDTO,
+    @Req() _req: Request,
     @Res({ passthrough: true }) _res: Response,
   ) {
     const { code } = _query;
     const token = await this.userService.loginByTwitchCallback(code);
+    const redirectURL =
+      _req.headers.referer || 'https://musicbook.kr/community';
 
     _res.cookie('jwt', token, {
       httpOnly: true,
       domain: process.env.ROOT_DOMAIN,
     });
-    _res.redirect(process.env.LOGIN_REDIRECT_ADDRESS);
-    // return new ApiResponseDataDTO(token);
+    _res.redirect(redirectURL);
   }
 
   @Get('login/google')
@@ -103,17 +108,19 @@ export class UserController {
   })
   async loginByGoogleCallback(
     @Query() _query: UserLoginCallbackQueryDTO,
+    @Req() _req: Request,
     @Res({ passthrough: true }) _res: Response,
   ) {
     const { code } = _query;
     const token = await this.userService.loginByGoogleCallback(code);
+    const redirectURL =
+      _req.headers.referer || 'https://musicbook.kr/community';
 
     _res.cookie('jwt', token, {
       httpOnly: true,
       domain: process.env.ROOT_DOMAIN,
     });
-    _res.redirect(process.env.LOGIN_REDIRECT_ADDRESS);
-    return new ApiResponseDataDTO(token);
+    _res.redirect(redirectURL);
   }
 
   @UseGuards(JwtAuthGuard)
