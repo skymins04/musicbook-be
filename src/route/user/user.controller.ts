@@ -54,7 +54,8 @@ export class UserController {
   logout(@Req() _req: Request, @Res({ passthrough: true }) _res: Response) {
     const redirectURL =
       _req.headers.referer || 'https://musicbook.kr/community';
-    _res.cookie('jwt', '', { maxAge: 0 }).redirect(redirectURL);
+    _res.clearCookie('jwt');
+    _res.redirect(redirectURL);
   }
 
   @Get('login/twitch')
