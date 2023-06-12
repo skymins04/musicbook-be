@@ -6,7 +6,6 @@ declare namespace NodeJS {
     API_PORT: number;
     LOGIN_REDIRECT_ADDRESS: string;
     ROOT_DOMAIN: string;
-    STATIC_SERVE_ROOT: string;
     MYSQL_HOST: string;
     MYSQL_PORT: number;
     MYSQL_USERNAME: string;
@@ -14,7 +13,6 @@ declare namespace NodeJS {
     MYSQL_DATABASE: string;
     REDIS_HOST: string;
     REDIS_PORT: number;
-    REDIS_PASSWORD: string;
     JWT_SECRET: string;
     TWITCH_CLIENT_ID: string;
     TWITCH_CLIENT_SECRET: string;

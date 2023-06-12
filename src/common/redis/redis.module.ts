@@ -15,7 +15,6 @@ import { RedisMusicRequestService } from './redis-music-request.service';
         config: {
           host: config.get('REDIS_HOST'),
           port: config.get<number>('REDIS_PORT'),
-          password: config.get('REDIS_PASSWORD'),
         },
       }),
     }),
@@ -26,7 +25,6 @@ import { RedisMusicRequestService } from './redis-music-request.service';
         redis: {
           host: config.get('REDIS_HOST'),
           port: config.get<number>('REDIS_PORT'),
-          password: config.get('REDIS_PASSWORD'),
         },
       }),
     }),
