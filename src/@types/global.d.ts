@@ -13,6 +13,7 @@ declare namespace NodeJS {
     MYSQL_DATABASE: string;
     REDIS_HOST: string;
     REDIS_PORT: number;
+    REDIS_PASSWORD: string;
     JWT_SECRET: string;
     TWITCH_CLIENT_ID: string;
     TWITCH_CLIENT_SECRET: string;
