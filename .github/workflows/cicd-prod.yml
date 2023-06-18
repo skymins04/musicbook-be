@@ -47,6 +47,7 @@ jobs:
           echo CLOUDFLARE_R2_ACCESS_KEY=\"${{ secrets.CLOUDFLARE_R2_ACCESS_KEY }}\" >> .env
           echo CLOUDFLARE_R2_SECRET_ACCESS_KEY=\"${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}\" >> .env
           echo CLOUDFLARE_R2_CDN_ADDRESS=\"${{ secrets.CLOUDFLARE_R2_CDN_ADDRESS }}\" >> .env
+          echo NODE_ENV=\"${{ secrets.NODE_ENV }}\" >> .env
           # Add other variables as needed
 
       - name: Build and push Docker image
