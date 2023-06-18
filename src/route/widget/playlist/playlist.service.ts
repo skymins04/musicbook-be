@@ -33,11 +33,9 @@ export class PlaylistService {
     const widget = await this.widgetPlaylistRepository.createWidgetPlaylist(
       _jwt.id,
     );
-    await this.cloudflareR2Service.putObject(
-      Buffer.from(''),
-      'text/css',
-      `widget_theme:playlist:${widget.id}`,
-    );
+    await this.cloudflareR2Service.putObject(Buffer.from(''), 'text/css', {
+      _key: `widget_theme/playlist/${widget.id}`,
+    });
     return widget;
   }
 
@@ -57,7 +55,7 @@ export class PlaylistService {
       await this.cloudflareR2Service.putObject(
         Buffer.from(_widget.customCSS),
         'text/css',
-        `widget_theme:playlist:${widget.id}`,
+        { _key: `widget_theme/playlist/${widget.id}` },
       );
 
     await this.widgetPlaylistRepository

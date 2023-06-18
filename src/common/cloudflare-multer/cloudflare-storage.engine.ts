@@ -8,10 +8,7 @@ import { join } from 'path';
 import * as fs from 'fs';
 
 export class CloudflareStorage implements StorageEngine {
-  constructor(
-    private readonly cloudflareImagesService: CloudflareImagesService,
-    private readonly cloudflareR2Service: CloudflareR2Service,
-  ) {
+  constructor(private readonly cloudflareR2Service: CloudflareR2Service) {
     this.diskStorage = diskStorage({
       destination: join(__dirname, '..', '..', '..', '.uploads'),
     });
@@ -24,31 +21,19 @@ export class CloudflareStorage implements StorageEngine {
     _file: Express.Multer.File,
     _cb: (error?: any, info?: Partial<Express.Multer.File>) => void,
   ) {
+    // TODO: Disk I/O 없이 파일을 올릴 순 없을까?
     this.diskStorage._handleFile(_req, _file, (e, _diskFile) => {
       for (const key of Object.keys(_diskFile)) {
         _file[key] = _diskFile[key];
       }
       if (!_file.path) throw new BadRequestException('file path is empty');
-      if (_file.originalname.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
-        this.cloudflareImagesService
-          .getDirectUploadURL()
-          .then((directUploadURL) => {
-            _cb(null, { filename: directUploadURL.id });
-            this.cloudflareImagesService.addUploadQueue({
-              path: _file.path,
-              uploadId: directUploadURL.id,
-              uploadURL: directUploadURL.uploadURL,
-            });
-          });
-      } else {
-        const key = uuidv4();
-        this.cloudflareR2Service
-          .putObject(fs.readFileSync(_file.path), _file.mimetype, key)
-          .then((result) => {
-            fs.unlinkSync(_file.path);
-            _cb(null, { filename: key });
-          });
-      }
+      const key = uuidv4();
+      this.cloudflareR2Service
+        .putObject(fs.readFileSync(_file.path), _file.mimetype, { _key: key })
+        .then((result) => {
+          fs.unlinkSync(_file.path);
+          _cb(null, { filename: key });
+        });
     });
   }
 
@@ -61,7 +46,5 @@ export class CloudflareStorage implements StorageEngine {
   }
 }
 
-export const getCloudflareStorage = (
-  imagesService: CloudflareImagesService,
-  r2Service: CloudflareR2Service,
-) => new CloudflareStorage(imagesService, r2Service);
+export const getCloudflareStorage = (r2Service: CloudflareR2Service) =>
+  new CloudflareStorage(r2Service);

@@ -11,14 +11,8 @@ import { getCloudflareStorage } from './cloudflare-storage.engine';
     MulterModule.registerAsync({
       imports: [CloudflareModule],
       inject: [CloudflareImagesService, CloudflareR2Service],
-      useFactory: (
-        cloudflareImagesService: CloudflareImagesService,
-        cloudflareR2Service: CloudflareR2Service,
-      ) => ({
-        storage: getCloudflareStorage(
-          cloudflareImagesService,
-          cloudflareR2Service,
-        ),
+      useFactory: (cloudflareR2Service: CloudflareR2Service) => ({
+        storage: getCloudflareStorage(cloudflareR2Service),
         limits: {
           fileSize: 50 * 1024 * 1024,
         },

@@ -10,7 +10,10 @@ export class CloudflareR2Service {
     accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY,
     secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
   });
-  private readonly DEFAULT_BUCKET_NAME = 'musicbook';
+  private readonly DEFAULT_BUCKET_NAME =
+    process.env.NODE_ENV === 'production'
+      ? 'musicbook-assets'
+      : 'musicbook-assets-dev';
 
   createBucket(_bucketName: string) {
     return this.R2.createBucket({ Bucket: _bucketName }).promise();
@@ -23,13 +26,15 @@ export class CloudflareR2Service {
   putObject(
     _buffer: Buffer,
     _contentType: string,
-    _key?: string,
-    _bucketName: string = this.DEFAULT_BUCKET_NAME,
+    _options?: {
+      _key?: string;
+      _bucketName?: string;
+    },
   ) {
     return this.R2.putObject({
-      Key: _key || uuidv4(),
+      Key: _options?._key || uuidv4(),
       Body: _buffer,
-      Bucket: _bucketName,
+      Bucket: _options?._bucketName || this.DEFAULT_BUCKET_NAME,
       ContentType: _contentType,
     }).promise();
   }
