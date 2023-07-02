@@ -24,7 +24,7 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo API_ADDRESS=\"${{ secrets.API_ADDRESS }}\" >>  .env
+          echo API_ADDRESS=\"${{ secrets.API_ADDRESS }}\" >> .env
           echo API_PORT=\"${{ secrets.API_PORT }}\" >> .env
           echo ROOT_DOMAIN=\"${{ secrets.ROOT_DOMAIN }}\" >> .env
           echo LOGIN_REDIRECT_ADDRESS=\"${{ secrets.LOGIN_REDIRECT_ADDRESS }}\" >> .env
