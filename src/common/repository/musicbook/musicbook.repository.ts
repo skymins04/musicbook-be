@@ -246,9 +246,9 @@ export class MusicBookRepository {
 
     if (_options?.category)
       musicQueryBuilder = musicQueryBuilder.andWhere(
-        "music.category = '%:category%'",
+        'music.category LIKE :category',
         {
-          category: _options.category,
+          category: `%${_options.category}%`,
         },
       );
     if (_options?.bookId)
