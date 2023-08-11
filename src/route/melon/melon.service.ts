@@ -12,12 +12,14 @@ import { GetSongMelonResponseDataDTO } from './dto/get-song-melon.dto';
 import { GetAlbumMelonResponseDataDTO } from './dto/get-album-melon.dto';
 import { MusicBookSourceRepository } from 'src/common/repository/musicbook/musicbook-source.repository';
 import { MusicSourceMelonEntity } from 'src/common/repository/musicbook/music-source-melon.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MelonService {
   constructor(
     @InjectRedis() private readonly redisCache: Redis,
     private readonly musicbookSourceRepositoryService: MusicBookSourceRepository,
+    private readonly configService: ConfigService,
   ) {}
 
   async searchSongByMelon(
@@ -163,10 +165,7 @@ export class MelonService {
         } else {
           thumbnailBaseURL = thumbnailRawURL.split('.jpg')[0];
         }
-        thumbnailBaseURL = thumbnailBaseURL.replace(
-          'https://cdnimg.melon.co.kr',
-          'https://cdnimg.musicbook.kr/melon',
-        );
+        thumbnailBaseURL = this.replaceMelonCDNHost(thumbnailBaseURL);
 
         const melonSource = new MusicSourceMelonEntity();
         melonSource.songId = _songId;
@@ -175,7 +174,7 @@ export class MelonService {
         melonSource.artistName = artistName;
         melonSource.category = category;
         melonSource.releasedAt = new Date(releasedAt);
-        melonSource.artistThumbnail = artistThumbnail;
+        melonSource.artistThumbnail = this.replaceMelonCDNHost(artistThumbnail);
         melonSource.albumThumbnail1000 = `${thumbnailBaseURL}_1000.jpg`;
         melonSource.albumThumbnail500 = `${thumbnailBaseURL}_500.jpg`;
         melonSource.albumThumbnail200 = `${thumbnailBaseURL}.jpg`;
@@ -241,6 +240,7 @@ export class MelonService {
         } else {
           thumbnailBaseURL = thumbnailRawURL.split('.jpg')[0];
         }
+        thumbnailBaseURL = this.replaceMelonCDNHost(thumbnailBaseURL);
 
         return {
           albumId: _albumId,
@@ -254,5 +254,14 @@ export class MelonService {
           },
         };
       });
+  }
+
+  replaceMelonCDNHost(url: string) {
+    return url.replace(
+      'https://cdnimg.melon.co.kr',
+      `${this.configService.get<string>(
+        'CLOUDFLARE_IMAGES_CDN_ADDRESS',
+      )}/melon`,
+    );
   }
 }
