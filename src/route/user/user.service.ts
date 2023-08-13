@@ -150,7 +150,7 @@ export class UserService {
       });
       const parsedJwt = this.jwtAuthService.jwtVerify(jwt);
       await this.bookService.createBook(parsedJwt, {
-        customId: `user-${uuidv4()}`,
+        customId: null,
         title: `${user.displayName}의 노래책`,
       });
       await this.widgetPlaylistService.createWidgetPlaylist(parsedJwt);
@@ -190,13 +190,20 @@ export class UserService {
       });
     } else {
       const user = await this.userRepository.createUserByGoogle(userGoogle);
-      return this.jwtAuthService.jwtSign({
+      const jwt = this.jwtAuthService.jwtSign({
         id: user.id,
         displayName: user.displayName,
         accessToken: '',
         provider: 'google',
         providerId: googleAPIUserInfo.sub,
       });
+      const parsedJwt = this.jwtAuthService.jwtVerify(jwt);
+      await this.bookService.createBook(parsedJwt, {
+        customId: null,
+        title: `${user.displayName}의 노래책`,
+      });
+      await this.widgetPlaylistService.createWidgetPlaylist(parsedJwt);
+      return jwt;
     }
   }
 
