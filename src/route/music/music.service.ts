@@ -295,7 +295,7 @@ export class MusicService {
   }
 
   async getLikeCountOfMusic(_musicId: string) {
-    const music = await this.musicbookRepository.findOneBookById(_musicId);
+    const music = await this.musicbookRepository.findOneMusicById(_musicId);
     if (!music) throw new BadRequestException();
     return music.likeCount;
   }
