@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -66,6 +67,19 @@ export class GetBooksDTO {
     required: false,
   })
   q?: string;
+
+  @Transform((value) => {
+    return value.value === 'true' ? true : false;
+  })
+  @IsBoolean()
+  @IsOptional()
+  @ApiProperty({
+    description: '팔로우 여부',
+    type: Boolean,
+    example: false,
+    required: false,
+  })
+  isLiked?: boolean;
 }
 
 class GetBooksResponseMetaDTO {

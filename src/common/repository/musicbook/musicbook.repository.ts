@@ -236,13 +236,14 @@ export class MusicBookRepository {
     bookId?: string;
     userId?: string;
     requestUserId?: string;
+    isLiked?: boolean;
   }) {
     let musicQueryBuilder = this.musicRepository
       .createQueryBuilder('music')
       .leftJoinAndSelect(
         'music.musicLikes',
-        'like',
-        'like.viewer_id = :viewer_id',
+        'ml',
+        'ml.viewer_id = :viewer_id',
         { viewer_id: _options?.requestUserId },
       )
       .leftJoinAndSelect('music.broadcaster', 'broadcaster')
@@ -250,6 +251,13 @@ export class MusicBookRepository {
       .leftJoinAndSelect('music.musicSourceOriginal', 'musicSourceOriginal')
       .leftJoinAndSelect('music.musicSourceMelon', 'musicSourceMelon')
       .where('music.is_hide = 0');
+
+    if (_options?.isLiked) {
+      musicQueryBuilder = musicQueryBuilder.andWhere(
+        'EXISTS(SELECT 1 FROM `music-like` ml WHERE ml.msc_id = music.id AND ml.viewer_id = :viewer_id)',
+        { viewer_id: _options?.requestUserId },
+      );
+    }
 
     if (_options?.category)
       musicQueryBuilder = musicQueryBuilder.andWhere(
@@ -285,6 +293,7 @@ export class MusicBookRepository {
       bookId?: string;
       userId?: string;
       requestUserId?: string;
+      isLiked?: boolean;
     },
   ) {
     const musicQueryBuilder = this.getMusicSearchQueryBuilder(_options);
@@ -305,6 +314,7 @@ export class MusicBookRepository {
       bookId?: string;
       userId?: string;
       requestUserId?: string;
+      isLiked?: boolean;
     },
   ) {
     const musicQueryBuilder = this.getMusicSearchQueryBuilder(_options);
@@ -325,6 +335,7 @@ export class MusicBookRepository {
       bookId?: string;
       userId?: string;
       requestUserId?: string;
+      isLiked?: boolean;
     },
   ) {
     const musicQueryBuilder = this.getMusicSearchQueryBuilder(_options);
@@ -483,17 +494,26 @@ export class MusicBookRepository {
     });
   }
 
-  getBookSearchQueryBuilder(_options: { q?: string; requestUserId?: string }) {
+  getBookSearchQueryBuilder(_options: {
+    q?: string;
+    requestUserId?: string;
+    isLiked?: boolean;
+  }) {
     let queryBuilder = this.bookRepository
       .createQueryBuilder('book')
-      .leftJoinAndSelect(
-        'book.bookLikes',
-        'like',
-        'like.viewer_id = :viewer_id',
-        { viewer_id: _options?.requestUserId },
-      )
+      .leftJoinAndSelect('book.bookLikes', 'bl', 'bl.viewer_id = :viewer_id', {
+        viewer_id: _options?.requestUserId,
+      })
       .leftJoinAndSelect('book.broadcaster', 'broadcaster')
       .where('book.is_hide = 0');
+
+    if (_options.isLiked) {
+      queryBuilder = queryBuilder.andWhere(
+        'EXISTS(SELECT 1 FROM `book-like` bl WHERE bl.bk_id = book.id AND bl.viewer_id = :viewer_id)',
+        { viewer_id: _options?.requestUserId },
+      );
+    }
+
     if (_options?.q) {
       const keyword = _options?.q.replace(/ /g, '');
       queryBuilder = queryBuilder
@@ -509,9 +529,14 @@ export class MusicBookRepository {
     page?: number;
     q?: string;
     requestUserId?: string;
+    isLiked?: boolean;
   }) {
-    const { perPage = 30, page = 1, q, requestUserId } = _options;
-    const queryBuilder = this.getBookSearchQueryBuilder({ q, requestUserId });
+    const { perPage = 30, page = 1, q, requestUserId, isLiked } = _options;
+    const queryBuilder = this.getBookSearchQueryBuilder({
+      q,
+      requestUserId,
+      isLiked,
+    });
     return queryBuilder
       .orderBy('book.createdAt', 'DESC')
       .skip(perPage * (page - 1))
@@ -524,9 +549,14 @@ export class MusicBookRepository {
     page?: number;
     q?: string;
     requestUserId?: string;
+    isLiked?: boolean;
   }) {
-    const { perPage = 30, page = 1, q, requestUserId } = _options;
-    const queryBuilder = this.getBookSearchQueryBuilder({ q, requestUserId });
+    const { perPage = 30, page = 1, q, requestUserId, isLiked } = _options;
+    const queryBuilder = this.getBookSearchQueryBuilder({
+      q,
+      requestUserId,
+      isLiked,
+    });
     return queryBuilder
       .orderBy('RAND()')
       .skip(perPage * (page - 1))
@@ -539,9 +569,14 @@ export class MusicBookRepository {
     page?: number;
     q?: string;
     requestUserId?: string;
+    isLiked?: boolean;
   }) {
-    const { perPage = 30, page = 1, q, requestUserId } = _options;
-    const queryBuilder = this.getBookSearchQueryBuilder({ q, requestUserId });
+    const { perPage = 30, page = 1, q, requestUserId, isLiked } = _options;
+    const queryBuilder = this.getBookSearchQueryBuilder({
+      q,
+      requestUserId,
+      isLiked,
+    });
     return queryBuilder
       .leftJoinAndSelect('book.bookLikes', 'likes')
       .addSelect('COUNT(likes.id)', 'likeCount')

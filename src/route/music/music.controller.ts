@@ -77,12 +77,14 @@ export class MusicController {
       category,
       bookId,
       q,
+      isLiked,
     } = _query;
     const musics = await this.musciService.getMusics(perPage, page, sort, {
       category,
       bookId,
       q,
       requestUserId: _jwt?.id,
+      isLiked,
     });
     return new ApiResponsePagenationDataDTO<{
       sort: keyof typeof EMusicbookSortMethod;

@@ -63,13 +63,14 @@ export class BookController {
     @Jwt() _jwt: MusicbookJwtPayload,
     @Query() _query: GetBooksDTO,
   ) {
-    const { q, page = 1, sort = 'NEWEST', perPage = 30 } = _query;
+    const { q, page = 1, sort = 'NEWEST', perPage = 30, isLiked } = _query;
     const books = await this.bookSerivce.getBooks(
       perPage,
       page,
       sort,
       q,
       _jwt?.id,
+      isLiked,
     );
     return new ApiResponsePagenationDataDTO<{
       sort: keyof typeof EMusicbookSortMethod;

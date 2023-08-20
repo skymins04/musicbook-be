@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -80,6 +81,19 @@ export class GetMusicsPagenationDTO {
     required: false,
   })
   q?: string;
+
+  @Transform((value) => {
+    return value.value === 'true' ? true : false;
+  })
+  @IsBoolean()
+  @IsOptional()
+  @ApiProperty({
+    description: '좋아요 여부',
+    type: Boolean,
+    example: false,
+    required: false,
+  })
+  isLiked?: boolean;
 }
 
 export class GetMusicsDTO extends GetMusicsPagenationDTO {

@@ -31,6 +31,7 @@ export class BookService {
       page: number;
       q?: string;
       requestUserId?: string;
+      isLiked?: boolean;
     }) => Promise<BookEntity[]>
   > = {
     NEWEST: (_option) => {
@@ -50,12 +51,14 @@ export class BookService {
     _sort: keyof typeof EMusicbookSortMethod,
     _q?: string,
     _requestUserId?: string,
+    _isLiked?: boolean,
   ) {
     return this.getBooksSortHandler[_sort]({
       perPage: _perPage,
       page: _page,
       q: _q,
       requestUserId: _requestUserId,
+      isLiked: _isLiked,
     });
   }
 

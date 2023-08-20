@@ -52,6 +52,7 @@ export class MusicService {
         userId?: string;
         bookId?: string;
         requestUserId?: string;
+        isLiked?: boolean;
       },
     ) => Promise<MusicEntity[]>
   > = {
@@ -88,6 +89,7 @@ export class MusicService {
       userId?: string;
       bookId?: string;
       requestUserId?: string;
+      isLiked?: boolean;
     },
   ) {
     return this.getMusicsSortHandler[_sort](_perPage, _page, _options);
