@@ -54,7 +54,7 @@ import { WidgetPlaylistRepository } from './widget-playlist/widget-playlist.repo
             SongRequestBlacklistEntity,
             WidgetPlaylistEntity,
           ],
-          synchronize: false,
+          synchronize: true,
           logging: config.get('NODE_ENV') === 'development',
           keepConnectionAlive: config.get('NODE_ENV') === 'development',
           namingStrategy: new SnakeNamingStrategy(),

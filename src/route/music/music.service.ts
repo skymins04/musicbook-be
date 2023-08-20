@@ -51,32 +51,30 @@ export class MusicService {
         category?: string;
         userId?: string;
         bookId?: string;
+        requestUserId?: string;
       },
     ) => Promise<MusicEntity[]>
   > = {
     NEWEST: (_perPage, _page, _options) => {
-      return this.musicbookRepository.findManyNewestMusic(_perPage, _page, {
-        q: _options?.q,
-        category: _options?.category,
-        userId: _options?.userId,
-        bookId: _options?.bookId,
-      });
+      return this.musicbookRepository.findManyNewestMusic(
+        _perPage,
+        _page,
+        _options,
+      );
     },
     SUGGEST: (_perPage, _page, _options) => {
-      return this.musicbookRepository.findManySuggestMusic(_perPage, _page, {
-        q: _options?.q,
-        category: _options?.category,
-        userId: _options?.userId,
-        bookId: _options?.bookId,
-      });
+      return this.musicbookRepository.findManySuggestMusic(
+        _perPage,
+        _page,
+        _options,
+      );
     },
     POPULAR: (_perPage, _page, _options) => {
-      return this.musicbookRepository.findManyPopularMusic(_perPage, _page, {
-        q: _options?.q,
-        category: _options?.category,
-        userId: _options?.userId,
-        bookId: _options?.bookId,
-      });
+      return this.musicbookRepository.findManyPopularMusic(
+        _perPage,
+        _page,
+        _options,
+      );
     },
   };
 
@@ -89,14 +87,10 @@ export class MusicService {
       category?: string;
       userId?: string;
       bookId?: string;
+      requestUserId?: string;
     },
   ) {
-    return this.getMusicsSortHandler[_sort](_perPage, _page, {
-      q: _options?.q,
-      category: _options?.category,
-      userId: _options?.userId,
-      bookId: _options?.bookId,
-    });
+    return this.getMusicsSortHandler[_sort](_perPage, _page, _options);
   }
 
   private createMusicTypeHandler: Record<

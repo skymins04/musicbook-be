@@ -42,12 +42,14 @@ import { Jwt } from 'src/common/jwt-auth/jwt.decorator';
 import { EMusicbookSortMethod } from 'src/common/repository/musicbook/musicbook.enum';
 import { BookConfigDTO, BookConfigReponseDTO } from './dto/book-config.dto';
 import { ImgFilesInterceptor } from 'src/common/cloudflare-multer/image-files.interceptor';
+import { JwtTokenGuard } from 'src/common/jwt-auth/jwt-token.guard';
 
 @Controller('book')
 @ApiTags('Book')
 export class BookController {
   constructor(private readonly bookSerivce: BookService) {}
 
+  @UseGuards(JwtTokenGuard)
   @Get()
   @ApiOperation({
     summary: '노래책 목록 조회',
@@ -57,9 +59,18 @@ export class BookController {
     description: '노래책 목록 조회 성공',
     type: GetBooksResponseDTO,
   })
-  async getBooks(@Query() _query: GetBooksDTO) {
+  async getBooks(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Query() _query: GetBooksDTO,
+  ) {
     const { q, page = 1, sort = 'NEWEST', perPage = 30 } = _query;
-    const books = await this.bookSerivce.getBooks(perPage, page, sort, q);
+    const books = await this.bookSerivce.getBooks(
+      perPage,
+      page,
+      sort,
+      q,
+      _jwt?.id,
+    );
     return new ApiResponsePagenationDataDTO<{
       sort: keyof typeof EMusicbookSortMethod;
     }>(

@@ -26,16 +26,21 @@ export class BookService {
 
   private getBooksSortHandler: Record<
     keyof typeof EMusicbookSortMethod,
-    (_perPage: number, _page: number, _q?: string) => Promise<BookEntity[]>
+    (_options: {
+      perPage: number;
+      page: number;
+      q?: string;
+      requestUserId?: string;
+    }) => Promise<BookEntity[]>
   > = {
-    NEWEST: (_perPage, _page, _q) => {
-      return this.musicbookRepository.findManyNewestBook(_perPage, _page, _q);
+    NEWEST: (_option) => {
+      return this.musicbookRepository.findManyNewestBook(_option);
     },
-    SUGGEST: (_perPage, _page, _q) => {
-      return this.musicbookRepository.findManySuggestBook(_perPage, _page, _q);
+    SUGGEST: (_option) => {
+      return this.musicbookRepository.findManySuggestBook(_option);
     },
-    POPULAR: (_perPage, _page, _q) => {
-      return this.musicbookRepository.findManyPopularBook(_perPage, _page, _q);
+    POPULAR: (_option) => {
+      return this.musicbookRepository.findManyPopularBook(_option);
     },
   };
 
@@ -44,8 +49,14 @@ export class BookService {
     _page: number,
     _sort: keyof typeof EMusicbookSortMethod,
     _q?: string,
+    _requestUserId?: string,
   ) {
-    return this.getBooksSortHandler[_sort](_perPage, _page, _q);
+    return this.getBooksSortHandler[_sort]({
+      perPage: _perPage,
+      page: _page,
+      q: _q,
+      requestUserId: _requestUserId,
+    });
   }
 
   async getURLsForBookImgDirectUploading(
@@ -250,7 +261,13 @@ export class BookService {
     _page: number,
     _sort: keyof typeof EMusicbookSortMethod,
     _q: string,
+    _reqeustUserId?: string,
   ) {
-    return this.getBooksSortHandler[_sort](_perPage, _page, _q);
+    return this.getBooksSortHandler[_sort]({
+      perPage: _perPage,
+      page: _page,
+      q: _q,
+      requestUserId: _reqeustUserId,
+    });
   }
 }

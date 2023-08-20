@@ -49,12 +49,14 @@ import { UpdateMyMusicDTO } from './dto/update-my-music.dto';
 import { MusicConfigDTO } from './dto/music-config.dto';
 import { ImgFilesInterceptor } from 'src/common/cloudflare-multer/image-files.interceptor';
 import { AudioFilesInterceptor } from 'src/common/cloudflare-multer/audio-files.interceptor';
+import { JwtTokenGuard } from 'src/common/jwt-auth/jwt-token.guard';
 
 @Controller('music')
 @ApiTags('Music')
 export class MusicController {
   constructor(private readonly musciService: MusicService) {}
 
+  @UseGuards(JwtTokenGuard)
   @Get()
   @ApiOperation({
     summary: '수록곡 목록 조회',
@@ -64,7 +66,10 @@ export class MusicController {
     description: '수록곡 목록 조회 성공',
     type: GetMusicsResponseDTO,
   })
-  async getMusics(@Query() _query: GetMusicsDTO) {
+  async getMusics(
+    @Jwt() _jwt: MusicbookJwtPayload,
+    @Query() _query: GetMusicsDTO,
+  ) {
     const {
       perPage = 30,
       page = 1,
@@ -77,6 +82,7 @@ export class MusicController {
       category,
       bookId,
       q,
+      requestUserId: _jwt?.id,
     });
     return new ApiResponsePagenationDataDTO<{
       sort: keyof typeof EMusicbookSortMethod;

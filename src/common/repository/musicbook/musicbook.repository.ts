@@ -235,9 +235,16 @@ export class MusicBookRepository {
     category?: string;
     bookId?: string;
     userId?: string;
+    requestUserId?: string;
   }) {
     let musicQueryBuilder = this.musicRepository
       .createQueryBuilder('music')
+      .leftJoinAndSelect(
+        'music.musicLikes',
+        'like',
+        'like.viewer_id = :viewer_id',
+        { viewer_id: _options?.requestUserId },
+      )
       .leftJoinAndSelect('music.broadcaster', 'broadcaster')
       .leftJoinAndSelect('music.book', 'book')
       .leftJoinAndSelect('music.musicSourceOriginal', 'musicSourceOriginal')
@@ -277,6 +284,7 @@ export class MusicBookRepository {
       category?: string;
       bookId?: string;
       userId?: string;
+      requestUserId?: string;
     },
   ) {
     const musicQueryBuilder = this.getMusicSearchQueryBuilder(_options);
@@ -296,6 +304,7 @@ export class MusicBookRepository {
       category?: string;
       bookId?: string;
       userId?: string;
+      requestUserId?: string;
     },
   ) {
     const musicQueryBuilder = this.getMusicSearchQueryBuilder(_options);
@@ -315,6 +324,7 @@ export class MusicBookRepository {
       category?: string;
       bookId?: string;
       userId?: string;
+      requestUserId?: string;
     },
   ) {
     const musicQueryBuilder = this.getMusicSearchQueryBuilder(_options);
@@ -473,13 +483,19 @@ export class MusicBookRepository {
     });
   }
 
-  getBookSearchQueryBuilder(_q?: string) {
+  getBookSearchQueryBuilder(_options: { q?: string; requestUserId?: string }) {
     let queryBuilder = this.bookRepository
       .createQueryBuilder('book')
+      .leftJoinAndSelect(
+        'book.bookLikes',
+        'like',
+        'like.viewer_id = :viewer_id',
+        { viewer_id: _options?.requestUserId },
+      )
       .leftJoinAndSelect('book.broadcaster', 'broadcaster')
       .where('book.is_hide = 0');
-    if (_q) {
-      const keyword = _q.replace(/ /g, '');
+    if (_options?.q) {
+      const keyword = _options?.q.replace(/ /g, '');
       queryBuilder = queryBuilder
         .andWhere(`REPLACE(book.title,' ','') LIKE '%${keyword}%'`)
         .orWhere(`book.customId LIKE '%${keyword}%'`)
@@ -488,33 +504,51 @@ export class MusicBookRepository {
     return queryBuilder;
   }
 
-  findManyNewestBook(_perPage = 30, _page = 1, _q?: string) {
-    const queryBuilder = this.getBookSearchQueryBuilder(_q);
+  findManyNewestBook(_options: {
+    perPage?: number;
+    page?: number;
+    q?: string;
+    requestUserId?: string;
+  }) {
+    const { perPage = 30, page = 1, q, requestUserId } = _options;
+    const queryBuilder = this.getBookSearchQueryBuilder({ q, requestUserId });
     return queryBuilder
       .orderBy('book.createdAt', 'DESC')
-      .skip(_perPage * (_page - 1))
-      .take(_perPage)
+      .skip(perPage * (page - 1))
+      .take(perPage)
       .getMany();
   }
 
-  findManySuggestBook(_perPage = 30, _page = 1, _q?: string) {
-    const queryBuilder = this.getBookSearchQueryBuilder(_q);
+  findManySuggestBook(_options: {
+    perPage?: number;
+    page?: number;
+    q?: string;
+    requestUserId?: string;
+  }) {
+    const { perPage = 30, page = 1, q, requestUserId } = _options;
+    const queryBuilder = this.getBookSearchQueryBuilder({ q, requestUserId });
     return queryBuilder
       .orderBy('RAND()')
-      .skip(_perPage * (_page - 1))
-      .take(_perPage)
+      .skip(perPage * (page - 1))
+      .take(perPage)
       .getMany();
   }
 
-  findManyPopularBook(_perPage = 30, _page = 1, _q?: string) {
-    const queryBuilder = this.getBookSearchQueryBuilder(_q);
+  findManyPopularBook(_options: {
+    perPage?: number;
+    page?: number;
+    q?: string;
+    requestUserId?: string;
+  }) {
+    const { perPage = 30, page = 1, q, requestUserId } = _options;
+    const queryBuilder = this.getBookSearchQueryBuilder({ q, requestUserId });
     return queryBuilder
       .leftJoinAndSelect('book.bookLikes', 'likes')
       .addSelect('COUNT(likes.id)', 'likeCount')
       .orderBy('likeCount', 'DESC')
       .groupBy('book.id')
-      .skip(_perPage * (_page - 1))
-      .take(_perPage)
+      .skip(perPage * (page - 1))
+      .take(perPage)
       .getMany();
   }
 }
