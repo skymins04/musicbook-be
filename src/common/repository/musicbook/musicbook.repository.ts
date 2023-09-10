@@ -382,9 +382,10 @@ export class MusicBookRepository {
     await this.musicRepository.softDelete({ broadcaster: { id: _userId } });
   }
 
-  findOneBookById(_bookId: string) {
+  findOneBookById(_bookId: string, _requestUserId?: string) {
     const queryBuilder = this.getBookSearchQueryBuilder({
       id: _bookId,
+      requestUserId: _requestUserId,
     });
     return queryBuilder.getOne();
   }
@@ -433,9 +434,10 @@ export class MusicBookRepository {
     });
   }
 
-  findOneBookByCustomBookId(_customBookId: string) {
+  findOneBookByCustomBookId(_customBookId: string, _requestUserId?: string) {
     const queryBuilder = this.getBookSearchQueryBuilder({
       id: _customBookId,
+      requestUserId: _requestUserId,
     });
     return queryBuilder.getOne();
   }

@@ -246,6 +246,7 @@ export class BookController {
   }
 
   @Get(':bookId')
+  @UseGuards(JwtTokenGuard)
   @ApiOperation({
     summary: '특정 사용자 노래책 조회',
     description:
@@ -255,9 +256,9 @@ export class BookController {
     description: '노래책 조회 성공',
     type: BookResponseDTO,
   })
-  async getBook(@Param() _param: BookIDAndCustomIdDTO) {
+  async getBook(@Jwt() _jwt, @Param() _param: BookIDAndCustomIdDTO) {
     const { bookId } = _param;
-    return new ApiResponseDataDTO(await this.bookSerivce.getBook(bookId));
+    return new ApiResponseDataDTO(await this.bookSerivce.getBook(bookId, _jwt));
   }
 
   @Get(':bookId/like')

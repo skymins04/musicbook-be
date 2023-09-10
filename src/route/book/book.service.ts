@@ -187,12 +187,15 @@ export class BookService {
     return this.musicbookLikeRepository.getCountBookLikeByUserId(_jwt.id);
   }
 
-  async getBook(_bookId: string) {
+  async getBook(_bookId: string, _jwt?: MusicbookJwtPayload) {
     let book: BookEntity;
     if (_bookId.match(/^@[a-zA-Z0-9ㄱ-ㅎㅏ-ㅣ가-힣-_]{1,20}$/)) {
-      book = await this.musicbookRepository.findOneBookByCustomBookId(_bookId);
+      book = await this.musicbookRepository.findOneBookByCustomBookId(
+        _bookId,
+        _jwt.id,
+      );
     } else {
-      book = await this.musicbookRepository.findOneBookById(_bookId);
+      book = await this.musicbookRepository.findOneBookById(_bookId, _jwt.id);
     }
     if (!book) throw new NotFoundException();
     return book;
