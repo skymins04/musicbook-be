@@ -382,24 +382,11 @@ export class MusicBookRepository {
     await this.musicRepository.softDelete({ broadcaster: { id: _userId } });
   }
 
-  findOneBookById(
-    _bookId: string,
-    _options?: {
-      withDeleted?: boolean;
-      withJoin?: boolean | ('broadcaster' | 'musics')[];
-    },
-  ) {
-    return this.bookRepository.findOne({
-      where: { id: _bookId },
-      relations:
-        _options?.withJoin === undefined || _options?.withJoin
-          ? typeof _options?.withJoin === 'boolean' ||
-            _options?.withJoin === undefined
-            ? ['broadcaster']
-            : _options?.withJoin
-          : [],
-      withDeleted: _options?.withDeleted,
+  findOneBookById(_bookId: string) {
+    const queryBuilder = this.getBookSearchQueryBuilder({
+      id: _bookId,
     });
+    return queryBuilder.getOne();
   }
 
   existBookById(
@@ -446,24 +433,11 @@ export class MusicBookRepository {
     });
   }
 
-  findOneBookByCustomBookId(
-    _customBookId: string,
-    _options?: {
-      withDeleted?: boolean;
-      withJoin?: boolean | ('broadcaster' | 'musics')[];
-    },
-  ) {
-    return this.bookRepository.findOne({
-      where: { customId: _customBookId },
-      relations:
-        _options?.withJoin === undefined || _options?.withJoin
-          ? typeof _options?.withJoin === 'boolean' ||
-            _options?.withJoin === undefined
-            ? ['broadcaster']
-            : _options?.withJoin
-          : [],
-      withDeleted: _options?.withDeleted,
+  findOneBookByCustomBookId(_customBookId: string) {
+    const queryBuilder = this.getBookSearchQueryBuilder({
+      id: _customBookId,
     });
+    return queryBuilder.getOne();
   }
 
   existBookByCustomId(
@@ -498,6 +472,8 @@ export class MusicBookRepository {
     q?: string;
     requestUserId?: string;
     isLiked?: boolean;
+    id?: string;
+    customId?: string;
   }) {
     let queryBuilder = this.bookRepository
       .createQueryBuilder('book')
@@ -505,7 +481,20 @@ export class MusicBookRepository {
         viewer_id: _options?.requestUserId,
       })
       .leftJoinAndSelect('book.broadcaster', 'broadcaster')
+      .leftJoinAndSelect('book.musics', 'musics')
       .where('book.is_hide = 0');
+
+    if (_options.id) {
+      queryBuilder = queryBuilder.andWhere('book.id = :id', {
+        id: _options.id,
+      });
+    }
+
+    if (_options.customId) {
+      queryBuilder = queryBuilder.andWhere('book.customId = :id', {
+        id: _options.customId,
+      });
+    }
 
     if (_options.isLiked) {
       queryBuilder = queryBuilder.andWhere(

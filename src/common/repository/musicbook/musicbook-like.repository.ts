@@ -95,9 +95,7 @@ export class MusicBookLikeRepository {
       where: { viewer: { id: _userId }, book: { id: _bookId } },
     });
     if (isExistingLike) throw new BadRequestException();
-    const book = await this.musicbookRepository.findOneBookById(_bookId, {
-      withJoin: false,
-    });
+    const book = await this.musicbookRepository.findOneBookById(_bookId);
     if (!book) throw new BadRequestException();
 
     const like = new MusicLikeEntity();
@@ -115,9 +113,7 @@ export class MusicBookLikeRepository {
     });
     if (!res.affected) throw new BadRequestException();
 
-    const book = await this.musicbookRepository.findOneBookById(_bookId, {
-      withJoin: false,
-    });
+    const book = await this.musicbookRepository.findOneBookById(_bookId);
     if (!book) throw new BadRequestException();
     book.likeCount -= 1;
     await book.save();
